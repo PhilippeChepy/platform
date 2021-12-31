@@ -1,0 +1,42 @@
+[Unit]
+Description=Kubernetes API server
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+
+[Service]
+User={{ kube_apiserver_user }}
+ExecStart={{ kube_apiserver_bin_path }}/kube-apiserver \
+  --advertise-address=KUBE_APISERVER_ADVERTISE_ADDRESS \
+  --allow-privileged \
+  --authorization-mode=Node,RBAC \
+  --bind-address=0.0.0.0 \
+  --client-ca-file={{ kube_apiserver_config_path }}/server-ca.pem \
+  --enable-bootstrap-token-auth=true \
+  --etcd-cafile={{ kube_apiserver_config_path }}/registry-client-ca.pem \
+  --etcd-certfile={{ kube_apiserver_config_path }}/registry-client-cert.pem \
+  --etcd-compaction-interval=0 \
+  --etcd-keyfile={{ kube_apiserver_config_path }}/registry-client-cert.key \
+  --etcd-prefix=/kubernetes \
+  --etcd-servers=KUBE_APISERVER_ETCD_SERVERS \
+  --egress-selector-config-file={{ kube_apiserver_config_path }}/egress-selector-configuration.yaml \
+  --encryption-provider-config={{ kube_apiserver_config_path }}/encryption-configuration.yaml \
+  --kubelet-certificate-authority={{ kube_apiserver_config_path }}/node-ca.pem \
+  --kubelet-client-certificate={{ kube_apiserver_config_path }}/node-client-cert.pem \
+  --kubelet-client-key={{ kube_apiserver_config_path }}/node-client-cert.key \
+  --kubelet-preferred-address-types=InternalIP,ExternalIP \
+  --profiling=false \
+  --service-account-issuer=KUBE_APISERVER_SERVICE_ACCOUNT_ISSUER \
+  --service-account-key-file={{ kube_apiserver_config_path }}/service-account-public-key.pem \
+  --service-account-signing-key-file={{ kube_apiserver_config_path }}/service-account-private-key.pem \
+  --service-cluster-ip-range=KUBE_APISERVER_SERVICE_CLUSTER_IP_RANGE \
+  --tls-cert-file={{ kube_apiserver_config_path }}/server-cert.pem \
+  --tls-private-key-file={{ kube_apiserver_config_path }}/server-cert.key \
+  --requestheader-client-ca-file={{ kube_apiserver_config_path }}/aggregation-layer-ca.pem \
+  --proxy-client-cert-file={{ kube_apiserver_config_path }}/aggregation-layer-cert.pem \
+  --proxy-client-key-file={{ kube_apiserver_config_path }}/aggregation-layer-cert.key \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

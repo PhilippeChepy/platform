@@ -1,0 +1,112 @@
+---
+
+- name: Ensure Local storage directory exists
+  tags:
+    - etcd
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop:
+    - "{{ etcd_local_storage }}"
+
+- name: OS packages
+  tags:
+    - etcd
+  become: true
+  package:
+    name: ['unzip']
+    state: present
+    update_cache: true
+  when:
+    - installation_required | bool
+
+- name: Check etcd package checksum file
+  tags:
+    - etcd
+  stat:
+    path: "{{ etcd_local_storage }}/{{ etcd_shasums }}"
+  become: false
+  register: etcd_checksum
+
+- name: Get etcd package checksum file
+  tags:
+    - etcd
+  get_url:
+    url: "{{ etcd_checksum_file_url }}"
+    dest: "{{ etcd_local_storage }}/{{ etcd_shasums }}"
+  when: not etcd_checksum.stat.exists | bool
+
+- name: Get etcd package checksum
+  tags:
+    - etcd
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "{{ etcd_pkg }}" "{{ etcd_local_storage }}/{{ etcd_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: etcd_sha256
+
+- name: Check etcd package file
+  tags:
+    - etcd
+  stat:
+    path: "{{ etcd_local_storage }}/{{ etcd_pkg }}"
+  become: false
+  register: etcd_package
+
+- name: "Download etcd → {{ etcd_tgz_url }}"
+  tags:
+    - etcd
+  get_url:
+    url: "{{ etcd_tgz_url }}"
+    dest: "{{ etcd_local_storage }}/{{ etcd_pkg }}"
+    checksum: "sha256:{{ etcd_sha256.stdout }}"
+    timeout: "42"
+  when: not etcd_package.stat.exists | bool
+
+- name: Unarchive Etcd
+  tags:
+    - etcd
+  unarchive:
+    remote_src: true
+    src: "{{ etcd_local_storage }}/{{ etcd_pkg }}"
+    dest: "{{ etcd_local_storage }}"
+    creates: "{{ etcd_local_storage }}/etcd-v{{ etcd_version }}-{{ etcd_os }}-{{ etcd_architecture }}/{{ item }}"
+  loop:
+    - etcd
+    - etcdctl
+
+- name: Install etcd
+  tags:
+    - etcd
+  become: true
+  copy:
+    remote_src: true
+    src: "{{ etcd_local_storage }}/etcd-v{{ etcd_version }}-{{ etcd_os }}-{{ etcd_architecture }}/{{ item }}"
+    dest: "{{ etcd_bin_path }}"
+    owner: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    mode: "0755"
+  loop:
+    - etcd
+    - etcdctl
+
+- name: Create directories
+  tags:
+    - etcd
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    mode: 0700
+  with_items:
+    - "{{ etcd_config_path }}"
+    - "{{ etcd_data_path }}"

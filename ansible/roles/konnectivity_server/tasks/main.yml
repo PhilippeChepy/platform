@@ -1,0 +1,57 @@
+---
+
+- name: Add Kubernetes group
+  tags:
+    - konnectivity-server
+  become: true
+  group:
+    name: "{{ konnectivity_group }}"
+    state: present
+
+- name: Add Kubernetes user
+  tags:
+    - konnectivity-server
+  become: true
+  user:
+    name: "{{ konnectivity_user }}"
+    comment: "Kubernetes user"
+    group: "{{ konnectivity_group }}"
+    groups: "{{ konnectivity_groups }}"
+    shell: /bin/bash
+    system: true
+
+- name: "Copy proxy-server binary"
+  tags:
+    - konnectivity-server
+  copy:
+    src: "{{ konnectivity_server_binary }}"
+    dest: "{{ konnectivity_server_bin_path }}/proxy-server"
+    owner: "{{ konnectivity_user }}"
+    group: "{{ konnectivity_group }}"
+    mode: "0755"
+
+- name: Create directories
+  tags:
+    - konnectivity-server
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ konnectivity_user }}"
+    group: "{{ konnectivity_group }}"
+    mode: 0755
+  with_items:
+    - "{{ konnectivity_server_config_path }}"
+
+- name: systemd unit
+  tags:
+    - konnectivity-server
+  become: true
+  template:
+    src: "konnectivity.service.j2"
+    dest: "/etc/systemd/system/konnectivity.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd

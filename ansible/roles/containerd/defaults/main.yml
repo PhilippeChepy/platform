@@ -1,0 +1,25 @@
+---
+
+# Package variables
+containerd_version: "1.5.8"
+containerd_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+
+containerd_architecture: "{{ containerd_architecture_map[ansible_architecture] }}"
+containerd_os: "{{ ansible_system|lower }}"
+containerd_pkg: "containerd-{{ containerd_version }}-{{ containerd_os }}-{{ containerd_architecture }}.tar.gz"
+containerd_shasums: "crictl-v{{ containerd_version }}-{{ containerd_os }}-{{ containerd_architecture }}.tar.gz.sha256"
+containerd_tgz_url: "https://github.com/containerd/containerd/releases/download/v{{ containerd_version }}/containerd-{{ containerd_version }}-{{ containerd_os }}-{{ containerd_architecture }}.tar.gz"
+containerd_checksum_file_url: "https://github.com/containerd/containerd/releases/download/v{{ containerd_version }}/containerd-{{ containerd_version }}-{{ containerd_os }}-{{ containerd_architecture }}.tar.gz.sha256sum"
+
+# Paths
+containerd_bin_path: /usr/local/bin
+containerd_config_path: /etc/containerd
+
+containerd_enabled:
+  - containerd
+  - containerd-shim-runc-v1
+  - containerd-shim-runc-v2
+  - ctr
+  - containerd-shim

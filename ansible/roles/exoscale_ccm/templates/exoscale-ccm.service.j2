@@ -1,0 +1,21 @@
+[Unit]
+Description=Exoscale Cloud Controller Manager
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User={{ exoscale_ccm_user }}
+EnvironmentFile=/etc/default/exoscale
+ExecStart=/usr/local/bin/exoscale-cloud-controller-manager \
+  --allow-untagged-cloud \
+  --authentication-kubeconfig={{ exoscale_ccm_config_path }}/exoscale-ccm.kubeconfig \
+  --authorization-kubeconfig={{ exoscale_ccm_config_path }}/exoscale-ccm.kubeconfig \
+  --cloud-provider=exoscale \
+  --configure-cloud-routes=false \
+  --kubeconfig={{ exoscale_ccm_config_path }}/exoscale-ccm.kubeconfig \
+  --leader-elect=true
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,26 @@
+---
+
+# Package variables
+kube_apiserver_version: "1.23.1"
+kube_apiserver_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+kube_apiserver_architecture: "{{ kube_apiserver_architecture_map[ansible_architecture] }}"
+kube_apiserver_os: "{{ ansible_system|lower }}"
+kube_apiserver_shasums: "apiserver.SHA256SUMS"
+kube_apiserver_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_apiserver_version }}/bin/{{ kube_apiserver_os }}/{{ kube_apiserver_architecture }}/kube-apiserver"
+kube_apiserver_checksum_file_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_apiserver_version }}/SHA256SUMS"
+
+# Paths
+kube_apiserver_bin_path: /usr/local/bin
+kube_apiserver_config_path: /etc/kubernetes/apiserver
+
+# System user and group
+kube_apiserver_user: kube-apiserver
+kube_apiserver_group: kube-apiserver
+kube_apiserver_groups: null
+
+# Misc
+kube_apiserver_http_healthcheck: true

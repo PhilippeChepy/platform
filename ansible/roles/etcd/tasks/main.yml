@@ -1,0 +1,77 @@
+---
+
+- name: Add etcd group
+  become: true
+  group:
+    name: "{{ etcd_group }}"
+    state: present
+
+- name: Add etcd user
+  become: true
+  user:
+    name: "{{ etcd_user }}"
+    comment: "etcd user"
+    group: "{{ etcd_group }}"
+    groups: "{{ etcd_groups }}"
+    shell: /bin/bash
+    system: true
+
+# Binary installation
+
+- name: Check etcd installation
+  shell: command -v etcd
+  environment:
+    PATH: "{{ etcd_bin_path }}:{{ ansible_env.PATH }}"
+  register: etcd_installation
+  changed_when: false
+  ignore_errors: true
+  check_mode: false
+  tags:
+    - skip_ansible_lint  # command is a shell builtin
+
+- name: Get installed etcd version
+  shell: |
+    set -o pipefail
+    {{ etcd_installation.stdout }} --version | grep 'etcd Version' | cut -d' ' -f3
+  args:
+    executable: /bin/bash
+  when: not etcd_installation is failed
+  changed_when: false
+  check_mode: false
+  register: installed_etcd_version
+
+- name: Compute if installation is required
+  set_fact:
+    installation_required: "{{ etcd_installation is failed or installed_etcd_version.stdout != etcd_version }}"
+
+- name: Install OS packages and Etcd
+  include: _install.yml
+  when:
+    - installation_required | bool
+
+- name: systemd unit
+  tags:
+    - etcd
+  become: true
+  template:
+    src: "etcd.service.j2"
+    dest: "/etc/systemd/system/etcd.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+
+- name: Insert etcdctl source in dotfile
+  tags:
+    - etcd
+  become: true
+  lineinfile:
+    path: "{{ etcd_home }}/{{ etcd_dotfile }}"
+    line: ". /etc/default/etcdctl"
+    owner: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    create: true
+    mode: 0600
+  when:
+    - not etcd_dotfile_disable

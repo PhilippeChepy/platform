@@ -1,0 +1,52 @@
+---
+
+- name: Set Exoscale CCM group
+  tags:
+    - exoscale-ccm
+  become: true
+  group:
+    name: "{{ exoscale_ccm_group }}"
+    state: present
+
+- name: Set Exoscale CCM user
+  tags:
+    - exoscale-ccm
+  become: true
+  user:
+    name: "{{ exoscale_ccm_user }}"
+    comment: "Exoscale CCM user"
+    group: "{{ exoscale_ccm_group }}"
+    groups: "{{ exoscale_ccm_groups }}"
+    shell: /bin/bash
+    system: true
+
+# Binary installation
+
+- name: Install OS packages and Exoscale CCM
+  tags:
+    - exoscale-ccm
+  include: _install.yml
+
+- name: Create configuration directory
+  tags:
+    - exoscale-ccm
+  become: true
+  file:
+    dest: "{{ exoscale_ccm_config_path }}"
+    state: directory
+    owner: "{{ exoscale_ccm_user }}"
+    group: "{{ exoscale_ccm_group }}"
+    mode: 0755
+
+- name: systemd unit
+  tags:
+    - exoscale-ccm
+  become: true
+  template:
+    src: "exoscale-ccm.service.j2"
+    dest: "/etc/systemd/system/exoscale-ccm.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd

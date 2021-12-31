@@ -1,0 +1,85 @@
+---
+
+- name: Create directories
+  tags:
+    - cni-plugins
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  with_items:
+    - "{{ cni_plugins_bin_path }}"
+    - "{{ cni_plugins_config_path }}"
+
+- name: Check cni-plugins package checksum file
+  tags:
+    - cni-plugins
+  stat:
+    path: "/tmp/{{ cni_plugins_shasums }}"
+  become: false
+  register: cni_plugins_checksum
+
+- name: Get cni-plugins package checksum file
+  tags:
+    - cni-plugins
+  get_url:
+    url: "{{ cni_plugins_checksum_file_url }}"
+    dest: "/tmp/{{ cni_plugins_shasums }}"
+  when: not cni_plugins_checksum.stat.exists | bool
+
+- name: Get cni-plugins package checksum
+  tags:
+    - cni-plugins
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "{{ cni_plugins_pkg }}" "/tmp/{{ cni_plugins_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: cni_plugins_sha256
+
+- name: Check cni-plugins package file
+  tags:
+    - cni-plugins
+  stat:
+    path: "/tmp/{{ cni_plugins_pkg }}"
+  become: false
+  register: cni_plugins_package
+
+- name: "Download cni-plugins → {{ cni_plugins_tgz_url }}"
+  tags:
+    - cni-plugins
+  get_url:
+    url: "{{ cni_plugins_tgz_url }}"
+    dest: "/tmp/{{ cni_plugins_pkg }}"
+    checksum: "sha256:{{ cni_plugins_sha256.stdout }}"
+    timeout: "42"
+  when: not cni_plugins_package.stat.exists | bool
+
+- name: Unarchive cni-plugins
+  tags:
+    - cni-plugins
+  unarchive:
+    remote_src: true
+    src: "/tmp/{{ cni_plugins_pkg }}"
+    dest: "/tmp"
+    creates: "/tmp/{{ item }}"
+  loop: "{{ cni_plugins_enabled }}"
+
+- name: Install cni-plugins
+  tags:
+    - cni-plugins
+  become: true
+  copy:
+    remote_src: true
+    src: "/tmp/{{ item }}"
+    dest: "{{ cni_plugins_bin_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop: "{{ cni_plugins_enabled }}"

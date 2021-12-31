@@ -1,0 +1,23 @@
+---
+
+# Package variables
+kube_scheduler_version: "1.23.1"
+kube_scheduler_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+kube_scheduler_architecture: "{{ kube_scheduler_architecture_map[ansible_architecture] }}"
+kube_scheduler_os: "{{ ansible_system|lower }}"
+kube_scheduler_shasums: "scheduler.SHA256SUMS"
+kube_scheduler_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_scheduler_version }}/bin/{{ kube_scheduler_os }}/{{ kube_scheduler_architecture }}/kube-scheduler"
+kube_scheduler_checksum_file_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_scheduler_version }}/SHA256SUMS"
+
+# Paths
+kube_scheduler_bin_path: /usr/local/bin
+kube_scheduler_config_path: /etc/kubernetes/scheduler
+
+# System user and group
+kube_scheduler_user: kube-scheduler
+kube_scheduler_group: kube-scheduler
+kube_scheduler_groups: null

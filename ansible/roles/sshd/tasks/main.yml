@@ -1,0 +1,12 @@
+---
+
+- name: Ensure sshd_config setting
+  become: true
+  lineinfile:
+    dest: "/etc/ssh/sshd_config"
+    regexp: "{{ item }}"
+    line: "{{ sshd_settings[item] }}"
+    state: "present"
+  loop: "{{ sshd_settings|flatten }}"
+  tags:
+    - ssh

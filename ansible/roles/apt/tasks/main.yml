@@ -1,0 +1,17 @@
+---
+
+- name: Remove snap
+  include: _remove_snap.yml
+
+- name: Update APT settings
+  include: _apt_settings.yml
+
+- name: Remove irrelevant packages
+  become: true
+  package:
+    name: "{{ item }}"
+    state: absent
+    purge: true
+  loop:
+    - multipath-tools
+    - ufw

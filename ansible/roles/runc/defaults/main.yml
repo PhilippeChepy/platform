@@ -1,0 +1,16 @@
+---
+
+# Package variables
+runc_version: "1.0.3"
+runc_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+runc_architecture: "{{ runc_architecture_map[ansible_architecture] }}"
+runc_signature: "runc.{{ runc_architecture }}.asc"
+runc_url: "https://github.com/opencontainers/runc/releases/download/v{{ runc_version }}/runc.{{ runc_architecture }}"
+runc_signature_file_url: "https://github.com/opencontainers/runc/releases/download/v{{ runc_version }}/runc.{{ runc_architecture }}.asc"
+
+# Paths
+runc_bin_path: /usr/local/bin

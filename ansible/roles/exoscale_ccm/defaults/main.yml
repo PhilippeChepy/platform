@@ -1,0 +1,19 @@
+---
+
+# Package variables
+exoscale_ccm_version: "0.8.1"
+exoscale_ccm_pkg: "exoscale-cloud-controller-manager_{{ exoscale_ccm_version }}_linux_amd64.tar.gz"
+exoscale_ccm_shasums: "exoscale-cloud-controller-manager_{{ exoscale_ccm_version }}-SHA256SUMS"
+exoscale_ccm_tgz_url: "https://github.com/exoscale/exoscale-cloud-controller-manager/releases/download/v{{ exoscale_ccm_version }}/exoscale-cloud-controller-manager_{{ exoscale_ccm_version }}_linux_amd64.tar.gz"
+exoscale_ccm_checksum_file_url: "https://github.com/exoscale/exoscale-cloud-controller-manager/releases/download/v{{ exoscale_ccm_version }}/checksums.txt"
+
+exoscale_ccm_local_storage: /tmp/exoscale-ccm-assets
+
+# System user and group
+exoscale_ccm_user: exoscale-ccm
+exoscale_ccm_group: exoscale-ccm
+exoscale_ccm_groups: null
+
+# TLS variables
+exoscale_ccm_bin_path: "/usr/local/bin"
+exoscale_ccm_config_path: "/etc/kubernetes/exoscale-ccm"

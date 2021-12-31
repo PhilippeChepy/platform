@@ -1,0 +1,13 @@
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name default;
+
+        location / {
+                proxy_pass                    https://127.0.0.1:6443/readyz;
+                proxy_ssl_trusted_certificate {{ kube_apiserver_config_path }}/server-ca.pem;
+                proxy_ssl_certificate         {{ kube_apiserver_config_path }}/node-client-cert.pem;
+                proxy_ssl_certificate_key     {{ kube_apiserver_config_path }}/node-client-cert.key;
+        }
+}

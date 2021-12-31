@@ -1,0 +1,37 @@
+---
+
+# Package variables
+cni_plugins_version: "1.0.1"
+cni_plugins_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+cni_plugins_architecture: "{{ cni_plugins_architecture_map[ansible_architecture] }}"
+cni_plugins_os: "{{ ansible_system|lower }}"
+cni_plugins_pkg: "cni-plugins-{{ cni_plugins_os }}-{{ cni_plugins_architecture }}-v{{ cni_plugins_version }}.tgz"
+cni_plugins_shasums: "cni-plugins-{{ cni_plugins_os }}-{{ cni_plugins_architecture }}-v{{ cni_plugins_version }}.tgz.sha256"
+cni_plugins_tgz_url: "https://github.com/containernetworking/plugins/releases/download/v{{ cni_plugins_version }}/cni-plugins-{{ cni_plugins_os }}-{{ cni_plugins_architecture }}-v{{ cni_plugins_version }}.tgz"
+cni_plugins_checksum_file_url: "https://github.com/containernetworking/plugins/releases/download/v{{ cni_plugins_version }}/cni-plugins-{{ cni_plugins_os }}-{{ cni_plugins_architecture }}-v{{ cni_plugins_version }}.tgz.sha256"
+
+# Paths
+cni_plugins_bin_path: /opt/cni/bin
+cni_plugins_config_path: /etc/cni/net.d
+
+cni_plugins_enabled:
+  - macvlan
+  - static
+  - vlan
+  - portmap
+  - host-local
+  - vrf
+  - bridge
+  - tuning
+  - firewall
+  - host-device
+  - sbr
+  - loopback
+  - dhcp
+  - ptp
+  - ipvlan
+  - bandwidth

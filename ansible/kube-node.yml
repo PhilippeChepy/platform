@@ -1,0 +1,14 @@
+---
+
+- name: Update base OS settings
+  hosts: default
+  become: true
+  roles:
+    - apt
+    - sshd
+    - runc
+    - crictl
+    - cni_plugins
+    - systemd
+    - containerd
+    - kube_kubelet

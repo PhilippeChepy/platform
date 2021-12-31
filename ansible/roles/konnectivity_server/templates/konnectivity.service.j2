@@ -1,0 +1,25 @@
+[Unit]
+Description=API Server Network Proxy Server (Konnectivity)
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+
+[Service]
+User={{ konnectivity_user }}
+ExecStart={{ konnectivity_server_bin_path }}/proxy-server \
+  --logtostderr=true \
+  --cluster-cert={{ konnectivity_server_config_path }}/cluster-cert.pem \
+  --cluster-key={{ konnectivity_server_config_path }}/cluster-cert.key \
+  --mode=http-connect \
+  --server-ca-cert={{ konnectivity_server_config_path }}/server-ca.pem \
+  --server-cert={{ konnectivity_server_config_path }}/server-cert.pem \
+  --server-key={{ konnectivity_server_config_path }}/server-cert.key \
+  --agent-namespace=kube-system \
+  --agent-service-account=konnectivity-agent \
+  --kubeconfig={{ konnectivity_server_config_path }}/konnectivity-server.kubeconfig \
+  --authentication-audience=system:konnectivity-server
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

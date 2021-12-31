@@ -1,0 +1,33 @@
+---
+
+# Package variables
+etcd_version: "3.5.1"
+etcd_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+etcd_architecture: "{{ etcd_architecture_map[ansible_architecture] }}"
+etcd_os: "{{ ansible_system|lower }}"
+etcd_pkg: "etcd-v{{ etcd_version }}-{{ etcd_os }}-{{ etcd_architecture }}.tar.gz"
+etcd_shasums: "etcd_v{{ etcd_version }}-SHA256SUMS"
+etcd_tgz_url: "https://storage.googleapis.com/etcd/v{{ etcd_version }}/etcd-v{{ etcd_version }}-{{ etcd_os }}-{{ etcd_architecture }}.tar.gz"
+etcd_checksum_file_url: "https://storage.googleapis.com/etcd/v{{ etcd_version }}/SHA256SUMS"
+
+#
+
+etcd_local_storage: /tmp/etcd-assets
+
+# Paths
+etcd_bin_path: /usr/local/bin
+etcd_config_path: /etc/etcd
+etcd_data_path: /var/lib/etcd
+etcd_home: "/home/{{ etcd_user }}"
+
+# System user and group
+etcd_user: etcd
+etcd_group: etcd
+etcd_groups: null
+
+etcd_dotfile: ".bashrc"
+etcd_dotfile_disable: false

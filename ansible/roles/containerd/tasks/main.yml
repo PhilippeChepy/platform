@@ -1,0 +1,111 @@
+---
+
+- name: Create directories
+  tags:
+    - containerd
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: 0755
+  with_items:
+    - "{{ containerd_config_path }}"
+
+- name: Check containerd package checksum file
+  tags:
+    - containerd
+  stat:
+    path: "/tmp/{{ containerd_shasums }}"
+  become: false
+  register: containerd_checksum
+
+- name: Get containerd package checksum file
+  tags:
+    - containerd
+  get_url:
+    url: "{{ containerd_checksum_file_url }}"
+    dest: "/tmp/{{ containerd_shasums }}"
+  when: not containerd_checksum.stat.exists | bool
+
+- name: Get containerd package checksum
+  tags:
+    - containerd
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "{{ containerd_pkg }}" "/tmp/{{ containerd_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: containerd_sha256
+
+- name: Check containerd package file
+  tags:
+    - containerd
+  stat:
+    path: "/tmp/{{ containerd_pkg }}"
+  become: false
+  register: containerd_package
+
+- name: "Download containerd → {{ containerd_tgz_url }}"
+  tags:
+    - containerd
+  get_url:
+    url: "{{ containerd_tgz_url }}"
+    dest: "/tmp/{{ containerd_pkg }}"
+    checksum: "sha256:{{ containerd_sha256.stdout }}"
+    timeout: "42"
+  when: not containerd_package.stat.exists | bool
+
+- name: Unarchive containerd
+  tags:
+    - containerd
+  unarchive:
+    remote_src: true
+    src: "/tmp/{{ containerd_pkg }}"
+    dest: "/tmp"
+    creates: "/tmp/{{ item }}"
+  loop: "{{ containerd_enabled }}"
+
+- name: Install containerd
+  tags:
+    - containerd
+  become: true
+  copy:
+    remote_src: true
+    src: "/tmp/bin/{{ item }}"
+    dest: "{{ containerd_bin_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop: "{{ containerd_enabled }}"
+
+- name: systemd unit
+  tags:
+    - containerd
+  become: true
+  copy:
+    src: "config.toml"
+    dest: "{{ containerd_config_path }}/config.toml"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: systemd unit
+  tags:
+    - containerd
+  become: true
+  template:
+    src: "containerd.service.j2"
+    dest: "/etc/systemd/system/containerd.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - enable containerd

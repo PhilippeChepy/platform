@@ -1,0 +1,18 @@
+---
+
+# Package variables
+cilium_cli_version: "0.10.0"
+cilium_cli_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+cilium_cli_architecture: "{{ cilium_cli_architecture_map[ansible_architecture] }}"
+cilium_cli_os: "{{ ansible_system|lower }}"
+cilium_cli_pkg: "cilium-{{ cilium_cli_os }}-{{ cilium_cli_architecture }}.tar.gz"
+cilium_cli_shasums: "cilium-{{ cilium_cli_os }}-{{ cilium_cli_architecture }}.tar.gz.sha256"
+cilium_cli_tgz_url: "https://github.com/cilium/cilium-cli/releases/download/v{{ cilium_cli_version }}/cilium-{{ cilium_cli_os }}-{{ cilium_cli_architecture }}.tar.gz"
+cilium_cli_checksum_file_url: "https://github.com/cilium/cilium-cli/releases/download/v{{ cilium_cli_version }}/cilium-{{ cilium_cli_os }}-{{ cilium_cli_architecture }}.tar.gz.sha256sum"
+
+# Paths
+cilium_cli_bin_path: /usr/local/bin

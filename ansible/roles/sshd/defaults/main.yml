@@ -1,0 +1,6 @@
+---
+
+sshd_settings:
+  "^PasswordAuthentication": "PasswordAuthentication no"
+  "^PermitRootLogin": "PermitRootLogin no"
+  "^PermitTunnel": "PermitTunnel no"

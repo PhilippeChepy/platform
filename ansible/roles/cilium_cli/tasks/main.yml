@@ -1,0 +1,69 @@
+---
+
+- name: Check cilium-cli package checksum file
+  tags:
+    - cilium-cli
+  stat:
+    path: "/tmp/{{ cilium_cli_shasums }}"
+  become: false
+  register: cilium_cli_checksum
+
+- name: Get cilium-cli package checksum file
+  tags:
+    - cilium-cli
+  get_url:
+    url: "{{ cilium_cli_checksum_file_url }}"
+    dest: "/tmp/{{ cilium_cli_shasums }}"
+  when: not cilium_cli_checksum.stat.exists | bool
+
+- name: Get cilium-cli package checksum
+  tags:
+    - cilium-cli
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "{{ cilium_cli_pkg }}" "/tmp/{{ cilium_cli_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: cilium_cli_sha256
+
+- name: Check cilium-cli package file
+  tags:
+    - cilium-cli
+  stat:
+    path: "/tmp/{{ cilium_cli_pkg }}"
+  become: false
+  register: cilium_cli_package
+
+- name: "Download cilium-cli → {{ cilium_cli_tgz_url }}"
+  tags:
+    - cilium-cli
+  get_url:
+    url: "{{ cilium_cli_tgz_url }}"
+    dest: "/tmp/{{ cilium_cli_pkg }}"
+    checksum: "sha256:{{ cilium_cli_sha256.stdout }}"
+    timeout: "42"
+  when: not cilium_cli_package.stat.exists | bool
+
+- name: Unarchive cilium
+  tags:
+    - cilium-cli
+  unarchive:
+    remote_src: true
+    src: "/tmp/{{ cilium_cli_pkg }}"
+    dest: "/tmp"
+    creates: "/tmp/cilium"
+
+- name: Install cilium
+  tags:
+    - cilium-cli
+  become: true
+  copy:
+    remote_src: true
+    src: "/tmp/cilium"
+    dest: "{{ cilium_cli_bin_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"

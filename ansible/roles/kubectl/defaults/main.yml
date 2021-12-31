@@ -1,0 +1,17 @@
+---
+
+# Package variables
+kubectl_version: "1.23.1"
+kubectl_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+kubectl_architecture: "{{ kubectl_architecture_map[ansible_architecture] }}"
+kubectl_os: "{{ ansible_system|lower }}"
+kubectl_shasums: "kubectl.SHA256SUMS"
+kubectl_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubectl_version }}/bin/{{ kubectl_os }}/{{ kubectl_architecture }}/kubectl"
+kubectl_checksum_file_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubectl_version }}/SHA256SUMS"
+
+# Paths
+kubectl_bin_path: /usr/local/bin

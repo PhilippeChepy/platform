@@ -1,0 +1,109 @@
+---
+
+- name: Add Kubernetes API Server group
+  tags:
+    - kube-apiserver
+  become: true
+  group:
+    name: "{{ kube_apiserver_group }}"
+    state: present
+
+- name: Add Kubernetes API Server user
+  tags:
+    - kube-apiserver
+  become: true
+  user:
+    name: "{{ kube_apiserver_user }}"
+    comment: "Kubernetes API Server user"
+    group: "{{ kube_apiserver_group }}"
+    groups: "{{ kube_apiserver_groups }}"
+    shell: /bin/bash
+    system: true
+
+- name: Check Kubernetes API Server checksum file
+  tags:
+    - kube-apiserver
+  stat:
+    path: "/tmp/{{ kube_apiserver_shasums }}"
+  become: false
+  register: kube_apiserver_checksum
+
+- name: Get Kubernetes API Server checksum file
+  tags:
+    - kube-apiserver
+  get_url:
+    url: "{{ kube_apiserver_checksum_file_url }}"
+    dest: "/tmp/{{ kube_apiserver_shasums }}"
+  when: not kube_apiserver_checksum.stat.exists | bool
+
+- name: Get Kubernetes API Server checksum
+  tags:
+    - kube-apiserver
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "v{{ kube_apiserver_version }}/bin/{{ kube_apiserver_os }}/{{ kube_apiserver_architecture }}/kube-apiserver$" "/tmp/{{ kube_apiserver_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: kube_apiserver_sha256
+
+- name: "Download Kubernetes API Server → {{ kube_apiserver_url }}"
+  tags:
+    - kube-apiserver
+  get_url:
+    url: "{{ kube_apiserver_url }}"
+    dest: "{{ kube_apiserver_bin_path }}/kube-apiserver"
+    checksum: "sha256:{{ kube_apiserver_sha256.stdout }}"
+    owner: "{{ kube_apiserver_user }}"
+    group: "{{ kube_apiserver_group }}"
+    mode: "0755"
+
+- name: Create directories
+  tags:
+    - kube-apiserver
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ kube_apiserver_user }}"
+    group: "{{ kube_apiserver_group }}"
+    mode: 0755
+  with_items:
+    - "{{ kube_apiserver_config_path }}"
+
+- name: Install nginx (for healthcheck endpoint)
+  tags:
+    - kube-apiserver
+  become: true
+  package:
+    name: ['nginx']
+    state: present
+    update_cache: true
+  when: kube_apiserver_http_healthcheck
+
+- name: Set healthcheck endpoint configuration
+  tags:
+    - kube-apiserver
+  template:
+    src: "healthcheck.conf.j2"
+    dest: "/etc/nginx/sites-available/default"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  when: kube_apiserver_http_healthcheck
+
+- name: systemd unit
+  tags:
+    - kube-apiserver
+  become: true
+  template:
+    src: "kube-apiserver.service.j2"
+    dest: "/etc/systemd/system/kube-apiserver.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd

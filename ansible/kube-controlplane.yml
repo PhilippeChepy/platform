@@ -1,0 +1,16 @@
+---
+
+- name: Update base OS settings
+  hosts: default
+  become: true
+  roles:
+    - apt
+    - sshd
+    - cilium_cli
+    - systemd
+    - kube_apiserver
+    - konnectivity_server
+    - kube_controller_manager
+    - kube_scheduler
+    - exoscale_ccm
+    - kubectl

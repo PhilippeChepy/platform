@@ -1,0 +1,8 @@
+---
+
+- name: enable containerd
+  become: true
+  systemd:
+    name: containerd
+    enabled: true
+    state: started

@@ -1,0 +1,14 @@
+---
+
+# Package variables
+# extracted from eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-server:v0.0.26
+konnectivity_server_binary: "proxy-server-v0.0.26-linux-amd64"
+
+# Paths
+konnectivity_server_bin_path: /usr/local/bin
+konnectivity_server_config_path: /etc/kubernetes/konnectivity
+
+# System user and group
+konnectivity_user: konnectivity
+konnectivity_group: konnectivity
+konnectivity_groups: null

@@ -1,0 +1,33 @@
+---
+
+- name: shutdown services or sockets
+  become: true
+  service:
+    name: "{{ item }}"
+    state: "stopped"
+    enabled: "false"
+  failed_when: false
+  loop:
+    - snapd.service
+    - snapd.socket
+
+- name: remove snapd packages
+  become: true
+  package:
+    name: snapd
+    state: absent
+    purge: true
+
+- name: remove snapd-related directories
+  become: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /snap
+    - /var/snap
+    - /var/lib/snapd
+    - /var/cache/snapd
+    - /root/snap
+    - /run/snapd-snap.socket
+    - /run/snapd.socket

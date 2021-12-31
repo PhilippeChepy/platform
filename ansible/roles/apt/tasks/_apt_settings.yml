@@ -1,0 +1,37 @@
+---
+
+- name: "Install package unattended-upgrades"
+  become: true
+  package:
+    pkg: "unattended-upgrades"
+    state: present
+
+- name: "Update APT package cache"
+  become: true
+  apt:
+    update_cache: "{{ apt_update_cache }}"
+    cache_valid_time: "{{ apt_cache_valid_time }}"
+  retries: 2
+  delay: 5
+  tags:
+    - apt
+
+- name: "Upgrade APT to the latest packages"
+  become: true
+  apt:
+    upgrade: safe
+  retries: 2
+  delay: 5
+  tags:
+    - apt
+
+- name: "Adjust APT update intervals"
+  become: true
+  copy:
+    src: 10periodic
+    dest: /etc/apt/apt.conf.d/10periodic
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - apt

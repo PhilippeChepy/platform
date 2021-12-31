@@ -1,0 +1,81 @@
+---
+
+- name: Ensure Local storage directory exists
+  tags:
+    - exoscale-ccm
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop:
+    - "{{ exoscale_ccm_local_storage }}"
+
+- name: Check Exoscale CCM package checksum file
+  tags:
+    - exoscale-ccm
+  stat:
+    path: "{{ exoscale_ccm_local_storage }}/{{ exoscale_ccm_shasums }}"
+  become: false
+  register: exoscale_ccm_checksum
+
+- name: Get Exoscale CCM package checksum file
+  tags:
+    - exoscale-ccm
+  get_url:
+    url: "{{ exoscale_ccm_checksum_file_url }}"
+    dest: "{{ exoscale_ccm_local_storage }}/{{ exoscale_ccm_shasums }}"
+  when: not exoscale_ccm_checksum.stat.exists | bool
+
+- name: Get Exoscale CCM package checksum
+  tags:
+    - exoscale-ccm
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "{{ exoscale_ccm_pkg }}" "{{ exoscale_ccm_local_storage }}/{{ exoscale_ccm_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: exoscale_ccm_sha256
+
+- name: Check Exoscale CCM package file
+  tags:
+    - exoscale-ccm
+  stat:
+    path: "{{ exoscale_ccm_local_storage }}/{{ exoscale_ccm_pkg }}"
+  become: false
+  register: exoscale_ccm_package
+
+- name: "Download Exoscale CCM → {{ exoscale_ccm_tgz_url }}"
+  tags:
+    - exoscale-ccm
+  get_url:
+    url: "{{ exoscale_ccm_tgz_url }}"
+    dest: "{{ exoscale_ccm_local_storage }}/{{ exoscale_ccm_pkg }}"
+    checksum: "sha256:{{ exoscale_ccm_sha256.stdout }}"
+    timeout: "42"
+  when: not exoscale_ccm_package.stat.exists | bool
+
+- name: Unarchive Exoscale CCM
+  tags:
+    - exoscale-ccm
+  unarchive:
+    remote_src: true
+    src: "{{ exoscale_ccm_local_storage }}/{{ exoscale_ccm_pkg }}"
+    dest: "{{ exoscale_ccm_local_storage }}"
+    creates: "{{ exoscale_ccm_local_storage }}/exoscale-cloud-controller-manager"
+
+- name: Install Exoscale CCM
+  tags:
+    - exoscale-ccm
+  become: true
+  copy:
+    remote_src: true
+    src: "{{ exoscale_ccm_local_storage }}/exoscale-cloud-controller-manager"
+    dest: "{{ exoscale_ccm_bin_path }}"
+    owner: "{{ exoscale_ccm_user }}"
+    group: "{{ exoscale_ccm_group }}"
+    mode: "0755"
