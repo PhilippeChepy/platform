@@ -1,0 +1,14 @@
+---
+
+- name: systemd unit
+  tags:
+    - vault
+  become: true
+  template:
+    src: "vault.service.j2"
+    dest: "/etc/systemd/system/vault.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd

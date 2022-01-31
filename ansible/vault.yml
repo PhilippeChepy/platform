@@ -1,0 +1,10 @@
+---
+
+- name: Update base OS settings
+  hosts: default
+  become: true
+  roles:
+    - apt
+    - sshd
+    - systemd
+    - vault

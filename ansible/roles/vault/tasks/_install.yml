@@ -1,0 +1,123 @@
+---
+
+- name: Ensure Local storage directory exists
+  tags:
+    - vault
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop:
+    - "{{ vault_local_storage }}"
+
+- name: OS packages
+  tags:
+    - vault
+  become: true
+  package:
+    name: ['unzip', 'acl']
+    state: present
+    update_cache: true
+
+- name: Check Vault package checksum file
+  tags:
+    - vault
+  stat:
+    path: "{{ vault_local_storage }}/{{ vault_shasums }}"
+  become: false
+  register: vault_checksum
+
+- name: Get Vault package checksum file
+  tags:
+    - vault
+  get_url:
+    url: "{{ vault_checksum_file_url }}"
+    dest: "{{ vault_local_storage }}/{{ vault_shasums }}"
+  when: not vault_checksum.stat.exists | bool
+
+- name: Get Vault package checksum
+  tags:
+    - vault
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "{{ vault_pkg }}" "{{ vault_local_storage }}/{{ vault_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: vault_sha256
+
+- name: Check Vault package file
+  tags:
+    - vault
+  stat:
+    path: "{{ vault_local_storage }}/{{ vault_pkg }}"
+  become: false
+  register: vault_package
+
+- name: "Download Vault → {{ vault_zip_url }}"
+  tags:
+    - vault
+  get_url:
+    url: "{{ vault_zip_url }}"
+    dest: "{{ vault_local_storage }}/{{ vault_pkg }}"
+    checksum: "sha256:{{ vault_sha256.stdout }}"
+    timeout: "42"
+  when: not vault_package.stat.exists | bool
+
+- name: Unarchive Vault
+  tags:
+    - vault
+  unarchive:
+    remote_src: true
+    src: "{{ vault_local_storage }}/{{ vault_pkg }}"
+    dest: "{{ vault_local_storage }}"
+    creates: "{{ vault_local_storage }}/vault"
+
+- name: Install Vault
+  tags:
+    - vault
+  become: true
+  copy:
+    remote_src: true
+    src: "{{ vault_local_storage }}/vault"
+    dest: "{{ vault_bin_path }}"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0755"
+
+- name: Check Vault mlock capability
+  tags:
+    - vault
+  become: true
+  command: "setcap cap_ipc_lock=+ep {{ vault_bin_path }}/vault"
+  changed_when: false  # read-only task
+  ignore_errors: true
+  register: vault_mlock_capability
+
+- name: Enable non root mlock capability
+  tags:
+    - vault
+  become: true
+  command: "setcap cap_ipc_lock=+ep {{ vault_bin_path }}/vault"
+  when: vault_mlock_capability is failed
+
+- name: Create directories
+  tags:
+    - vault
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0750
+  with_items:
+    - "{{ vault_config_path }}"
+    - "{{ vault_plugin_path }}"
+    - "{{ vault_data_path }}"
+    - "{{ vault_log_path }}"
+    - "{{ vault_run_path }}"
