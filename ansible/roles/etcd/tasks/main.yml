@@ -29,25 +29,8 @@
   tags:
     - skip_ansible_lint  # command is a shell builtin
 
-- name: Get installed etcd version
-  shell: |
-    set -o pipefail
-    {{ etcd_installation.stdout }} --version | grep 'etcd Version' | cut -d' ' -f3
-  args:
-    executable: /bin/bash
-  when: not etcd_installation is failed
-  changed_when: false
-  check_mode: false
-  register: installed_etcd_version
-
-- name: Compute if installation is required
-  set_fact:
-    installation_required: "{{ etcd_installation is failed or installed_etcd_version.stdout != etcd_version }}"
-
 - name: Install OS packages and Etcd
   include: _install.yml
-  when:
-    - installation_required | bool
 
 - name: systemd unit
   tags:

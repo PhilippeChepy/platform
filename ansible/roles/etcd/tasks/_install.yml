@@ -20,8 +20,6 @@
     name: ['unzip']
     state: present
     update_cache: true
-  when:
-    - installation_required | bool
 
 - name: Check etcd package checksum file
   tags:
