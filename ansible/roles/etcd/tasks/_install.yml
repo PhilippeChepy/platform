@@ -108,3 +108,4 @@
   with_items:
     - "{{ etcd_config_path }}"
     - "{{ etcd_data_path }}"
+    - "{{ etcd_certs_path }}"
