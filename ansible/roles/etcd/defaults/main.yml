@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-etcd_version: "3.5.1"
+etcd_version: "3.5.2"
 etcd_architecture_map:
   amd64: amd64
   x86_64: amd64
@@ -21,6 +21,7 @@ etcd_local_storage: /tmp/etcd-assets
 # Paths
 etcd_bin_path: /usr/local/bin
 etcd_config_path: /etc/etcd
+etcd_certs_path: /etc/etcd/tls
 etcd_data_path: /var/lib/etcd
 etcd_home: "/home/{{ etcd_user }}"
 

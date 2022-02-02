@@ -11,7 +11,7 @@ Related repositories:
 
 # Templates
 
-- etcd.pkr.hcl (Etcd 3.5.1):
+- etcd.pkr.hcl (Etcd 3.5.2):
     - Settings must be set in `/etc/default/etcd` when deploying.
 - kube-controlplane.pkr.hcl (Kubernetes 1.23.3 control plane):
     - Lots of certificates must be set

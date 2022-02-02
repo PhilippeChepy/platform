@@ -6,4 +6,5 @@
   roles:
     - apt
     - sshd
+    - systemd
     - etcd

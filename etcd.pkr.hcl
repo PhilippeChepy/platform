@@ -13,8 +13,8 @@ source "exoscale" "base" {
   instance_template = "Linux Ubuntu 20.04 LTS 64-bit"
   instance_disk_size = 10
   template_zone = var.zone
-  template_name = "Etcd 3.5.1"
-  template_description = "Etcd 3.5.1 on top of Ubuntu 20.04"
+  template_name = "Etcd 3.5.2"
+  template_description = "Etcd 3.5.2 on top of Ubuntu 20.04"
   template_username = "ubuntu"
   ssh_username = "ubuntu"
 }
