@@ -1,0 +1,75 @@
+---
+
+- name: Add Vault group
+  become: true
+  group:
+    name: "{{ vault_group }}"
+    state: present
+
+- name: Add Vault user
+  become: true
+  user:
+    name: "{{ vault_user }}"
+    comment: "Vault user"
+    group: "{{ vault_group }}"
+    groups: "{{ vault_groups }}"
+    shell: /bin/bash
+    system: true
+
+# Binary installation
+
+- name: Check Vault installation
+  shell: command -v vault
+  environment:
+    PATH: "{{ vault_bin_path }}:{{ ansible_env.PATH }}"
+  register: vault_installation
+  changed_when: false
+  ignore_errors: true
+  check_mode: false
+  tags:
+    - skip_ansible_lint  # command is a shell builtin
+
+- name: Get installed Vault version
+  shell: |
+    set -o pipefail
+    {{ vault_installation.stdout }} -version | cut -d' ' -f2 | tr -d 'v'
+  args:
+    executable: /bin/bash
+  when: not vault_installation is failed
+  changed_when: false
+  check_mode: false
+  register: installed_vault_version
+
+- name: Install OS packages and Vault
+  include: _install.yml
+
+- name: extract systemd version
+  shell: |
+    set -o pipefail
+    systemctl --version systemd | head -n 1 | cut -d' ' -f2
+  args:
+    executable: /bin/bash
+  changed_when: false
+  check_mode: false
+  register: systemd_version
+  tags: skip_ansible_lint
+
+- name: Create TLS directory
+  tags:
+    - vault
+    - tls-server
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0750
+  with_items:
+    - "{{ vault_tls_config_path }}"
+
+- name: Configure Vault and service
+  include: _config.yml
+
+- name: Setup friendly environment
+  include: _environment.yml

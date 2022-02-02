@@ -1,0 +1,56 @@
+---
+
+# Package variables
+vault_version: "1.9.3"
+vault_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  armv7l: arm
+  aarch64: arm64
+
+vault_architecture: "{{ vault_architecture_map[ansible_architecture] }}"
+vault_os: "{{ ansible_system|lower }}"
+vault_pkg: "vault_{{ vault_version }}_{{ vault_os }}_{{ vault_architecture }}.zip"
+vault_shasums: "vault_{{ vault_version }}_SHA256SUMS"
+vault_zip_url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_{{ vault_os }}_{{ vault_architecture }}.zip"
+vault_checksum_file_url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_SHA256SUMS"
+
+#
+
+vault_local_storage: /tmp/vault-assets
+
+# Paths
+vault_bin_path: /usr/local/bin
+vault_config_path: /etc/vault
+vault_plugin_path: /usr/local/lib/vault/plugins
+vault_data_path: /var/lib/vault
+vault_log_path: /var/log/vault
+vault_run_path: /var/run/vault
+vault_home: "/home/{{ vault_user }}"
+
+# System user and group
+vault_user: vault
+vault_group: vault
+vault_groups: null
+
+vault_dotfile: ".bashrc"
+vault_dotfile_disable: false
+
+# Handlers
+vault_service_restart: true
+
+# General Settings
+
+vault_main_config: "{{ vault_config_path }}/vault.hcl"
+vault_log_level: "info"
+vault_port: 8200
+
+# TLS variables
+vault_tls_config_path: "/etc/vault/tls"
+vault_tls_ca_cert_file: "ca.pem"
+
+# Storage backend
+
+## Storage tls settings
+vault_backend_tls_cert_file: "client.pem"
+vault_backend_tls_key_file: "client.key"
