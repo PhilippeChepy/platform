@@ -1,7 +1,7 @@
 ---
 
 - name: Update APT settings
-  include: _apt_settings.yml
+  include_tasks: _apt_settings.yml
 
 - name: Remove unwanted packages
   become: true

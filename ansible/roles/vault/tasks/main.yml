@@ -41,7 +41,7 @@
   register: installed_vault_version
 
 - name: Install OS packages and Vault
-  include: _install.yml
+  include_tasks: _install.yml
 
 - name: extract systemd version
   shell: |
@@ -69,7 +69,7 @@
     - "{{ vault_tls_config_path }}"
 
 - name: Configure Vault and service
-  include: _config.yml
+  include_tasks: _config.yml
 
 - name: Setup friendly environment
-  include: _environment.yml
+  include_tasks: _environment.yml
