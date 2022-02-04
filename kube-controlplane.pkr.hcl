@@ -31,7 +31,7 @@ build {
 packer {
   required_plugins {
     exoscale = {
-      version = ">= 0.1.2"
+      version = ">= 0.1.3"
       source  = "github.com/exoscale/exoscale"
     }
   }
