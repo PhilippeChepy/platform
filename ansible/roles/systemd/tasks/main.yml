@@ -1,0 +1,7 @@
+- name: Mask unwanted units
+  become: true
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    masked: true
+  loop: "{{ systemd_unwanted_units }}"
