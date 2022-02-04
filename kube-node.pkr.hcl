@@ -24,6 +24,7 @@ build {
 
   provisioner "ansible" {
     playbook_file = "./ansible/kube-node.yml"
+    user          = "ubuntu"
   }
 }
 

@@ -24,6 +24,7 @@ build {
 
   provisioner "ansible" {
     playbook_file = "./ansible/kube-controlplane.yml"
+    user          = "ubuntu"
   }
 }
 

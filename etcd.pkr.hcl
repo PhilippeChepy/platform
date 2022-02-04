@@ -24,6 +24,7 @@ build {
 
   provisioner "ansible" {
     playbook_file = "./ansible/etcd.yml"
+    user          = "ubuntu"
   }
 }
 
