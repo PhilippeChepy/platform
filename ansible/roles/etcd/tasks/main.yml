@@ -30,7 +30,7 @@
     - skip_ansible_lint  # command is a shell builtin
 
 - name: Install OS packages and Etcd
-  include: _install.yml
+  include_tasks: _install.yml
 
 - name: systemd unit
   tags:

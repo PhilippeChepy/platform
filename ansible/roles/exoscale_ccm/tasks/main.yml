@@ -25,7 +25,7 @@
 - name: Install OS packages and Exoscale CCM
   tags:
     - exoscale-ccm
-  include: _install.yml
+  include_tasks: _install.yml
 
 - name: Create configuration directory
   tags:

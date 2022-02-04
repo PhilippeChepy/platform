@@ -94,6 +94,7 @@
   loop:
     - etcd
     - etcdctl
+    - etcdutl
 
 - name: Create directories
   tags:

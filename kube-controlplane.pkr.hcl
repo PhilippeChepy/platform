@@ -8,15 +8,15 @@ variable "zone" {
 }
 
 source "exoscale" "base" {
-  api_key = var.api_key
-  api_secret = var.api_secret
-  instance_template = "Linux Ubuntu 20.04 LTS 64-bit"
-  instance_disk_size = 10
-  template_zone = var.zone
-  template_name = "Kubernetes 1.23.3 control plane"
-  template_description = "Kubernetes 1.23.3 control plane components on top of Ubuntu 20.04"
-  template_username = "ubuntu"
-  ssh_username = "ubuntu"
+  api_key              = var.api_key
+  api_secret           = var.api_secret
+  instance_template    = "Linux Ubuntu 20.04 LTS 64-bit"
+  instance_disk_size   = 10
+  template_zone        = var.zone
+  template_name        = "Kubernetes 1.23.3 control plane"
+  template_description = "Kubernetes 1.23.3 control plane components (minimal Ubuntu 20.04)"
+  template_username    = "ubuntu"
+  ssh_username         = "ubuntu"
 }
 
 build {
@@ -24,14 +24,15 @@ build {
 
   provisioner "ansible" {
     playbook_file = "./ansible/kube-controlplane.yml"
+    user          = "ubuntu"
   }
 }
 
 packer {
   required_plugins {
     exoscale = {
-      version = ">= 0.1.2"
-      source = "github.com/exoscale/exoscale"
+      version = ">= 0.1.3"
+      source  = "github.com/exoscale/exoscale"
     }
   }
 }
