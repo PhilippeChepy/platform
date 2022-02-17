@@ -13,10 +13,10 @@ Related repositories:
 
 - etcd.pkr.hcl (Etcd 3.5.2):
     - Settings must be set in `/etc/default/etcd` when deploying.
-- kube-controlplane.pkr.hcl (Kubernetes 1.23.3 control plane):
+- kube-controlplane.pkr.hcl (Kubernetes 1.23.4 control plane):
     - Lots of certificates must be set
     - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
-- kube-node.pkr.hcl (Kubernetes 1.23.3 node):
+- kube-node.pkr.hcl (Kubernetes 1.23.4 node):
     - TLS is bootstraped with a token
     - Used by [Terraform Kubelet Pool @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubelet-pool)
 - vault.pkr.hcl (Vault 1.9.3)
