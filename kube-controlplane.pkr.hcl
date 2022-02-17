@@ -13,8 +13,8 @@ source "exoscale" "base" {
   instance_template    = "Linux Ubuntu 20.04 LTS 64-bit"
   instance_disk_size   = 10
   template_zone        = var.zone
-  template_name        = "Kubernetes 1.23.3 control plane"
-  template_description = "Kubernetes 1.23.3 control plane components (minimal Ubuntu 20.04)"
+  template_name        = "Kubernetes 1.23.4 control plane"
+  template_description = "Kubernetes 1.23.4 control plane components (minimal Ubuntu 20.04)"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
