@@ -71,5 +71,16 @@
 - name: Configure Vault and service
   include_tasks: _config.yml
 
-- name: Setup friendly environment
-  include_tasks: _environment.yml
+- name: Insert vault source in dotfile
+  tags:
+    - vault
+  become: true
+  lineinfile:
+    path: "{{ vault_home }}/{{ vault_dotfile }}"
+    line: ". /etc/default/vault"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    create: true
+    mode: 0600
+  when:
+    - not vault_dotfile_disable

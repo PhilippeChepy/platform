@@ -52,5 +52,5 @@ vault_tls_ca_cert_file: "ca.pem"
 # Storage backend
 
 ## Storage tls settings
-vault_backend_tls_cert_file: "client.pem"
-vault_backend_tls_key_file: "client.key"
+vault_backend_tls_cert_file: "peer-cert.pem"
+vault_backend_tls_key_file: "peer-cert.key"
