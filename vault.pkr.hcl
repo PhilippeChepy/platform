@@ -14,7 +14,7 @@ source "exoscale" "base" {
   instance_disk_size   = 10
   template_zone        = var.zone
   template_name        = "Vault 1.9.3"
-  template_description = "Hashicorp Vault 1.9.3 on top of Ubuntu 20.04"
+  template_description = "Hashicorp Vault 1.9.4 on top of Ubuntu 20.04"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }

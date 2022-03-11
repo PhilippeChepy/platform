@@ -21,7 +21,7 @@ AmbientCapabilities=CAP_SYSLOG CAP_IPC_LOCK
 {% endif %}
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
-ExecStart=/bin/sh -c 'exec {{ vault_bin_path }}/vault {{ vault_mode }} -config={{ vault_config_dir }} -log-level={{ vault_log_level | lower }}'
+ExecStart=/bin/sh -c 'exec {{ vault_bin_path }}/vault {{ vault_mode }} -config={{ vault_config_path }} -log-level={{ vault_log_level | lower }}'
 ExecReload=/bin/kill --signal HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT
