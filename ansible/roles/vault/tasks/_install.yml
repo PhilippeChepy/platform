@@ -65,7 +65,6 @@
     url: "{{ vault_zip_url }}"
     dest: "{{ vault_local_storage }}/{{ vault_pkg }}"
     checksum: "sha256:{{ vault_sha256.stdout }}"
-    timeout: "42"
   when: not vault_package.stat.exists | bool
 
 - name: Unarchive Vault
@@ -115,9 +114,67 @@
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
     mode: 0750
-  with_items:
+  loop:
     - "{{ vault_config_path }}"
     - "{{ vault_plugin_path }}"
     - "{{ vault_data_path }}"
     - "{{ vault_log_path }}"
     - "{{ vault_run_path }}"
+
+- name: Check Vault plugin
+  tags:
+    - vault
+    - vault-plugin
+  become: true
+  become_user: "{{ vault_user }}"
+  stat:
+    path: "{{ vault_plugin_path }}/{{ item.name }}"
+  register: vault_plugins_package
+  loop: "{{ vault_external_plugins }}"
+
+- name: "Download Vault plugin → {{ item.archive_url }}"
+  tags:
+    - vault
+    - vault-plugin
+  become: true
+  become_user: "{{ vault_user }}"
+  get_url:
+    url: "{{ item.archive_url }}"
+    dest: "{{ vault_plugin_path }}/archive-{{ item.name }}"
+    checksum: "sha256:{{ item.archive_checksum }}"
+  when: not vault_plugins_package.results[item_index].stat.exists | bool
+  loop: "{{ vault_external_plugins }}"
+  loop_control:
+    index_var: item_index
+
+- name: Unarchive Vault plugin
+  tags:
+    - vault
+    - vault-plugin
+  become: true
+  become_user: "{{ vault_user }}"
+  unarchive:
+    remote_src: true
+    src: "{{ vault_plugin_path }}/archive-{{ item.name }}"
+    dest: "{{ vault_plugin_path }}"
+    include:
+      - "{{ item.name }}"
+    creates: "{{ vault_local_storage }}/{{ item.name }}"
+  when: not vault_plugins_package.results[item_index].stat.exists | bool
+  loop: "{{ vault_external_plugins }}"
+  loop_control:
+    index_var: item_index
+
+- name: "Delete archive → {{ item.name }}"
+  tags:
+    - vault
+    - vault-plugin
+  become: true
+  become_user: "{{ vault_user }}"
+  file:
+    state: absent
+    dest: "{{ vault_plugin_path }}/archive-{{ item.name }}"
+  when: not vault_plugins_package.results[item_index].stat.exists | bool
+  loop: "{{ vault_external_plugins }}"
+  loop_control:
+    index_var: item_index

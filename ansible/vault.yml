@@ -3,6 +3,16 @@
 - name: Update base OS settings
   hosts: default
   become: true
+  vars:
+    vault_external_plugins:
+      - name: vault-plugin-secrets-exoscale
+        archive_url: https://github.com/exoscale/vault-plugin-secrets-exoscale/releases/download/v0.2.2/vault-plugin-secrets-exoscale_0.2.2_linux_amd64.tar.gz
+        archive_checksum: f9fe67204712007f7acc5533f33e2f4f97862a2116436398a0f9e2526cf0233f
+        archive_item: vault-plugin-secrets-exoscale
+      - name: vault-plugin-auth-exoscale
+        archive_url: https://github.com/exoscale/vault-plugin-auth-exoscale/releases/download/v0.2.0/vault-plugin-auth-exoscale_0.2.0_linux_amd64.tar.gz
+        archive_checksum: 88df8ceb11624144b8ca13a127533866b7ec165b49a2362ad4ed793395edc204
+        archive_item: vault-plugin-auth-exoscale
   roles:
     - apt
     - sshd
