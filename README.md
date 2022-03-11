@@ -11,15 +11,18 @@ Related repositories:
 
 # Templates
 
-- etcd.pkr.hcl (Etcd 3.5.2):
+- `etcd.pkr.hcl` (Etcd 3.5.2):
     - Settings must be set in `/etc/default/etcd` when deploying.
-- kube-controlplane.pkr.hcl (Kubernetes 1.23.4 control plane):
-    - Lots of certificates must be set
+    - For use with an Hashicorp Vault cluster for TLS management, or manual provisioning
     - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
-- kube-node.pkr.hcl (Kubernetes 1.23.4 node):
+- `kube-controlplane.pkr.hcl` (Kubernetes 1.23.4 control plane):
+    - For use with an Hashicorp Vault cluster for TLS management, or manual provisioning
+    - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
+- `kube-node.pkr.hcl` (Kubernetes 1.23.4 node):
     - TLS is bootstraped with a token
     - Used by [Terraform Kubelet Pool @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubelet-pool)
-- vault.pkr.hcl (Vault 1.9.3)
+- `vault.pkr.hcl` (Vault 1.9.3)
+    - Used by [Terraform Vault @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-vault)
 
 # Build instructions
 
