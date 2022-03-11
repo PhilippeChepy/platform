@@ -17,11 +17,12 @@ vault_checksum_file_url: "https://releases.hashicorp.com/vault/{{ vault_version 
 
 #
 
+vault_mode: server
 vault_local_storage: /tmp/vault-assets
 
 # Paths
 vault_bin_path: /usr/local/bin
-vault_config_path: /etc/vault
+vault_config_path: /etc/vault/config.d
 vault_plugin_path: /usr/local/lib/vault/plugins
 vault_data_path: /var/lib/vault
 vault_log_path: /var/log/vault
