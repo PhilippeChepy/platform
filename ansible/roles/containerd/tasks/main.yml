@@ -10,7 +10,7 @@
     owner: "root"
     group: "root"
     mode: 0755
-  with_items:
+  loop:
     - "{{ containerd_config_path }}"
 
 - name: Check containerd package checksum file

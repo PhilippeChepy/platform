@@ -70,7 +70,7 @@
     owner: "{{ kube_controllermanager_user }}"
     group: "{{ kube_controllermanager_group }}"
     mode: 0755
-  with_items:
+  loop:
     - "{{ kube_controllermanager_config_path }}"
 
 - name: systemd unit
