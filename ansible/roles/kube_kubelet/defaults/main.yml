@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-kubelet_version: "1.23.4"
+kubelet_version: "1.23.5"
 kubelet_architecture_map:
   amd64: amd64
   x86_64: amd64

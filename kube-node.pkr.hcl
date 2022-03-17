@@ -13,8 +13,8 @@ source "exoscale" "base" {
   instance_template    = "Linux Ubuntu 20.04 LTS 64-bit"
   instance_disk_size   = 10
   template_zone        = var.zone
-  template_name        = "Kubernetes 1.23.4 node"
-  template_description = "Kubernetes 1.23.4 node components (minimal Ubuntu 20.04 + Hashicorp Vault as agent)"
+  template_name        = "Kubernetes 1.23.5 node"
+  template_description = "Kubernetes 1.23.5 node components (minimal Ubuntu 20.04 + Hashicorp Vault as agent)"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
