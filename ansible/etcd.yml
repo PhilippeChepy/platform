@@ -3,8 +3,11 @@
 - name: Update base OS settings
   hosts: default
   become: true
+  vars:
+    vault_mode: agent
   roles:
     - apt
     - sshd
     - systemd
+    - vault
     - etcd
