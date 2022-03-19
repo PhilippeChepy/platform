@@ -10,7 +10,7 @@
     owner: "root"
     group: "root"
     mode: "0755"
-  with_items:
+  loop:
     - "{{ cni_plugins_bin_path }}"
     - "{{ cni_plugins_config_path }}"
 

@@ -70,7 +70,7 @@
     owner: "{{ kube_scheduler_user }}"
     group: "{{ kube_scheduler_group }}"
     mode: 0755
-  with_items:
+  loop:
     - "{{ kube_scheduler_config_path }}"
 
 - name: systemd unit

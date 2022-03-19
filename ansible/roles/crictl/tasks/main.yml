@@ -21,8 +21,10 @@
     - crictl
     - skip_ansible_lint
   shell: |
-    set -o pipefail
-    grep "{{ crictl_pkg }}" "/tmp/{{ crictl_shasums }}" | awk '{print $1}'
+    cat /tmp/{{ crictl_shasums }}
+    # before 1.23.0:
+    # set -o pipefail
+    # grep "{{ crictl_pkg }}" "/tmp/{{ crictl_shasums }}" | awk '{print $1}'
   args:
     executable: /bin/bash
   changed_when: false

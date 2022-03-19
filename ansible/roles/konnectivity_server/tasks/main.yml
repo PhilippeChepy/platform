@@ -40,7 +40,7 @@
     owner: "{{ konnectivity_user }}"
     group: "{{ konnectivity_group }}"
     mode: 0755
-  with_items:
+  loop:
     - "{{ konnectivity_server_config_path }}"
 
 - name: systemd unit

@@ -50,7 +50,7 @@
     owner: "root"
     group: "root"
     mode: 0700
-  with_items:
+  loop:
     - "{{ kubelet_config_path }}"
 
 - name: systemd unit

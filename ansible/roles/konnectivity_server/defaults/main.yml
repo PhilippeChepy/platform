@@ -2,7 +2,7 @@
 
 # Package variables
 # extracted from eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-server:v0.0.26
-konnectivity_server_binary: "proxy-server-v0.0.27-linux-amd64"
+konnectivity_server_binary: "proxy-server-v0.0.30-linux-amd64"
 
 # Paths
 konnectivity_server_bin_path: /usr/local/bin

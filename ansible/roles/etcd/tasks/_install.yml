@@ -106,7 +106,7 @@
     owner: "{{ etcd_user }}"
     group: "{{ etcd_group }}"
     mode: 0700
-  with_items:
+  loop:
     - "{{ etcd_config_path }}"
     - "{{ etcd_data_path }}"
     - "{{ etcd_certs_path }}"
