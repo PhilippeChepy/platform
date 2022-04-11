@@ -16,6 +16,18 @@
     shell: /bin/bash
     system: true
 
+- name: Add vault to sudoers for service reload
+  tags:
+    - vault
+  become: true
+  lineinfile:
+    path: "/etc/sudoers.d/vault"
+    line: "%vault ALL= NOPASSWD: /bin/systemctl reload vault-server"
+    owner: "root"
+    group: "root"
+    create: true
+    mode: 0440
+
 # Binary installation
 
 - name: Check Vault installation
