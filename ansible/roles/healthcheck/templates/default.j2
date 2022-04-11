@@ -1,0 +1,18 @@
+server {
+    listen 8888;
+    listen [::]:8888;
+
+    server_name default;
+
+    location = /healthz {
+        access_log off;
+        gzip off;
+        fastcgi_pass unix:/var/run/fcgiwrap.socket;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME {{ healthcheck_script }};
+    }
+
+    location / {
+        return 404;
+    }
+}

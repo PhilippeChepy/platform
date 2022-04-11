@@ -1,0 +1,21 @@
+---
+
+- name: Install nginx
+  tags:
+    - healthcheck
+  become: true
+  package:
+    name: ['nginx', 'fcgiwrap']
+    state: present
+    update_cache: true
+
+- name: Set healthcheck endpoint configuration
+  tags:
+    - healthcheck
+  template:
+    src: "default.j2"
+    dest: "/etc/nginx/sites-available/default"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
