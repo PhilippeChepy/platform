@@ -22,7 +22,7 @@ vault_local_storage: /tmp/vault-assets
 
 # Paths
 vault_bin_path: /usr/local/bin
-vault_config_path: /etc/vault/config.d
+vault_config_path: /etc/vault/conf.d
 vault_plugin_path: /usr/local/lib/vault/plugins
 vault_data_path: /var/lib/vault
 vault_log_path: /var/log/vault
@@ -43,7 +43,7 @@ vault_service_restart: true
 # General Settings
 
 vault_main_config: "{{ vault_config_path }}/vault.hcl"
-vault_log_level: "info"
+vault_log_level: "warn"
 vault_port: 8200
 
 # TLS variables
