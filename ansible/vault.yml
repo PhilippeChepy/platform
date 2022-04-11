@@ -4,6 +4,15 @@
   hosts: default
   become: true
   vars:
+  roles:
+    - apt
+    - sshd
+
+- name: Install Vault server
+  hosts: default
+  become: true
+  vars:
+    vault_config_path: /etc/vault/server-conf.d
     vault_external_plugins:
       - name: vault-plugin-secrets-exoscale
         archive_url: https://github.com/exoscale/vault-plugin-secrets-exoscale/releases/download/v0.2.2/vault-plugin-secrets-exoscale_0.2.2_linux_amd64.tar.gz
@@ -14,7 +23,15 @@
         archive_checksum: 88df8ceb11624144b8ca13a127533866b7ec165b49a2362ad4ed793395edc204
         archive_item: vault-plugin-auth-exoscale
   roles:
-    - apt
-    - sshd
+    - systemd
+    - vault
+
+- name: Install Vault Agent
+  hosts: default
+  become: true
+  vars:
+    vault_config_path: /etc/vault/agent-conf.d
+    vault_mode: agent
+  roles:
     - systemd
     - vault
