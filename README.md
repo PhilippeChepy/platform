@@ -11,7 +11,7 @@ Related repositories:
 
 # Templates
 
-- `etcd.pkr.hcl` (Etcd 3.5.2):
+- `etcd.pkr.hcl` (Etcd 3.5.3):
     - Settings must be set in `/etc/default/etcd` when deploying.
     - For use with an Hashicorp Vault cluster for TLS management, or manual provisioning
     - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
