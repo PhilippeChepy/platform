@@ -14,7 +14,7 @@ source "exoscale" "base" {
   instance_disk_size   = 10
   template_zone        = var.zone
   template_name        = "Kubernetes 1.23.5 control plane"
-  template_description = "Kubernetes 1.23.5 control plane components (minimal Ubuntu 20.04 + Hashicorp Vault as agent)"
+  template_description = "Kubernetes 1.23.5 - Control Plane (minimal Ubuntu 20.04 & Hashicorp Vault 1.10.0)"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
