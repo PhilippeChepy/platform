@@ -10,11 +10,11 @@ variable "zone" {
 source "exoscale" "base" {
   api_key              = var.api_key
   api_secret           = var.api_secret
-  instance_template    = "Linux Ubuntu 20.04 LTS 64-bit"
+  instance_template    = "Linux Ubuntu 22.04 LTS 64-bit"
   instance_disk_size   = 10
   template_zone        = var.zone
-  template_name        = "Vault 1.10.0"
-  template_description = "Hashicorp Vault 1.10.0 on top of Ubuntu 20.04"
+  template_name        = "Vault 1.10.1"
+  template_description = "Hashicorp Vault 1.10.1 on top of Ubuntu 22.04"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
