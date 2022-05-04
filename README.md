@@ -15,10 +15,10 @@ Related repositories:
     - Settings must be set in `/etc/default/etcd` when deploying.
     - For use with an Hashicorp Vault cluster for TLS management, or manual provisioning
     - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
-- `kube-controlplane.pkr.hcl` (Kubernetes 1.23.5 control plane):
+- `kube-controlplane.pkr.hcl` (Kubernetes 1.24.0 control plane):
     - For use with an Hashicorp Vault cluster for TLS management, or manual provisioning
     - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
-- `kube-node.pkr.hcl` (Kubernetes 1.23.5 node):
+- `kube-node.pkr.hcl` (Kubernetes 1.24.0 node):
     - TLS is bootstraped with a token
     - Used by [Terraform Kubelet Pool @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubelet-pool)
 - `vault.pkr.hcl` (Vault 1.10.0)

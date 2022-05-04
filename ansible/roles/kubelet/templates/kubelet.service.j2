@@ -6,13 +6,10 @@ Requires=network-online.target time-sync.target containerd.service
 
 [Service]
 ExecStart={{ kubelet_bin_path }}/kubelet \
-  --bootstrap-kubeconfig={{ kubelet_config_path }}/bootstrap-kubeconfig \
   --config={{ kubelet_config_path }}/config.yaml \
   --container-runtime=remote \
   --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
-  --image-pull-progress-deadline=2m \
   --kubeconfig={{ kubelet_config_path }}/kubelet.kubeconfig \
-  --network-plugin=cni \
   --register-node=true \
   --v=2
 Restart=on-failure
