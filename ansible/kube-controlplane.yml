@@ -9,9 +9,9 @@
   roles:
     - apt
     - sshd
-    - cilium_cli
     - systemd
     - vault
+    - cilium_cli
     - kube_apiserver
     - konnectivity_server
     - kube_controller_manager

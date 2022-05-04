@@ -55,3 +55,15 @@
     group: root
     mode: "0644"
   notify: reload systemd
+
+- name: Add user to sudoers for service restart
+  tags:
+    - konnectivity-server
+  become: true
+  lineinfile:
+    path: "/etc/sudoers.d/konnectivity-server"
+    line: "%{{ konnectivity_user }} ALL= NOPASSWD: /bin/systemctl restart konnectivity"
+    owner: "root"
+    group: "root"
+    create: true
+    mode: 0440

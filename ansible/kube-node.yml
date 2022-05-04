@@ -9,6 +9,5 @@
     - runc
     - crictl
     - cni_plugins
-    - systemd
     - containerd
-    - kube_kubelet
+    - kubelet

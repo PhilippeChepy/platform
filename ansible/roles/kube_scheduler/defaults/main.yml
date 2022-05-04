@@ -18,6 +18,6 @@ kube_scheduler_bin_path: /usr/local/bin
 kube_scheduler_config_path: /etc/kubernetes/scheduler
 
 # System user and group
-kube_scheduler_user: kube-scheduler
-kube_scheduler_group: kube-scheduler
+kube_scheduler_user: kube
+kube_scheduler_group: kube
 kube_scheduler_groups: null

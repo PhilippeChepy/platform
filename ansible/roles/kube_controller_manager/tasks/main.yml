@@ -5,7 +5,7 @@
     - kube-controller-manager
   become: true
   group:
-    name: "{{ kube_controllermanager_group }}"
+    name: "{{ kube_controller_manager_group }}"
     state: present
 
 - name: Add Kubernetes Controller Manager user
@@ -13,10 +13,10 @@
     - kube-controller-manager
   become: true
   user:
-    name: "{{ kube_controllermanager_user }}"
+    name: "{{ kube_controller_manager_user }}"
     comment: "Kubernetes Controller Manager user"
-    group: "{{ kube_controllermanager_group }}"
-    groups: "{{ kube_controllermanager_groups }}"
+    group: "{{ kube_controller_manager_group }}"
+    groups: "{{ kube_controller_manager_groups }}"
     shell: /bin/bash
     system: true
 
@@ -24,17 +24,17 @@
   tags:
     - kube-controller-manager
   stat:
-    path: "/tmp/{{ kube_controllermanager_shasums }}"
+    path: "/tmp/{{ kube_controller_manager_shasums }}"
   become: false
-  register: kube_controllermanager_checksum
+  register: kube_controller_manager_checksum
 
 - name: Get Kubernetes Controller Manager checksum file
   tags:
     - kube-controller-manager
   get_url:
-    url: "{{ kube_controllermanager_checksum_file_url }}"
-    dest: "/tmp/{{ kube_controllermanager_shasums }}"
-  when: not kube_controllermanager_checksum.stat.exists | bool
+    url: "{{ kube_controller_manager_checksum_file_url }}"
+    dest: "/tmp/{{ kube_controller_manager_shasums }}"
+  when: not kube_controller_manager_checksum.stat.exists | bool
 
 - name: Get Kubernetes Controller Manager checksum
   tags:
@@ -42,22 +42,22 @@
     - skip_ansible_lint
   shell: |
     set -o pipefail
-    grep "v{{ kube_controllermanager_version }}/bin/{{ kube_controllermanager_os }}/{{ kube_controllermanager_architecture }}/kube-controller-manager$" "/tmp/{{ kube_controllermanager_shasums }}" | awk '{print $1}'
+    grep "v{{ kube_controller_manager_version }}/bin/{{ kube_controller_manager_os }}/{{ kube_controller_manager_architecture }}/kube-controller-manager$" "/tmp/{{ kube_controller_manager_shasums }}" | awk '{print $1}'
   args:
     executable: /bin/bash
   changed_when: false
   become: false
-  register: kube_controllermanager_sha256
+  register: kube_controller_manager_sha256
 
-- name: "Download Kubernetes Controller Manager → {{ kube_controllermanager_url }}"
+- name: "Download Kubernetes Controller Manager → {{ kube_controller_manager_url }}"
   tags:
     - kube-controller-manager
   get_url:
-    url: "{{ kube_controllermanager_url }}"
-    dest: "{{ kube_controllermanager_bin_path }}/kube-controllermanager"
-    checksum: "sha256:{{ kube_controllermanager_sha256.stdout }}"
-    owner: "{{ kube_controllermanager_user }}"
-    group: "{{ kube_controllermanager_group }}"
+    url: "{{ kube_controller_manager_url }}"
+    dest: "{{ kube_controller_manager_bin_path }}/kube-controller-manager"
+    checksum: "sha256:{{ kube_controller_manager_sha256.stdout }}"
+    owner: "{{ kube_controller_manager_user }}"
+    group: "{{ kube_controller_manager_group }}"
     mode: "0755"
 
 - name: Create directories
@@ -67,21 +67,33 @@
   file:
     dest: "{{ item }}"
     state: directory
-    owner: "{{ kube_controllermanager_user }}"
-    group: "{{ kube_controllermanager_group }}"
+    owner: "{{ kube_controller_manager_user }}"
+    group: "{{ kube_controller_manager_group }}"
     mode: 0755
   loop:
-    - "{{ kube_controllermanager_config_path }}"
+    - "{{ kube_controller_manager_config_path }}"
 
 - name: systemd unit
   tags:
     - kube-controller-manager
   become: true
   template:
-    src: "kube-controllermanager.service.j2"
-    dest: "/etc/systemd/system/kube-controllermanager.service"
+    src: "kube-controller-manager.service.j2"
+    dest: "/etc/systemd/system/kube-controller-manager.service"
     force: true
     owner: root
     group: root
     mode: "0644"
   notify: reload systemd
+
+- name: Add user to sudoers for service restart
+  tags:
+    - kube-controller-manager
+  become: true
+  lineinfile:
+    path: "/etc/sudoers.d/kube-controller-manager"
+    line: "%{{ kube_controller_manager_user }} ALL= NOPASSWD: /bin/systemctl restart kube-controller-manager"
+    owner: "root"
+    group: "root"
+    create: true
+    mode: 0440

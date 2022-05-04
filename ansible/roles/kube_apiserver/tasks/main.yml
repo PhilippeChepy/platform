@@ -67,33 +67,24 @@
   file:
     dest: "{{ item }}"
     state: directory
+    owner: "root"
+    group: "root"
+    mode: 0755
+  with_items:
+    - "{{ kube_apiserver_kubernetes_base_path }}"
+
+- name: Create directories
+  tags:
+    - kube-apiserver
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
     owner: "{{ kube_apiserver_user }}"
     group: "{{ kube_apiserver_group }}"
     mode: 0755
   with_items:
     - "{{ kube_apiserver_config_path }}"
-
-- name: Install nginx (for healthcheck endpoint)
-  tags:
-    - kube-apiserver
-  become: true
-  package:
-    name: ['nginx']
-    state: present
-    update_cache: true
-  when: kube_apiserver_http_healthcheck
-
-- name: Set healthcheck endpoint configuration
-  tags:
-    - kube-apiserver
-  template:
-    src: "healthcheck.conf.j2"
-    dest: "/etc/nginx/sites-available/default"
-    force: true
-    owner: root
-    group: root
-    mode: "0644"
-  when: kube_apiserver_http_healthcheck
 
 - name: systemd unit
   tags:
@@ -107,3 +98,27 @@
     group: root
     mode: "0644"
   notify: reload systemd
+
+- name: Add user to sudoers for service restart
+  tags:
+    - kube-apiserver
+  become: true
+  lineinfile:
+    path: "/etc/sudoers.d/kube-apiserver"
+    line: "%{{ kube_apiserver_user }} ALL= NOPASSWD: /bin/systemctl restart kube-apiserver"
+    owner: "root"
+    group: "root"
+    create: true
+    mode: 0440
+
+- name: konnectivity egress configuration
+  tags:
+    - kube-apiserver
+  become: true
+  template:
+    src: "egress-selector-configuration.yaml.j2"
+    dest: "{{ kube_apiserver_config_path }}/egress-selector-configuration.yaml"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"

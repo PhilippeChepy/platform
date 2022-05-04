@@ -2,22 +2,22 @@
 
 # Package variables
 kube_controller_manager_version: "1.24.0"
-kube_controllermanager_architecture_map:
+kube_controller_manager_architecture_map:
   amd64: amd64
   x86_64: amd64
   aarch64: arm64
 
-kube_controllermanager_architecture: "{{ kube_controllermanager_architecture_map[ansible_architecture] }}"
-kube_controllermanager_os: "{{ ansible_system|lower }}"
-kube_controllermanager_shasums: "controllermanager.SHA256SUMS"
-kube_controllermanager_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_controllermanager_version }}/bin/{{ kube_controllermanager_os }}/{{ kube_controllermanager_architecture }}/kube-controller-manager"
-kube_controllermanager_checksum_file_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_controllermanager_version }}/SHA256SUMS"
+kube_controller_manager_architecture: "{{ kube_controller_manager_architecture_map[ansible_architecture] }}"
+kube_controller_manager_os: "{{ ansible_system|lower }}"
+kube_controller_manager_shasums: "controllermanager.SHA256SUMS"
+kube_controller_manager_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_controller_manager_version }}/bin/{{ kube_controller_manager_os }}/{{ kube_controller_manager_architecture }}/kube-controller-manager"
+kube_controller_manager_checksum_file_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_controller_manager_version }}/SHA256SUMS"
 
 # Paths
-kube_controllermanager_bin_path: /usr/local/bin
-kube_controllermanager_config_path: /etc/kubernetes/controllermanager
+kube_controller_manager_bin_path: /usr/local/bin
+kube_controller_manager_config_path: /etc/kubernetes/controller-manager
 
 # System user and group
-kube_controllermanager_user: kube-controllermanager
-kube_controllermanager_group: kube-controllermanager
-kube_controllermanager_groups: null
+kube_controller_manager_user: kube
+kube_controller_manager_group: kube
+kube_controller_manager_groups: null

@@ -1,5 +1,25 @@
 ---
 
+- name: Add Kubernetes client group
+  tags:
+    - kubectl
+  become: true
+  group:
+    name: "{{ kubectl_group }}"
+    state: present
+
+- name: Add Kubernetes client user
+  tags:
+    - kubectl
+  become: true
+  user:
+    name: "{{ kubectl_user }}"
+    comment: "Kubernetes client user"
+    group: "{{ kubectl_group }}"
+    groups: "{{ kubectl_groups }}"
+    shell: /bin/bash
+    system: true
+
 - name: Check kubectl checksum file
   tags:
     - kubectl
@@ -39,3 +59,17 @@
     owner: "root"
     group: "root"
     mode: "0755"
+
+- name: Create directories
+  tags:
+    - kubectl
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ kubectl_user }}"
+    group: "{{ kubectl_group }}"
+    mode: 0755
+  loop:
+    - "{{ kubectl_config_path }}"
+    - "/home/{{ kubectl_user }}/.kube"
