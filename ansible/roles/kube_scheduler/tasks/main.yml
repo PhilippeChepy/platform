@@ -85,3 +85,15 @@
     group: root
     mode: "0644"
   notify: reload systemd
+
+- name: Add user to sudoers for service restart
+  tags:
+    - kube-scheduler
+  become: true
+  lineinfile:
+    path: "/etc/sudoers.d/kube-scheduler"
+    line: "%{{ kube_scheduler_user }} ALL= NOPASSWD: /bin/systemctl restart kube-scheduler"
+    owner: "root"
+    group: "root"
+    create: true
+    mode: 0440

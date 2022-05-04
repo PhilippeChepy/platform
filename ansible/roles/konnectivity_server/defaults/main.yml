@@ -9,6 +9,6 @@ konnectivity_server_bin_path: /usr/local/bin
 konnectivity_server_config_path: /etc/kubernetes/konnectivity
 
 # System user and group
-konnectivity_user: konnectivity
-konnectivity_group: konnectivity
+konnectivity_user: kube
+konnectivity_group: kube
 konnectivity_groups: null
