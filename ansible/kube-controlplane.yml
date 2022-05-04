@@ -16,5 +16,4 @@
     - konnectivity_server
     - kube_controller_manager
     - kube_scheduler
-    - exoscale_ccm
     - kubectl
