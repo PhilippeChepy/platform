@@ -1,0 +1,29 @@
+cluster_name      = "CLUSTER_NAME"
+max_lease_ttl     = "768h"
+default_lease_ttl = "768h"
+
+plugin_directory = "{{ vault_plugin_path }}"
+disable_mlock    = true
+ui               = true
+
+cluster_addr = "https://CLUSTER_MEMBER_ADDRESS:8201"
+api_addr     = "https://CLUSTER_MEMBER_ADDRESS:8200"
+
+listener "tcp" {
+  address            = "0.0.0.0:8200"
+  cluster_address    = "CLUSTER_MEMBER_ADDRESS:8201"
+  tls_cert_file      = "{{ vault_tls_config_path }}/server.pem"
+  tls_key_file       = "{{ vault_tls_config_path }}/server.key"
+  tls_client_ca_file = "{{ vault_tls_config_path }}/ca.pem"
+}
+
+storage "raft" {
+  path    = "/var/lib/vault"
+  node_id = "CLUSTER_MEMBER_NAME"
+
+  retry_join {
+    leader_tls_servername = "CLUSTER_NAME"
+    leader_api_addr       = "https://CLUSTER_EIP_ADDRESS:8200"
+    leader_ca_cert_file   = "{{ vault_tls_config_path }}/ca.pem"
+  }
+}

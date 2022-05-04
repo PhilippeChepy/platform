@@ -1,0 +1,53 @@
+vault {
+  address = "VAULT_ADDRESS"
+  ca_cert = "{{ vault_tls_config_path }}/ca.pem"
+}
+
+auto_auth {
+  method "approle" {
+    mount_path = "auth/exoscale"
+
+    config = {
+      role_id_file_path                   = "{{ vault_agent_config_path }}/.role_id"
+      secret_id_file_path                 = "{{ vault_agent_config_path }}/.instance_id"
+      remove_secret_id_file_after_reading = false
+    }
+  }
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{ with secret "VAULT_PKI_VAULT_CA_CHAIN" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{{ .Data.issuing_ca }}
+{{ end }}
+{% endraw %}
+EOT
+  destination = "{{ vault_tls_config_path }}/ca.pem"
+  command     = "sudo systemctl reload vault-server"
+  perms       = 0644
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{ with secret "VAULT_PKI_VAULT_CERT_SERVER" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{{ .Data.certificate }}
+{{ .Data.issuing_ca }}
+{{ end }}
+{% endraw %}
+EOT
+  destination = "{{ vault_tls_config_path }}/server.pem"
+  command     = "sudo systemctl reload vault-server"
+  perms       = 0644
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{ with secret "VAULT_PKI_VAULT_CERT_SERVER" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{{ .Data.private_key }}
+{{ end }}
+{% endraw %}
+EOT
+  destination = "{{ vault_tls_config_path }}/server.key"
+  command     = "sudo systemctl reload vault-server"
+  perms       = 0600
+}
