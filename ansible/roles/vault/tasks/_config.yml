@@ -6,7 +6,7 @@
   become: true
   template:
     src: "vault.service.j2"
-    dest: "/etc/systemd/system/vault-{{ vault_mode }}.service"
+    dest: "/etc/systemd/system/{{ vault_service_name }}.service"
     force: true
     owner: root
     group: root

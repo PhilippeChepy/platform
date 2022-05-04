@@ -22,7 +22,7 @@
   become: true
   lineinfile:
     path: "/etc/sudoers.d/vault"
-    line: "%vault ALL= NOPASSWD: /bin/systemctl reload vault-server"
+    line: "%{{ vault_user }} ALL= NOPASSWD: /bin/systemctl reload {{ vault_service_name }}"
     owner: "root"
     group: "root"
     create: true
@@ -74,14 +74,56 @@
   file:
     dest: "{{ item }}"
     state: directory
-    owner: "{{ vault_user }}"
-    group: "{{ vault_group }}"
-    mode: 0750
+    owner: "root"
+    group: "root"
+    mode: 0755
   loop:
     - "{{ vault_tls_config_path }}"
 
 - name: Configure Vault and service
   include_tasks: _config.yml
+
+- name: vault-server configuration
+  tags:
+    - vault
+  become: true
+  template:
+    src: "vault-server.hcl.j2"
+    dest: "{{ vault_config_path }}/vault.hcl"
+    force: true
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0600
+  when:
+    - vault_mode == 'server'
+
+- name: vault-agent configuration
+  tags:
+    - vault
+  become: true
+  template:
+    src: "vault-agent.hcl.j2"
+    dest: "{{ vault_agent_config_path }}/vault.hcl"
+    force: true
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0600
+  when:
+    - vault_mode == 'server'
+
+- name: vault-agent configuration
+  tags:
+    - vault
+  become: true
+  template:
+    src: "vault.j2"
+    dest: "/etc/default/vault"
+    force: true
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0600
+  when:
+    - vault_mode == 'agent'
 
 - name: Insert vault source in dotfile
   tags:
