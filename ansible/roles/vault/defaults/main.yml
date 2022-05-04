@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-vault_version: "1.10.0"
+vault_version: "1.10.1"
 vault_architecture_map:
   amd64: amd64
   x86_64: amd64
@@ -23,6 +23,7 @@ vault_local_storage: /tmp/vault-assets
 # Paths
 vault_bin_path: /usr/local/bin
 vault_config_path: /etc/vault/conf.d
+vault_agent_config_path: /etc/vault/agent-conf.d
 vault_plugin_path: /usr/local/lib/vault/plugins
 vault_data_path: /var/lib/vault
 vault_log_path: /var/log/vault
@@ -39,6 +40,7 @@ vault_dotfile_disable: false
 
 # Handlers
 vault_service_restart: true
+vault_service_name: "vault-{{ vault_mode }}"
 
 # General Settings
 
@@ -53,8 +55,8 @@ vault_tls_ca_cert_file: "ca.pem"
 # Storage backend
 
 ## Storage tls settings
-vault_backend_tls_cert_file: "peer-cert.pem"
-vault_backend_tls_key_file: "peer-cert.key"
+vault_backend_tls_cert_file: "server.pem"
+vault_backend_tls_key_file: "server.key"
 
 # Plugins
 vault_external_plugins: []
