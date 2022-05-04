@@ -1,0 +1,9 @@
+---
+
+# Package variables
+jq_version: "1.6"
+
+jq_url: "https://github.com/stedolan/jq/releases/download/jq-{{ jq_version }}/jq-linux64"
+
+# Paths
+jq_bin_path: /usr/local/bin
