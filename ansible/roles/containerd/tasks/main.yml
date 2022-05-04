@@ -83,7 +83,7 @@
     mode: "0755"
   loop: "{{ containerd_enabled }}"
 
-- name: systemd unit
+- name: Set configuration
   tags:
     - containerd
   become: true
