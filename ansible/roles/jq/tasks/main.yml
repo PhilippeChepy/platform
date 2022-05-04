@@ -1,0 +1,22 @@
+---
+
+- name: Check jq binary file
+  tags:
+    - jq
+  stat:
+    path: "{{ jq_bin_path }}/jq"
+  become: false
+  register: exoscale_cli_package
+
+
+- name: "Download jq → {{ jq_url }}"
+  tags:
+    - jq
+  get_url:
+    url: "{{ jq_url }}"
+    dest: "{{ jq_bin_path }}/jq"
+    timeout: "42"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  when: not exoscale_cli_package.stat.exists | bool
