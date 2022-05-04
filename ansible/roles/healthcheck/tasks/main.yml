@@ -19,3 +19,19 @@
     owner: root
     group: root
     mode: "0644"
+
+- name: Change fcgiwrap user
+  tags:
+    - healthcheck
+  replace:
+    path: /lib/systemd/system/fcgiwrap.service
+    regexp: "^User=([a-zA-Z0-9_-]+)$"
+    replace: "User={{ healthcheck_user }}"
+
+- name: Change fcgiwrap group
+  tags:
+    - healthcheck
+  replace:
+    path: /lib/systemd/system/fcgiwrap.service
+    regexp: "^Group=([a-zA-Z0-9_-]+)$"
+    replace: "Group={{ healthcheck_user }}"
