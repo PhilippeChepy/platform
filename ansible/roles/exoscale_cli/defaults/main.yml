@@ -1,0 +1,19 @@
+---
+
+# Package variables
+exoscale_cli_version: "1.54.0"
+exoscale_cli_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+exoscale_cli_architecture: "{{ exoscale_cli_architecture_map[ansible_architecture] }}"
+exoscale_cli_os: "{{ ansible_system|lower }}"
+exoscale_cli_pkg: "exoscale-cli_{{ exoscale_cli_version }}_{{ exoscale_cli_os }}_{{ exoscale_cli_architecture }}.tar.gz"
+
+exoscale_cli_shasums: "exo-{{ exoscale_cli_os }}-{{ exoscale_cli_architecture }}.tar.gz.sha256"
+exoscale_cli_tgz_url: "https://github.com/exoscale/cli/releases/download/v{{ exoscale_cli_version }}/exoscale-cli_{{ exoscale_cli_version }}_{{ exoscale_cli_os }}_{{ exoscale_cli_architecture }}.tar.gz"
+exoscale_cli_checksum_file_url: "https://github.com/exoscale/cli/releases/download/v{{ exoscale_cli_version }}/exoscale-cli_{{ exoscale_cli_version }}_checksums.txt"
+
+# Paths
+exoscale_cli_bin_path: /usr/local/bin
