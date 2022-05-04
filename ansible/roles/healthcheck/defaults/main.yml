@@ -1,3 +1,5 @@
 ---
 
-healthcheck_script: 
+healthcheck_user: www-data
+healthcheck_port: 8888
+healthcheck_script_path: 

@@ -1,6 +1,6 @@
 server {
-    listen 8888;
-    listen [::]:8888;
+    listen {{ healthcheck_port }};
+    listen [::]:{{ healthcheck_port }};
 
     server_name default;
 
@@ -9,7 +9,7 @@ server {
         gzip off;
         fastcgi_pass unix:/var/run/fcgiwrap.socket;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME {{ healthcheck_script }};
+        fastcgi_param SCRIPT_FILENAME {{ healthcheck_script_path }};
     }
 
     location / {
