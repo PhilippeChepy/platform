@@ -10,11 +10,11 @@ variable "zone" {
 source "exoscale" "base" {
   api_key              = var.api_key
   api_secret           = var.api_secret
-  instance_template    = "Linux Ubuntu 20.04 LTS 64-bit"
+  instance_template    = "Linux Ubuntu 22.04 LTS 64-bit"
   instance_disk_size   = 10
   template_zone        = var.zone
-  template_name        = "Etcd 3.5.3"
-  template_description = "Etcd 3.5.3 (minimal Ubuntu 20.04 & Hashicorp Vault 1.10.0)"
+  template_name        = "Etcd 3.5.4"
+  template_description = "Etcd 3.5.4 (minimal Ubuntu 22.04 & Hashicorp Vault 1.10.1)"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
