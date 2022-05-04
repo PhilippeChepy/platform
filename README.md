@@ -21,7 +21,7 @@ Related repositories:
 - `kube-node.pkr.hcl` (Kubernetes 1.24.0 node):
     - TLS is bootstraped with a token
     - Used by [Terraform Kubelet Pool @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubelet-pool)
-- `vault.pkr.hcl` (Vault 1.10.0)
+- `vault.pkr.hcl` (Vault 1.10.1)
     - Used by [Terraform Vault @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-vault)
 
 # Build instructions
