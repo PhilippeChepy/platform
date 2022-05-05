@@ -74,8 +74,8 @@
   file:
     dest: "{{ item }}"
     state: directory
-    owner: "root"
-    group: "root"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
     mode: 0755
   loop:
     - "{{ vault_tls_config_path }}"
@@ -90,20 +90,6 @@
   template:
     src: "vault-server.hcl.j2"
     dest: "{{ vault_config_path }}/vault.hcl"
-    force: true
-    owner: "{{ vault_user }}"
-    group: "{{ vault_group }}"
-    mode: 0600
-  when:
-    - vault_mode == 'server'
-
-- name: vault-agent configuration
-  tags:
-    - vault
-  become: true
-  template:
-    src: "vault-agent.hcl.j2"
-    dest: "{{ vault_agent_config_path }}/vault.hcl"
     force: true
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"

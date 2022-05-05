@@ -1,0 +1,26 @@
+---
+
+- name: Create directories
+  tags:
+    - vault-agent-vault
+  become: true
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ vault_agent_vault_user }}"
+    group: "{{ vault_agent_vault_group }}"
+    mode: 0755
+  loop:
+    - "{{ vault_agent_vault_config_path }}"
+
+- name: vault-agent configuration
+  tags:
+    - vault-agent-vault
+  become: true
+  template:
+    src: "vault.hcl.j2"
+    dest: "{{ vault_agent_vault_config_path }}/vault.hcl"
+    force: true
+    owner: "{{ vault_agent_vault_user }}"
+    group: "{{ vault_agent_vault_group }}"
+    mode: "0600"
