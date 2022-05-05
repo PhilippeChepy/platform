@@ -1,4 +1,0 @@
-systemd_unwanted_units:
-  - getty@tty1.service
-  - system-getty.slice
-  - serial-getty@ttyS0.service
