@@ -58,3 +58,18 @@
     mode: 0600
   when:
     - not etcd_dotfile_disable
+
+- name: Install additional templated files
+  tags:
+    - etcd
+  become: true
+  template:
+    src: "{{ item.name }}.j2"
+    dest: "{{ item.dest }}/{{ item.name }}"
+    force: true
+    owner: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - {name: 'etcdctl', dest: "/etc/default", mode: "0600"}
+    - {name: 'base-environment', dest: "{{ etcd_config_path }}", mode: "0600"}

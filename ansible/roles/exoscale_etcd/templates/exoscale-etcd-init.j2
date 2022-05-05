@@ -1,0 +1,17 @@
+#!/bin/bash
+
+systemctl start etcd-vault-agent.service
+
+# Wait vault-agent provisioned Etcd Authentication certs
+while [ ! -f {{ etcd_certs_path }}/ca.pem ]; do sleep 1; done
+while [ ! -f {{ etcd_certs_path }}/server.key ]; do sleep 1; done
+while [ ! -f {{ etcd_certs_path }}/server.pem ]; do sleep 1; done
+
+# Wait vault-agent provisioned Exoscale Credentials
+while [ ! -f {{ etcd_config_path }}/exoscale-environment ]; do sleep 1; done
+
+source {{ etcd_config_path }}/exoscale-environment
+
+etcd-exoscale-pool register
+
+systemctl start etcd

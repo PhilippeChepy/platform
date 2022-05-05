@@ -1,0 +1,315 @@
+#!/bin/bash
+
+set -o pipefail
+SCRIPT="${0##*/}"
+
+## Defaults
+
+: "${ETCD_ADDITIONAL_VARS_FILE:=/etc/etcd/base-environment}"
+: "${ETCD_CACERT:=/etc/etcd/tls/ca.pem}"
+: "${ETCD_CERT:=/etc/etcd/tls/server.pem}"
+: "${ETCD_FINAL_ENVIRONMENT_FILE:=/etc/default/etcd}"
+: "${ETCD_CLUSTER_URL:=}"
+: "${ETCD_KEY:=/etc/etcd/tls/server.key}"
+: "${ETCD_MEMBER_ADDRESS:=}"
+: "${ETCD_PEER_PORT:=2380}"
+: "${ETCD_PEER_SCHEME:=https}"
+: "${ETCD_SERVER_PORT:=2379}"
+: "${ETCD_SERVER_SCHEME:=https}"
+: "${EXOSCALE_API_KEY:=}"
+: "${EXOSCALE_API_SECRET:=}"
+: "${EXOSCALE_INSTANCEPOOL_ID:=}"
+: "${EXOSCALE_ZONE:=}"
+
+## Usage
+__USAGE() {
+  cat >&2 <<EOF
+USAGE: ${SCRIPT} [<options>] {env|help|register|clean}
+
+SYNOPSIS:
+  Manage current server membership in an etcd cluster.
+
+OPTIONS:
+
+  --environment-file
+    Load options from environment file.
+
+  --etcd-additional-vars-file, env:ETCD_ADDITIONAL_VARS_FILE
+    Path to an additional environment file content to add to the target environment file. (default: /etc/etcd/base-environment).
+
+  --etcd-cacert, env:ETCD_CACERT
+    The path to the CA certificate used by the cluster (default: /etc/etcd/tls/ca.pem).
+
+  --etcd-cert, env:ETCD_CERT
+    The path to the certificate used to authenticate with the cluster (default: /etc/etcd/tls/server.pem).
+
+  --etcd-final-environment-file, env:ETCD_FINAL_ENVIRONMENT_FILE
+    The target environment file to build (default: /etc/default/etcd).
+
+  --etcd-cluster-url, env:ETCD_CLUSTER_URL
+    The endpoint to the cluster URL (default: choose an available member from the instance pool).
+
+  --etcd-key, env:ETCD_KEY
+    The path to the private key used to authenticate with the cluster (default: /etc/etcd/tls/server.key)
+
+  --etcd-member-address, env:ETCD_MEMBER_ADDRESS
+    The ip address used for communication (default: ip address set on eth0).
+
+  --etcd-peer-port, env:ETCD_PEER_PORT
+    The mort used for communication between cluster peers (default: 2380).
+
+  --etcd-peer-scheme, env:ETCD_PEER_SCHEME
+    The protocol used for communication between cluster peers (default: https).
+
+  --etcd-server-port, env:ETCD_SERVER_PORT
+    The port used for communication from etcd clients (default: 2379).
+
+  --etcd-server-scheme, env:ETCD_SERVER_SCHEME
+    The protocol used for communication from etcd clients (default: https).
+
+  --exoscale-api-key, env:EXOSCALE_API_KEY
+    The Exoscale API key, used for autodetection of cluster propoerties (must be specified)
+
+  --exoscale-api-secret, env:EXOSCALE_API_SECRET
+    The Exoscale API secret, used for autodetection of cluster propoerties (must be specified)
+
+  --exoscale-instancepool-id, env:EXOSCALE_INSTANCEPOOL_ID
+    The ID of the instance pool which this instance belongs to (must be specified).
+
+  --exoscale-zone, env:EXOSCALE_ZONE
+    The zone where the instance is located (must be specified).
+
+REFs:
+  - https://etcd.io/docs/v3.5/tutorials/how-to-deal-with-membership/
+  - http://engineering.monsanto.com/2015/06/12/etcd-clustering/
+  - https://github.com/Bayer-Group/etcd-aws-cluster/blob/master/etcd-aws-cluster
+
+EOF
+}
+
+[ $# -lt 1 ] && __USAGE && exit 1
+
+# Arguments
+ETCD_CLUSTER_ACTION=
+__OPTION() {
+  [ -z "${2}" ] && echo "ERROR[${SCRIPT}]: Missing option parameter (${1})" >&2 && exit 1
+  return 0
+}
+while [ -n "${1}" ]; do
+  case "${1}" in
+    'help'|'--help'|'-h')
+      __USAGE; exit 1;;
+    '--etcd-additional-vars-file')
+        __OPTION "${@}"; ETCD_ADDITIONAL_VARS_FILE="${2}"; shift;;
+    '--etcd-cacert')
+        __OPTION "${@}"; ETCD_CACERT="${2}"; shift;;
+    '--etcd-cert')
+        __OPTION "${@}"; ETCD_CERT="${2}"; shift;;
+    '--etcd-final-environment-file')
+        __OPTION "${@}"; ETCD_FINAL_ENVIRONMENT_FILE="${2}"; shift;;
+    '--etcd-cluster-url')
+        __OPTION "${@}"; ETCD_CLUSTER_URL="${2}"; shift;;
+    '--etcd-key')
+        __OPTION "${@}"; ETCD_KEY="${2}"; shift;;
+    '--etcd-member-address')
+        __OPTION "${@}"; ETCD_MEMBER_ADDRESS="${2}"; shift;;
+    '--etcd-peer-port')
+        __OPTION "${@}"; ETCD_PEER_PORT="${2}"; shift;;
+    '--etcd-peer-scheme')
+        __OPTION "${@}"; ETCD_PEER_SCHEME="${2}"; shift;;
+    '--etcd-server-port')
+        __OPTION "${@}"; ETCD_SERVER_PORT="${2}"; shift;;
+    '--etcd-server-scheme')
+        __OPTION "${@}"; ETCD_SERVER_SCHEME="${2}"; shift;;
+    '--exoscale-api-key')
+        __OPTION "${@}"; EXOSCALE_API_KEY="${2}"; shift;;
+    '--exoscale-api-secret')
+        __OPTION "${@}"; EXOSCALE_API_SECRET="${2}"; shift;;
+    '--exoscale-instancepool-id')
+        __OPTION "${@}"; EXOSCALE_INSTANCEPOOL_ID="${2}"; shift;;
+    '--exoscale-zone')
+        __OPTION "${@}"; EXOSCALE_ZONE="${2}"; shift;;
+
+    '--environment-file')
+      source <(sed -nE "s/^\s*(ETCD_[_A-Z]*=([0-9]*|'[^']*'))\s*(#.*)?\$/\1/p" "${2}")
+      source <(sed -nE "s/^\s*(EXOSCALE_[_A-Z]*=([0-9]*|'[^']*'))\s*(#.*)?\$/\1/p" "${2}")
+      shift;;
+    -*)
+      echo "ERROR[${SCRIPT}]: Invalid option (${1})" >&2 && exit 1;;
+    *)
+      if [ -z "${ETCD_CLUSTER_ACTION}" ]; then
+        ETCD_CLUSTER_ACTION="${1}"
+      else
+        echo "ERROR[${SCRIPT}]: Invalid argument (${1})" >&2 && exit 1
+      fi
+      ;;
+  esac
+  shift
+done
+
+# Validation
+case "${ETCD_CLUSTER_ACTION}" in
+  'env'|'help'|'register'|'clean') ;;
+  *) echo "ERROR[${SCRIPT}]: Invalid action (${ETCD_CLUSTER_ACTION:-n/a})" >&2 && exit 1
+esac
+
+## Setup
+
+if [ -z "${ETCD_CLUSTER_URL}" ]; then
+  ETCD_CLUSTER_URL="$(date +"${EXOSCALE_BACKUP_TIMESTAMP_FORMAT}")"
+fi
+
+if [ -z "${ETCD_MEMBER_ADDRESS}" ]; then
+  ETCD_MEMBER_ADDRESS="$(ip a s eth0 | grep -E -o 'inet [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | cut -d' ' -f2)"
+fi
+
+# if [ -z "${ETCD_CLUSTER_URL}" ]; then
+  
+# fi
+
+# Environment
+if [ "${ETCD_CLUSTER_ACTION}" == 'env' ]; then
+  cat <<EOF
+ETCD_ADDITIONAL_VARS_FILE='${ETCD_ADDITIONAL_VARS_FILE}'
+ETCD_CACERT='${ETCD_CACERT}'
+ETCD_CERT='${ETCD_CERT}'
+ETCD_FINAL_ENVIRONMENT_FILE='${ETCD_FINAL_ENVIRONMENT_FILE}'
+ETCD_CLUSTER_URL='${ETCD_CLUSTER_URL}'
+ETCD_KEY='${ETCD_KEY}'
+ETCD_MEMBER_ADDRESS='${ETCD_MEMBER_ADDRESS}'
+ETCD_PEER_PORT='${ETCD_PEER_PORT}'
+ETCD_PEER_SCHEME='${ETCD_PEER_SCHEME}'
+ETCD_SERVER_PORT='${ETCD_SERVER_PORT}'
+ETCD_SERVER_SCHEME='${ETCD_SERVER_SCHEME}'
+EXOSCALE_API_KEY='${EXOSCALE_API_KEY}'
+EXOSCALE_API_SECRET='${EXOSCALE_API_SECRET}'
+EXOSCALE_INSTANCEPOOL_ID='${EXOSCALE_INSTANCEPOOL_ID}'
+EXOSCALE_ZONE='${EXOSCALE_ZONE}'
+EOF
+  exit 0
+fi
+
+## Helpers
+
+function render_etcd_configuration() {
+    echo "INFO[${SCRIPT}]: Rendering configuration for a '$1' cluster"
+    cat "${ETCD_ADDITIONAL_VARS_FILE}" > "${ETCD_FINAL_ENVIRONMENT_FILE}"
+    cat >> "${ETCD_FINAL_ENVIRONMENT_FILE}" <<EOF
+
+# Clustering settings
+ETCD_INITIAL_CLUSTER_STATE=$1
+ETCD_NAME=${INSTANCE_NAME}
+ETCD_INITIAL_CLUSTER=$2
+EOF
+}
+
+## Main
+
+# etcd <-> etcdctl environment variables
+export ETCDCTL_CACERT="${ETCD_CACERT}"
+export ETCDCTL_CERT="${ETCD_CERT}"
+export ETCDCTL_KEY="${ETCD_KEY}"
+
+# etcd peer name is always set to short hostname
+INSTANCE_NAME=$(hostname -s)
+
+peer_urls=
+peer_names=
+
+discovered_members=
+if [ -z "${ETCD_CLUSTER_URL}" ]; then
+    # If ETCD_CLUSTER_URL is not defined, we try to auto detect an endpoint from the underlying instance pool
+    # using the Exoscale API
+    echo "INFO[${SCRIPT}]: Cluster URL not provided, trying to connect to the cluster through instance pool members"
+
+    instance_pool_urls=$(exo compute instance-pool show "${EXOSCALE_INSTANCEPOOL_ID}" -z "${EXOSCALE_ZONE}" --output-format=json  \
+        |jq -r ".instances[]" \
+        |xargs -I '{}' exo compute instance show -z "${EXOSCALE_ZONE}" --output-format=json '{}' \
+        |jq --raw-output "\"$ETCD_SERVER_SCHEME://\" + .ip_address + \":$ETCD_SERVER_PORT\"")
+
+    for url in ${instance_pool_urls}; do
+        echo "INFO[${SCRIPT}]: Trying to connect to '$url'"
+        discovered_members=$(etcdctl member list --write-out=json --hex --endpoints="$url")
+        
+        if [[ $? == 0 && $discovered_members ]]; then
+            ETCD_CLUSTER_URL="$url"
+            echo "INFO[${SCRIPT}]: Cluster is reachable from auto-discovered url '$url'"
+            break
+        fi
+    done
+else
+    discovered_members=$(etcdctl member list --write-out=json --hex --endpoints="${ETCD_CLUSTER_URL}")
+    if [[ $? == 0 && $discovered_members ]]; then
+        echo "INFO[${SCRIPT}]: Cluster is reachable from provided url '$ETCD_CLUSTER_URL'"
+    fi
+fi
+
+if [ "$discovered_members" ]; then
+    peer_urls=$(echo "$discovered_members" |jq --raw-output .members[].peerURLs[0])
+    peer_names=$(echo "$discovered_members" |jq --raw-output .members[].name)
+
+    echo "INFO[${SCRIPT}]: Discovered URLs:"
+    for found_url in $peer_urls; do
+        echo "INFO[${SCRIPT}]:   ${found_url}"
+    done
+
+    echo "INFO[${SCRIPT}]: Discovered related Names:"
+    for found_name in $peer_names; do
+        echo "INFO[${SCRIPT}]:   ${found_name}"
+    done
+fi
+
+export ETCDCTL_ENDPOINTS="${ETCD_CLUSTER_URL}"
+
+# Clean (& Register)
+
+if [ "${ETCD_CLUSTER_ACTION}" == 'register' ] || [ "${ETCD_CLUSTER_ACTION}" == 'clean' ]; then
+    pool_members_filter=$(exo compute instance-pool show "${EXOSCALE_INSTANCEPOOL_ID}" -z "${EXOSCALE_ZONE}" --output-format=json  \
+        |jq -r '.instances | map("contains(\"" + . + "\")") | join(" or ")')
+
+    invalid_member_ids=$(echo "$discovered_members" \
+        | jq --raw-output ".members | map(select(.name | $pool_members_filter | not )) | .[].ID")
+
+    for invalid_member_id in $invalid_member_ids; do
+        echo "INFO[${SCRIPT}]: Removing cluster member with ID '$invalid_member_id'"
+
+        if ! etcdctl member remove "$invalid_member_id" > /dev/null; then
+            echo "ERROR[${SCRIPT}]: Unable to remove member '$invalid_member_id'"
+            exit 1
+        fi
+    done
+fi
+
+# Register
+
+if [ "${ETCD_CLUSTER_ACTION}" == 'register' ]; then
+    if [[ "${peer_urls}" && "${peer_names}" != *"${INSTANCE_NAME}"* ]]; then
+        echo "INFO[${SCRIPT}]: Joining an existing cluster"
+
+        current_peer_url="${ETCD_PEER_SCHEME}://${ETCD_MEMBER_ADDRESS}:${ETCD_PEER_PORT}"
+        initial_cluster=$(etcdctl member list -w json \
+            |jq -r '.members | map(.name + "=" + .peerURLs[0]) | join(",")')
+        initial_cluster="$initial_cluster,$INSTANCE_NAME=$current_peer_url"
+
+        echo "INFO[${SCRIPT}]: Adding node"
+        if ! etcdctl member add "${INSTANCE_NAME}" --peer-urls="$current_peer_url"; then
+            echo "ERROR[${SCRIPT}]: Unable to add member '${INSTANCE_NAME}' with url '$current_peer_url'"
+            exit 1
+        fi
+
+        render_etcd_configuration "existing" "$initial_cluster"
+    else
+        echo "INFO[${SCRIPT}]: Creating a new cluster"
+
+        initial_cluster=$(exo compute instance-pool show "${EXOSCALE_INSTANCEPOOL_ID}" -z "${EXOSCALE_ZONE}" --output-format=json  \
+            |jq -r ".instances[]" \
+            |xargs -I '{}' exo compute instance show -z "${EXOSCALE_ZONE}" --output-format=json '{}' \
+            |jq --raw-output ".name + \"=$ETCD_PEER_SCHEME://\" + .ip_address + \":$ETCD_PEER_PORT\"" \
+            |xargs \
+            |sed 's/ /,/g')
+
+        render_etcd_configuration "new" "$initial_cluster"
+    fi
+fi
+
+exit 0

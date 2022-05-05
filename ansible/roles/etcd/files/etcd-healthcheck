@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. /etc/default/etcdctl
+
+ETCD_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --cacert "$ETCDCTL_CACERT" --cert "$ETCDCTL_CERT" --key "$ETCDCTL_KEY" "$ETCDCTL_ENDPOINTS/health")
+
+if [ "${ETCD_STATUS}" == '200' ]; then
+    echo 'Status: 200 OK'
+    echo 'Content-type: application/json'
+    echo ''
+    echo '{"healthy": true}'
+else
+    echo 'Status: 500 Internal Server Error'
+    echo 'Content-type: application/json'
+    echo ''
+    echo '{"healthy": false}'
+fi

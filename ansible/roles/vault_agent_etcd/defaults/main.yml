@@ -1,0 +1,9 @@
+---
+
+vault_agent_etcd_config_path: "{{ vault_config_path }}"
+vault_agent_etcd_user: "{{ vault_user }}"
+vault_agent_etcd_group: "{{ vault_group }}"
+
+vault_agent_etcd_auth_path: null
+vault_agent_etcd_pki_etcd_cert: pki/platform/kubernetes/etcd/issue/server
+vault_agent_etcd_iam_instance_pool: iam/exoscale/apikey/etcd-instance-pool
