@@ -3,12 +3,32 @@
 - name: Update base OS settings
   hosts: default
   become: true
-  vars:
-    vault_config_path: /etc/vault/agent-conf.d
-    vault_mode: agent
   roles:
     - apt
     - sshd
+
+- name: Install etcd and Vault agent
+  hosts: default
+  become: true
+  vars:
+    # vault agent
+    vault_config_path: /etc/etcd
+    vault_service_name: etcd-vault-agent
+    vault_mode: agent
+    vault_user: etcd
+    vault_group: etcd
+    # etcd healthcheck reverse-proxy for EIP
+    healthcheck_port: 2378
+    healthcheck_user: etcd
+    healthcheck_script_path: "{{ etcd_bin_path }}/etcd-healthcheck"
+    # etcd integration with vault agent
+    vault_agent_etcd_auth_path: auth/exoscale
+  roles:
     - systemd
     - vault
     - etcd
+    - healthcheck
+    - exoscale_cli
+    - jq
+    - exoscale_etcd
+    - vault_agent_etcd

@@ -1,0 +1,25 @@
+---
+
+- name: Install Exoscale helper scripts
+  tags:
+    - exoscale-etcd
+  become: true
+  copy:
+    src: "etcd-exoscale-pool"
+    dest: "{{ etcd_bin_path }}/etcd-exoscale-pool"
+    force: true
+    owner: root
+    group: root
+    mode: "0777"
+
+- name: Install additional templated files
+  tags:
+    - exoscale-etcd
+  become: true
+  template:
+    src: "exoscale-etcd-init.j2"
+    dest: "{{ etcd_bin_path }}/exoscale-etcd-init"
+    force: true
+    owner: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    mode: "0777"
