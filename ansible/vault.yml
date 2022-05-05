@@ -8,16 +8,6 @@
     - apt
     - sshd
 
-- name: Install Vault Agent
-  hosts: default
-  become: true
-  vars:
-    vault_config_path: /etc/vault/agent-conf.d
-    vault_mode: agent
-  roles:
-    - systemd
-    - vault
-
 - name: Install Vault server
   hosts: default
   become: true
@@ -36,3 +26,17 @@
   roles:
     - systemd
     - vault
+
+- name: Install Vault Agent
+  hosts: default
+  become: true
+  vars:
+    # vault agent
+    vault_config_path: /etc/vault/agent-conf.d
+    vault_mode: agent
+    # vault integration with vault agent
+    vault_agent_vault_auth_path: auth/exoscale
+  roles:
+    - systemd
+    - vault
+    - vault_agent_vault
