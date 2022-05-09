@@ -7,7 +7,7 @@
     - apt
     - sshd
     - runc
-    - crictl
+    - cri_tools
     - cni_plugins
     - containerd
     - kubelet
