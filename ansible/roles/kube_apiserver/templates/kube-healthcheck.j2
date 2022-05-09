@@ -1,0 +1,16 @@
+#!/bin/bash
+
+PUBLIC_IP=$(jq -r '.ds.meta_data."public-ipv4"' /run/cloud-init/instance-data.json)
+KUBEAPI_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --cacert {{ kube_apiserver_config_path }}/server-ca.pem "https://$PUBLIC_IP:6443/readyz")
+
+if [ "${KUBEAPI_STATUS}" == '200' ]; then
+    echo 'Status: 200 OK'
+    echo 'Content-type: application/json'
+    echo ''
+    echo '{"healthy": true}'
+else
+    echo 'Status: 500 Internal Server Error'
+    echo 'Content-type: application/json'
+    echo ''
+    echo '{"healthy": false}'
+fi

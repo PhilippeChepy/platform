@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Exit on missing certificates
+
+if [ ! -f {{ kube_controller_manager_config_path }}/aggregation-layer-ca.pem ]; then exit 0; fi
+if [ ! -f {{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig ]; then exit 0; fi
+if [ ! -f {{ kube_controller_manager_config_path }}/server-ca.pem ]; then exit 0; fi
+if [ ! -f {{ kube_controller_manager_config_path }}/service-account-private-key.pem ]; then exit 0; fi
+
+{{ kube_controller_manager_bin_path }}/kube-controller-manager \
+  --allocate-node-cidrs=true \
+  --authentication-kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
+  --authorization-kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
+  --client-ca-file={{ kube_controller_manager_config_path }}/server-ca.pem \
+  --cluster-cidr="$KUBE_CONTROLLER_MANAGER_CLUSTER_CIDR" \
+  --kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
+  --requestheader-client-ca-file={{ kube_controller_manager_config_path }}/aggregation-layer-ca.pem \
+  --root-ca-file={{ kube_controller_manager_config_path }}/server-ca.pem \
+  --service-account-private-key-file={{ kube_controller_manager_config_path }}/service-account-private-key.pem \
+  --use-service-account-credentials=true

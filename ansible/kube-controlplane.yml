@@ -1,19 +1,33 @@
 ---
 
-- name: Update base OS settings
+- name: Install Kubernetes Controller Manager and Vault agent
   hosts: default
   become: true
   vars:
-    vault_config_path: /etc/vault/agent-conf.d
+    # vault agent
+    vault_config_path: /etc/kubernetes
+    vault_service_name: kube-vault-agent
     vault_mode: agent
+    vault_user: kube
+    vault_group: kube
+    # kubernetes apiserver healthcheck reverse-proxy for EIP
+    healthcheck_port: 6444
+    healthcheck_user: kube
+    healthcheck_script_path: "{{ kube_apiserver_bin_path }}/kube-healthcheck"
+    # kubernetes control plane components integration with vault agent
+    vault_agent_kube_control_plane_auth_path: auth/exoscale
   roles:
     - apt
     - sshd
     - systemd
     - vault
+    - healthcheck
     - cilium_cli
     - kube_apiserver
     - konnectivity_server
     - kube_controller_manager
     - kube_scheduler
     - kubectl
+    - exoscale_cli
+    - jq
+    - vault_agent_kube_control_plane

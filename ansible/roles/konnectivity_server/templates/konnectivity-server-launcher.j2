@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Fails on missing certificates
+
+if [ ! -f {{ konnectivity_server_config_path }}/cluster.key ]; then exit 0; fi
+if [ ! -f {{ konnectivity_server_config_path }}/cluster.pem ]; then exit 0; fi
+if [ ! -f {{ konnectivity_server_config_path }}/konnectivity-server.kubeconfig ]; then exit 0; fi
+if [ ! -f {{ konnectivity_server_config_path }}/server-ca.pem ]; then exit 0; fi
+if [ ! -f {{ konnectivity_server_config_path }}/server.key ]; then exit 0; fi
+if [ ! -f {{ konnectivity_server_config_path }}/server.pem ]; then exit 0; fi
+
+{{ konnectivity_server_bin_path }}/proxy-server \
+  --logtostderr=true \
+  --cluster-cert={{ konnectivity_server_config_path }}/cluster.pem \
+  --cluster-key={{ konnectivity_server_config_path }}/cluster.key \
+  --mode=http-connect \
+  --server-ca-cert={{ konnectivity_server_config_path }}/server-ca.pem \
+  --server-cert={{ konnectivity_server_config_path }}/server.pem \
+  --server-key={{ konnectivity_server_config_path }}/server.key \
+  --agent-namespace=kube-system \
+  --agent-service-account=konnectivity-agent \
+  --kubeconfig={{ konnectivity_server_config_path }}/konnectivity-server.kubeconfig \
+  --authentication-audience=system:konnectivity-server
