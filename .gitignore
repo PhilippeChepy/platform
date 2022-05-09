@@ -5,3 +5,4 @@ terraform.tfvars
 .vars.hcl
 build.log
 id_rsa
+.virtual-env

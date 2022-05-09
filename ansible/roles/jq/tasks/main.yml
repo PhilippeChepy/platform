@@ -6,7 +6,7 @@
   stat:
     path: "{{ jq_bin_path }}/jq"
   become: false
-  register: exoscale_cli_package
+  register: jq_binary
 
 
 - name: "Download jq → {{ jq_url }}"
@@ -19,4 +19,4 @@
     owner: "root"
     group: "root"
     mode: "0755"
-  when: not exoscale_cli_package.stat.exists | bool
+  when: not jq_binary.stat.exists | bool
