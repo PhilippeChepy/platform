@@ -111,14 +111,17 @@
     create: true
     mode: 0440
 
-- name: konnectivity egress configuration
+- name: apiserver additional helper scripts
   tags:
     - kube-apiserver
   become: true
   template:
-    src: "egress-selector-configuration.yaml.j2"
-    dest: "{{ kube_apiserver_config_path }}/egress-selector-configuration.yaml"
+    src: "{{ item }}.j2"
+    dest: "{{ kube_apiserver_bin_path }}/{{ item }}"
     force: true
     owner: root
     group: root
-    mode: "0644"
+    mode: "0777"
+  loop:
+    - kube-healthcheck
+    - kube-apiserver-launcher

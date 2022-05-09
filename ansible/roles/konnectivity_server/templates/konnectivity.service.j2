@@ -5,18 +5,8 @@ Wants=network-online.target time-sync.target
 
 [Service]
 User={{ konnectivity_user }}
-ExecStart={{ konnectivity_server_bin_path }}/proxy-server \
-  --logtostderr=true \
-  --cluster-cert={{ konnectivity_server_config_path }}/cluster.pem \
-  --cluster-key={{ konnectivity_server_config_path }}/cluster.key \
-  --mode=http-connect \
-  --server-ca-cert={{ konnectivity_server_config_path }}/server-ca.pem \
-  --server-cert={{ konnectivity_server_config_path }}/server.pem \
-  --server-key={{ konnectivity_server_config_path }}/server.key \
-  --agent-namespace=kube-system \
-  --agent-service-account=konnectivity-agent \
-  --kubeconfig={{ konnectivity_server_config_path }}/konnectivity-server.kubeconfig \
-  --authentication-audience=system:konnectivity-server
+ExecStartPre=
+ExecStart={{ konnectivity_server_bin_path }}/konnectivity-server-launcher
 
 Restart=on-failure
 RestartSec=5

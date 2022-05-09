@@ -97,3 +97,17 @@
     group: "root"
     create: true
     mode: 0440
+
+- name: scheduler additional helper scripts
+  tags:
+    - kube-scheduler
+  become: true
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ kube_scheduler_bin_path }}/{{ item }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0777"
+  loop:
+    - kube-scheduler-launcher
