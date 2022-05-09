@@ -1,0 +1,18 @@
+---
+
+# Package variables
+cri_tools_version: "1.24.0"
+cri_tools_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+cri_tools_architecture: "{{ cri_tools_architecture_map[ansible_architecture] }}"
+cri_tools_os: "{{ ansible_system|lower }}"
+cri_tools_pkg: "crictl-v{{ cri_tools_version }}-{{ cri_tools_os }}-{{ cri_tools_architecture }}.tar.gz"
+cri_tools_shasums: "crictl-v{{ cri_tools_version }}-{{ cri_tools_os }}-{{ cri_tools_architecture }}.tar.gz.sha256"
+cri_tools_tgz_url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/v{{ cri_tools_version }}/crictl-v{{ cri_tools_version }}-{{ cri_tools_os }}-{{ cri_tools_architecture }}.tar.gz"
+cri_tools_checksum_file_url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/v{{ cri_tools_version }}/crictl-v{{ cri_tools_version }}-{{ cri_tools_os }}-{{ cri_tools_architecture }}.tar.gz.sha256"
+
+# Paths
+cri_tools_bin_path: /usr/local/bin

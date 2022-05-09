@@ -1,0 +1,71 @@
+---
+
+- name: Check cri-tools package checksum file
+  tags:
+    - cri-tools
+  stat:
+    path: "/tmp/{{ cri_tools_shasums }}"
+  become: false
+  register: cri_tools_checksum
+
+- name: Get cri-tools package checksum file
+  tags:
+    - cri-tools
+  get_url:
+    url: "{{ cri_tools_checksum_file_url }}"
+    dest: "/tmp/{{ cri_tools_shasums }}"
+  when: not cri_tools_checksum.stat.exists | bool
+
+- name: Get cri-tools package checksum
+  tags:
+    - cri-tools
+    - skip_ansible_lint
+  shell: |
+    cat /tmp/{{ cri_tools_shasums }}
+    # before 1.23.0:
+    # set -o pipefail
+    # grep "{{ cri_tools_pkg }}" "/tmp/{{ cri_tools_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: cri_tools_sha256
+
+- name: Check cri-tools package file
+  tags:
+    - cri-tools
+  stat:
+    path: "/tmp/{{ cri_tools_pkg }}"
+  become: false
+  register: cri_tools_package
+
+- name: "Download cri-tools → {{ cri_tools_tgz_url }}"
+  tags:
+    - cri-tools
+  get_url:
+    url: "{{ cri_tools_tgz_url }}"
+    dest: "/tmp/{{ cri_tools_pkg }}"
+    checksum: "sha256:{{ cri_tools_sha256.stdout }}"
+    timeout: "42"
+  when: not cri_tools_package.stat.exists | bool
+
+- name: Unarchive cri-tools
+  tags:
+    - cri-tools
+  unarchive:
+    remote_src: true
+    src: "/tmp/{{ cri_tools_pkg }}"
+    dest: "/tmp"
+    creates: "/tmp/crictl"
+
+- name: Install cri-tools
+  tags:
+    - cri-tools
+  become: true
+  copy:
+    remote_src: true
+    src: "/tmp/crictl"
+    dest: "{{ cri_tools_bin_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
