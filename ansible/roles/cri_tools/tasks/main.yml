@@ -69,3 +69,15 @@
     owner: "root"
     group: "root"
     mode: "0755"
+
+- name: Set default endpoint
+  tags:
+    - cri-tools
+  become: true
+  copy:
+    src: "crictl.yaml"
+    dest: "/etc/crictl.yaml"
+    force: true
+    owner: root
+    group: root
+    mode: "0666"
