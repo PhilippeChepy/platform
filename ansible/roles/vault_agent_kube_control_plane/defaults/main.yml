@@ -5,20 +5,21 @@ vault_agent_kube_control_plane_user: "{{ vault_user }}"
 vault_agent_kube_control_plane_group: "{{ vault_group }}"
 
 vault_agent_kube_control_plane_auth_path: null
-vault_agent_kube_control_plane_kv_secrets_encryption: kv/platform/kubernetes/secret-encryption
-vault_agent_kube_control_plane_kv_serviceaccount: kv/platform/kubernetes/service-account
-vault_agent_kube_control_plane_pki_aggregationlayer_ca_chain: pki/platform/kubernetes/aggregation-layer/cert/ca_chain
-vault_agent_kube_control_plane_pki_aggregationlayer_cert_apiserver: pki/platform/kubernetes/aggregation-layer/issue/apiserver
-vault_agent_kube_control_plane_pki_client_ca_chain: pki/platform/kubernetes/client/cert/ca_chain
-vault_agent_kube_control_plane_pki_client_cert_admin: pki/platform/kubernetes/client/issue/operator-admin
-vault_agent_kube_control_plane_pki_controlplane_ca_chain: pki/platform/kubernetes/control-plane/cert/ca_chain
-vault_agent_kube_control_plane_pki_controlplane_cert_apiserver: pki/platform/kubernetes/control-plane/issue/apiserver
-vault_agent_kube_control_plane_pki_controlplane_cert_konnectivity_egress: pki/platform/kubernetes/control-plane/issue/konnectivity-apiserver-egress
-vault_agent_kube_control_plane_pki_controlplane_cert_controller_manager: pki/platform/kubernetes/control-plane/issue/controller-manager
-vault_agent_kube_control_plane_pki_controlplane_cert_konnectivity: pki/platform/kubernetes/control-plane/issue/konnectivity
-vault_agent_kube_control_plane_pki_controlplane_cert_scheduler: pki/platform/kubernetes/control-plane/issue/scheduler
-vault_agent_kube_control_plane_pki_etcd_cert_apiserver: pki/platform/kubernetes/etcd/issue/apiserver
-vault_agent_kube_control_plane_pki_konnectivity_cert_apiserver: pki/platform/kubernetes/control-plane/issue/konnectivity-server-apiserver
-vault_agent_kube_control_plane_pki_konnectivity_cert_cluster: pki/platform/kubernetes/control-plane/issue/konnectivity-server-cluster
-vault_agent_kube_control_plane_pki_kubelet_ca_chain: pki/platform/kubernetes/kubelet/cert/ca_chain
-vault_agent_kube_control_plane_pki_kubelet_cert_apiserver: pki/platform/kubernetes/kubelet/issue/apiserver
+vault_agent_kube_control_plane_paths:
+  kv_secrets_encryption: 'kv/platform/kubernetes/secret-encryption'
+  kv_serviceaccount: 'kv/platform/kubernetes/service-account'
+  pki_aggregationlayer_ca_chain: 'pki/platform/kubernetes/aggregation-layer/cert/ca_chain'
+  pki_aggregationlayer_cert_apiserver: 'pki/platform/kubernetes/aggregation-layer/issue/apiserver'
+  pki_client_ca_chain: 'pki/platform/kubernetes/client/cert/ca_chain'
+  pki_client_cert_admin: 'pki/platform/kubernetes/client/issue/operator-admin'
+  pki_controlplane_ca_chain: 'pki/platform/kubernetes/control-plane/cert/ca_chain'
+  pki_controlplane_cert_apiserver: 'pki/platform/kubernetes/control-plane/issue/apiserver'
+  pki_controlplane_cert_konnectivity_egress: 'pki/platform/kubernetes/control-plane/issue/konnectivity-apiserver-egress'
+  pki_controlplane_cert_controller_manager: 'pki/platform/kubernetes/control-plane/issue/controller-manager'
+  pki_controlplane_cert_konnectivity: 'pki/platform/kubernetes/control-plane/issue/konnectivity'
+  pki_controlplane_cert_scheduler: 'pki/platform/kubernetes/control-plane/issue/scheduler'
+  pki_etcd_cert_apiserver: 'pki/platform/kubernetes/etcd/issue/apiserver'
+  pki_konnectivity_cert_apiserver: 'pki/platform/kubernetes/control-plane/issue/konnectivity-server-apiserver'
+  pki_konnectivity_cert_cluster: 'pki/platform/kubernetes/control-plane/issue/konnectivity-server-cluster'
+  pki_kubelet_ca_chain: 'pki/platform/kubernetes/kubelet/cert/ca_chain'
+  pki_kubelet_cert_apiserver: 'pki/platform/kubernetes/kubelet/issue/apiserver'
