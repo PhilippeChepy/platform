@@ -71,5 +71,4 @@
     group: "{{ kubectl_group }}"
     mode: 0755
   loop:
-    - "{{ kubectl_config_path }}"
     - "/home/{{ kubectl_user }}/.kube"
