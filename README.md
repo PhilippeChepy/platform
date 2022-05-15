@@ -11,18 +11,22 @@ Related repositories:
 
 # Templates
 
+Every templates are based on Ubuntu 22.04 (LTS)
+
+- `vault.pkr.hcl` (Vault 1.10.3)
+    - Hashicorp Vault is used as base for most PKI, IAM and other secret things in the whole target infrastructure
 - `etcd.pkr.hcl` (Etcd 3.5.4):
-    - Settings must be set in `/etc/default/etcd` when deploying.
-    - For use with an Hashicorp Vault cluster for TLS management, or manual provisioning
-    - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
+    - Etcd is used as datastore for the Kubernetes control plane.
+    - Hashicorp Vault as agent to manage etcd TLS certificates.
+    - Automatic management of the cluster, based on instance pool informations.
 - `kube-controlplane.pkr.hcl` (Kubernetes 1.24.0 control plane):
-    - For use with an Hashicorp Vault cluster for TLS management, or manual provisioning
-    - Used by [Terraform Kubernetes @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubernetes)
+    - Kubernetes control plane components (apiserver, konnectivity, scheduler, controller-manager).
+    - Hashicorp Vault as agent to manage control plane, aggregation layer, kubelet and client TLS certificates.
 - `kube-node.pkr.hcl` (Kubernetes 1.24.0 node):
-    - TLS is bootstraped with a token
-    - Used by [Terraform Kubelet Pool @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-kubelet-pool)
-- `vault.pkr.hcl` (Vault 1.10.1)
-    - Used by [Terraform Vault @ Exoscale](https://github.com/PhilippeChepy/terraform-exoscale-vault)
+    - Kubelet (Kubernetes node) service.
+    - No kube-proxy setup as it's expected to be handled by the CNI plugin that would be deployed (e.g. Cilium with strict
+    kube-proxy replacement).
+    - Hashicorp Vault as agent to manage kubelet TLS certificates.
 
 # Build instructions
 
