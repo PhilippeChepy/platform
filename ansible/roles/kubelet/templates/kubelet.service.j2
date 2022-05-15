@@ -5,13 +5,8 @@ After=network-online.target time-sync.target containerd.service
 Requires=network-online.target time-sync.target containerd.service
 
 [Service]
-ExecStart={{ kubelet_bin_path }}/kubelet \
-  --config={{ kubelet_config_path }}/config.yaml \
-  --container-runtime=remote \
-  --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
-  --kubeconfig={{ kubelet_config_path }}/kubelet.kubeconfig \
-  --register-node=true \
-  --v=2
+EnvironmentFile=/etc/default/kubelet
+ExecStart={{ kubelet_bin_path }}/kubelet-launcher
 Restart=on-failure
 RestartSec=5
 

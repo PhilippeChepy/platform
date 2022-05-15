@@ -6,18 +6,12 @@ apt_cache_valid_time: 3600
 apt_unwanted_packages:
   - at
   - accountsservice
-  - acpid
   - cron
-  - dbus
   - fwupd
-  - lvm2
   - lxcfs
-  - mdadm
   - multipath-tools
-  - open-iscsi
   - plymouth
   - policykit-1
-  - powermgmt-base
   - rsyslog
   - snapd
   - ubuntu-advantage-tools
