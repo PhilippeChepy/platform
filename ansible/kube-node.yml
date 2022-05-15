@@ -12,3 +12,4 @@
     - cni_plugins
     - containerd
     - kubelet
+    - cilium_sysctl
