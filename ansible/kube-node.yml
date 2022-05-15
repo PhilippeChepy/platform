@@ -6,6 +6,7 @@
   roles:
     - apt
     - sshd
+    - systemd
     - runc
     - cri_tools
     - cni_plugins
