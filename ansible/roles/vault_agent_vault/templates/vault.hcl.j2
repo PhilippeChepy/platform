@@ -17,7 +17,7 @@ auto_auth {
 
 template {
   contents    = <<EOT
-{% raw %}{{ with secret "{% endraw %}{{ vault_agent_vault_pki_vault_cert }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{ with secret "{% endraw %}{{ vault_agent_kubelet_paths['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.issuing_ca }}
 {{ end }}
 {% endraw %}
@@ -29,7 +29,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{ with secret "{% endraw %}{{ vault_agent_vault_pki_vault_cert }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{ with secret "{% endraw %}{{ vault_agent_kubelet_paths['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.certificate }}
 {{ .Data.issuing_ca }}
 {{ end }}
@@ -42,7 +42,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{ with secret "{% endraw %}{{ vault_agent_vault_pki_vault_cert }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{ with secret "{% endraw %}{{ vault_agent_kubelet_paths['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.private_key }}
 {{ end }}
 {% endraw %}
