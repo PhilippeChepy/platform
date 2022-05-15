@@ -13,6 +13,8 @@ if [ ! -f {{ kube_controller_manager_config_path }}/service-account-private-key.
   --authorization-kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
   --client-ca-file={{ kube_controller_manager_config_path }}/server-ca.pem \
   --cluster-cidr="$KUBE_CONTROLLER_MANAGER_CLUSTER_CIDR" \
+  --node-cidr-mask-size-ipv4="$KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV4" \
+  --node-cidr-mask-size-ipv6="$KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV6" \
   --kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
   --requestheader-client-ca-file={{ kube_controller_manager_config_path }}/aggregation-layer-ca.pem \
   --root-ca-file={{ kube_controller_manager_config_path }}/server-ca.pem \
