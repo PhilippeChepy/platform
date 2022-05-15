@@ -22,7 +22,7 @@
     healthcheck_user: etcd
     healthcheck_script_path: "{{ etcd_bin_path }}/etcd-healthcheck"
     # etcd integration with vault agent
-    vault_agent_etcd_auth_path: auth/exoscale
+    vault_agent_exoscale_etcd_auth_path: auth/exoscale
   roles:
     - systemd
     - vault
@@ -31,4 +31,4 @@
     - exoscale_cli
     - jq
     - exoscale_etcd
-    - vault_agent_etcd
+    - vault_agent_exoscale_etcd
