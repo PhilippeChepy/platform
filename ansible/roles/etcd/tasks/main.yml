@@ -73,3 +73,15 @@
   loop:
     - {name: 'etcdctl', dest: "/etc/default", mode: "0600"}
     - {name: 'base-environment', dest: "{{ etcd_config_path }}", mode: "0600"}
+
+- name: Install healthcheck script
+  tags:
+    - etcd
+  become: true
+  copy:
+    src: "etcd-healthcheck"
+    dest: "{{ etcd_bin_path }}/etcd-healthcheck"
+    force: true
+    owner: root
+    group: root
+    mode: "0777"
