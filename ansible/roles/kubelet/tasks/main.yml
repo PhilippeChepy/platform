@@ -53,18 +53,6 @@
   loop:
     - "{{ kubelet_config_path }}"
 
-- name: config
-  tags:
-    - kubelet
-  become: true
-  template:
-    src: "config.yaml.j2"
-    dest: "{{ kubelet_config_path }}/config.yaml"
-    force: true
-    owner: root
-    group: root
-    mode: "0644"
-
 - name: systemd unit
   tags:
     - kubelet
@@ -77,3 +65,17 @@
     group: root
     mode: "0644"
   notify: reload systemd
+
+- name: kubelet additional helper scripts
+  tags:
+    - kubelet
+  become: true
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ kubelet_bin_path }}/{{ item }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0777"
+  loop:
+    - kubelet-launcher
