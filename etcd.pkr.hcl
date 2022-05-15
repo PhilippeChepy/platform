@@ -14,7 +14,7 @@ source "exoscale" "base" {
   instance_disk_size   = 10
   template_zone        = var.zone
   template_name        = "Etcd 3.5.4"
-  template_description = "Etcd 3.5.4 (minimal Ubuntu 22.04 & Hashicorp Vault 1.10.1)"
+  template_description = "Etcd 3.5.4 (minimal Ubuntu 22.04 & Hashicorp Vault 1.10.3)"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
