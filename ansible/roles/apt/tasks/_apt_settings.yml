@@ -1,11 +1,5 @@
 ---
 
-- name: "Install package unattended-upgrades"
-  become: true
-  package:
-    pkg: "unattended-upgrades"
-    state: present
-
 - name: "Update APT package cache"
   become: true
   apt:
