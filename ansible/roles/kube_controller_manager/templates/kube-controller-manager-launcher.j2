@@ -3,6 +3,8 @@
 # Exit on missing certificates
 
 if [ ! -f {{ kube_controller_manager_config_path }}/aggregation-layer-ca.pem ]; then exit 0; fi
+if [ ! -f {{ kube_controller_manager_config_path }}/node-ca.pem ]; then exit 0; fi
+if [ ! -f {{ kube_controller_manager_config_path }}/node-ca.key ]; then exit 0; fi
 if [ ! -f {{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig ]; then exit 0; fi
 if [ ! -f {{ kube_controller_manager_config_path }}/server-ca.pem ]; then exit 0; fi
 if [ ! -f {{ kube_controller_manager_config_path }}/service-account-private-key.pem ]; then exit 0; fi
@@ -13,6 +15,8 @@ if [ ! -f {{ kube_controller_manager_config_path }}/service-account-private-key.
   --authorization-kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
   --client-ca-file={{ kube_controller_manager_config_path }}/server-ca.pem \
   --cluster-cidr="$KUBE_CONTROLLER_MANAGER_CLUSTER_CIDR" \
+  --cluster-signing-cert-file={{ kube_controller_manager_config_path }}/node-ca.pem \
+  --cluster-signing-key-file={{ kube_controller_manager_config_path }}/node-ca.key \
   --node-cidr-mask-size-ipv4="$KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV4" \
   --node-cidr-mask-size-ipv6="$KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV6" \
   --kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
