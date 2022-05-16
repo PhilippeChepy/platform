@@ -273,6 +273,30 @@ EOT
 
 template {
   contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['kv_kubelet_pki'] }}{% raw %}"  -}}
+{{ .Data.certificate }}
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ kube_controller_manager_config_path }}/node-ca.pem"
+  command     = "sudo systemctl restart kube-controller-manager"
+  perms       = 0644
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['kv_kubelet_pki'] }}{% raw %}"  -}}
+{{ .Data.private_key }}
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ kube_controller_manager_config_path }}/node-ca.key"
+  command     = "sudo systemctl restart kube-controller-manager"
+  perms       = 0644
+}
+
+template {
+  contents    = <<EOT
 {% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_ca_chain'] }}{% raw %}"  -}}
 {{ .Data.ca_chain }}
 {{- end }}

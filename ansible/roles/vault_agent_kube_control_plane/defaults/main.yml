@@ -23,3 +23,4 @@ vault_agent_kube_control_plane_paths:
   pki_konnectivity_cert_cluster: 'pki/platform/kubernetes/control-plane/issue/konnectivity-server-cluster'
   pki_kubelet_ca_chain: 'pki/platform/kubernetes/kubelet/cert/ca_chain'
   pki_kubelet_cert_apiserver: 'pki/platform/kubernetes/kubelet/issue/apiserver'
+  kv_kubelet_pki: 'kv/platform/kubernetes/kubelet-pki'
