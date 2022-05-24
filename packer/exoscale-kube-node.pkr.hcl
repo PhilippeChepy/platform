@@ -23,7 +23,7 @@ build {
   sources = ["source.exoscale.base"]
 
   provisioner "ansible" {
-    playbook_file = "./ansible/kube-node.yml"
+    playbook_file = "./ansible/exoscale-kube-node.yml"
     user          = "ubuntu"
   }
 }

@@ -23,7 +23,7 @@ build {
   sources = ["source.exoscale.base"]
 
   provisioner "ansible" {
-    playbook_file = "./ansible/etcd.yml"
+    playbook_file = "./ansible/exoscale-etcd.yml"
     user          = "ubuntu"
   }
 }

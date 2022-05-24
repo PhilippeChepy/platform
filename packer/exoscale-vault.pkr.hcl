@@ -23,7 +23,7 @@ build {
   sources = ["source.exoscale.base"]
 
   provisioner "ansible" {
-    playbook_file = "./ansible/vault.yml"
+    playbook_file = "./ansible/exoscale-vault.yml"
     user          = "ubuntu"
   }
 }
