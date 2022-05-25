@@ -1,0 +1,49 @@
+## template: jinja
+#cloud-config
+manage_etc_hosts: false
+hostname: {{ ds.meta_data.public_hostname }}
+fqdn: {{ ds.meta_data.public_hostname }}.${domain}
+
+write_files:
+- path: /etc/vault/tls/ca.pem
+  content: ${ vault_ca_pem }
+  encoding: b64
+  owner: etcd:etcd
+  permissions: "0644"
+- path: /etc/etcd/.role_id
+  owner: etcd:etcd
+  permissions: "0600"
+  content: etcd-server
+- path: /etc/etcd/.instance_id
+  owner: etcd:etcd
+  permissions: "0600"
+  content: "{{ ds.meta_data.instance_id }}"
+- path: /usr/local/bin/wait-vault
+  owner: etcd:etcd
+  permissions: "0777"
+  content: |
+    #!/bin/bash
+    while [ $(curl -sk -o /dev/null -w "%%{http_code}" "${vault_cluster_healthcheck_url}") != '200' ]; do
+        sleep 1;
+    done
+
+runcmd:
+# Vault CLI
+- [sed, -i, "s|CLUSTER_NAME|${vault_cluster_name}|g", "/etc/default/vault"]
+# Vault agent: etcd TLS certs self-renewal
+- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|CLUSTER_EIP_ADDRESS|${etcd_cluster_ip_address}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NAME|${etcd_cluster_name}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${etcd_cluster_zone}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_INSTANCEPOOL_NAME|${etcd_cluster_instance_pool_name}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/etcd/vault.hcl"]
+# etcd
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/default/etcdctl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/etcd/base-environment"]
+
+# Final bootstrap
+- [/usr/local/bin/wait-vault]
+- [/usr/local/bin/exoscale-etcd-init]
+- [systemctl, enable, etcd-vault-agent.service]
