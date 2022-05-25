@@ -1,0 +1,8 @@
+---
+
+- name: Operator Unseal
+  hosts: vault
+  tasks:
+  - include_role:
+      name: vault
+      tasks_from: operator-unseal

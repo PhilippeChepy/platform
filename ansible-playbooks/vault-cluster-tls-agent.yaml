@@ -1,0 +1,8 @@
+---
+
+- name: Enable TLS from Vault agent
+  hosts: vault
+  tasks:
+  - include_role:
+      name: vault
+      tasks_from: tls-enable-agent

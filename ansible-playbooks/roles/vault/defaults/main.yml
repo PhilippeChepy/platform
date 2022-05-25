@@ -1,0 +1,18 @@
+---
+
+vault_key_shares: 1
+vault_key_threshold: 1
+
+vault_unseal_data_dir: "{{ playbook_dir }}/../artifacts"
+vault_root_token_file: "{{ playbook_dir }}/../artifacts/root-token.txt"
+
+vault_cluster_name:
+vault_user: vault
+
+vault_unseal_key: []
+
+vault_environment:
+  VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
+  VAULT_CACERT: /etc/vault/tls/ca.pem
+  VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
+  VAULT_CLIENT_KEY: /etc/vault/tls/server.key

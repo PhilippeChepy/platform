@@ -1,0 +1,32 @@
+- set_fact:
+    vault_unseal_key: "{{ vault_unseal_key + [ lookup('file', '%s/vault-unseal-key-%d' | format(vault_unseal_data_dir, item)) ] }}"
+  loop: "{{ range(0, vault_key_threshold, 1)|list }}"
+  register: vault_init_data
+  delegate_to: localhost
+
+- debug:
+    msg: "{{ vault_unseal_key }}"
+
+- name: Start agent
+  become: true
+  systemd:
+    name: "vault-agent"
+    state: restarted
+    enabled: true
+
+
+- name: Unseal server
+  become: true
+  become_user: "{{ vault_user }}"
+  shell: |
+    vault operator unseal {{ item }}
+  environment: "{{ vault_environment }}"
+  loop: "{{ vault_unseal_key }}"
+  register: unseal
+  retries: 5
+  delay: 5
+  until: unseal is succeeded
+
+- name: Unseal status
+  debug:
+    msg: "{{ unseal }}"
