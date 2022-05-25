@@ -1,0 +1,28 @@
+- name: Initialise Vault
+  become: true
+  become_user: "{{ vault_user }}"
+  shell: |
+    vault operator init \
+      -key-shares={{ vault_key_shares }} \
+      -key-threshold={{ vault_key_threshold }} \
+      -format json
+  environment: "{{ vault_environment }}"
+  register: vault_init_data
+  delegate_to: "{{ play_hosts | first }}"
+
+- name: Parse output
+  set_fact:
+    vault_init_parsed: "{{ vault_init_data.stdout | from_json }}"
+
+- name: Write unseal keys
+  copy:
+    dest: "{{ vault_unseal_data_dir }}/vault-unseal-key-{{ item.0 }}"
+    content: "{{ item.1 }}"
+  with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
+  delegate_to: localhost
+
+- name: Write Root Token
+  copy:
+    content: "{{ vault_init_parsed.root_token }}"
+    dest: "{{ vault_root_token_file }}"
+  delegate_to: localhost

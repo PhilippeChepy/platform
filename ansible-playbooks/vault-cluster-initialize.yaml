@@ -1,0 +1,9 @@
+---
+
+- name: Operator init
+  hosts: vault
+  tasks:
+  - run_once: true
+    include_role:
+      name: vault
+      tasks_from: operator-init

@@ -1,0 +1,77 @@
+- name: Generate private key
+  become: true
+  openssl_privatekey:
+    path: "/etc/vault/tls/server.key"
+    owner: vault
+    group: vault
+    mode: 0600
+
+- name: Generate CSR
+  become: true
+  openssl_csr:
+    path: "/etc/vault/tls/server.csr"
+    privatekey_path: "/etc/vault/tls/server.key"
+    common_name: "{{ ansible_host }}"
+    subject_alt_name: "DNS:{{ vault_cluster_name }},DNS:{{ ansible_host }},IP:{{ vault_ip_address }},IP:{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+
+- name: Pull CSR
+  become: true
+  fetch: 
+    src: "/etc/vault/tls/server.csr"
+    dest: "../artifacts/{{ ansible_host }}.csr"
+    flat: true
+
+- name: Sign CSR with CA key
+  connection: local
+  delegate_to: localhost
+  openssl_certificate:
+    path: "../artifacts/{{ ansible_host }}.pem"
+    csr_path: "../artifacts/{{ ansible_host }}.csr"
+    ownca_path: "../artifacts/ca-certificate.pem"
+    ownca_privatekey_path: "../artifacts/ca-certificate.key"
+    provider: ownca
+
+- name: Push certificate
+  become: true
+  copy:
+    src: "../artifacts/{{ ansible_host }}.pem"
+    dest: "/etc/vault/tls/server.pem"
+    owner: vault
+    group: vault
+    mode: 0644
+
+- name: Push certificate
+  become: true
+  copy:
+    src: "../artifacts/ca-certificate.pem"
+    dest: "/etc/vault/tls/ca.pem"
+    owner: vault
+    group: vault
+    mode: 0644
+
+- name: Delete local copy of certificate
+  connection: local
+  delegate_to: localhost
+  file:
+    path: "../artifacts/{{ ansible_host }}.pem"
+    state: absent
+
+- name: Delete local copy of CSR
+  connection: local
+  delegate_to: localhost
+  file:
+    path: "../artifacts/{{ ansible_host }}.csr"
+    state: absent
+
+- name: Start server
+  become: true
+  systemd:
+    name: "vault-server"
+    state: started
+    enabled: true
+
+- name: Reload server
+  become: true
+  systemd:
+    name: "vault-server"
+    state: reloaded

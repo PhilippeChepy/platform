@@ -1,0 +1,18 @@
+- name: Remove cert
+  become: true
+  file:
+    path: /etc/vault/tls/server.pem
+    state: absent
+
+- name: Remove key
+  become: true
+  file:
+    path: /etc/vault/tls/server.key
+    state: absent
+
+- name: Start agent
+  become: true
+  systemd:
+    name: "vault-agent"
+    state: restarted
+    enabled: true
