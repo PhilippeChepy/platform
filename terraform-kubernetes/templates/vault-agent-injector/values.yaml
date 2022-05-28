@@ -1,0 +1,20 @@
+global:
+  tlsDisable: false
+
+injector:
+  enabled: true
+  externalVaultAddr: $vault:cluster_addr$
+  authPath: $vault:auth_path$
+  replicas: 2
+  agentImage:
+    repository: hashicorp/vault
+    tag: 1.10.3
+  image:
+    repository: "hashicorp/vault-k8s"
+    tag: "0.16.1"
+
+csi:
+  enabled: true
+
+server:
+  enabled: false
