@@ -1,0 +1,170 @@
+locals {
+  platform_name = "paas-staging"
+  platform_zone = "de-fra-1"
+
+  platform_admin_networks = [
+    "0.0.0.0/0",
+    "::/0"
+  ]
+
+  # TODO: set your infrastructure domain here
+  platform_domain = "${local.platform_name}.domain.tld"
+
+  platform_components = {
+    vault = {
+      endpoint = "vault.${local.platform_domain}"
+      # TODO: Set the template id returned by packer when building the vault template (from exoscale-vault.pkr.hcl)
+      template = "<vault-template-id>"
+    }
+    kubernetes = {
+      endpoint = "apiserver.kubernetes.${local.platform_domain}"
+      templates = {
+        # TODO: Set the template id returned by packer when building the etcd template (from exoscale-etcd.pkr.hcl)
+        etcd          = "<etcd-template-id>"
+        # TODO: Set the template id returned by packer when building the kubernetes control plane template (from exoscale-kube-controlplane.pkr.hcl)
+        control_plane = "<kubernetes-control-plane-template-id>"
+        # TODO: Set the template id returned by packer when building the kubelet template (from exoscale-kube-node.pkr.hcl)
+        kubelet       = "<kubernetes-node-template-id>"
+      }
+      # cluster settings
+      cluster_domain         = "kubernetes.${local.platform_domain}"
+      pod_cidr_ipv4          = "10.96.0.0/12"
+      service_cidr_ipv4      = "10.80.0.0/12"
+      apiserver_service_ipv4 = "10.80.0.1"
+      dns_service_ipv4       = "10.80.0.2"
+
+      pod_cidr_ipv6          = "fc00::2:0/112"
+      service_cidr_ipv6      = "fc00::1:0/112"
+      apiserver_service_ipv6 = "fc00::1:1"
+      dns_service_ipv6       = "fc00::1:2"
+
+      deployments = {
+        core = {
+          cilium-base = {
+            version   = "1.11.5",
+            namespace = "kube-system",
+            ready_on = [
+              { kind = "daemonset", name = "cilium" },
+              { kind = "deployment", name = "cilium-operator" },
+              { kind = "pod", name = "cni", mode = "wait", labels = ["k8s-app=cilium"] }
+            ]
+          }
+          konnectivity-agent = {
+            version   = "0.0.31",
+            namespace = "kube-system"
+            ready_on = [
+              { kind = "deployment", name = "konnectivity-agent" },
+              { kind = "pod", name = "kas-proxy", mode = "wait", labels = ["k8s-app=konnectivity-agent"] }
+            ]
+          }
+          core-dns = {
+            version   = "1.9.2",
+            namespace = "kube-system"
+            ready_on = [
+              { kind = "deployment", name = "coredns" }
+            ]
+          }
+          cert-manager = {
+            version   = "1.8.0",
+            namespace = "cert-manager",
+            templated = false
+            ready_on = [
+              { kind = "deployment", name = "cert-manager" },
+              { kind = "deployment", name = "cert-manager-cainjector" },
+              { kind = "deployment", name = "cert-manager-webhook" },
+              { kind = "pod", name = "webhook", mode = "wait" /*, condition = "completed" */, labels = ["app.kubernetes.io/name=webhook", "app.kubernetes.io/instance=cert-manager", "app.kubernetes.io/component=webhook"] },
+            ]
+          }
+          vault-agent-injector = {
+            version   = "0.16.0",
+            namespace = "vault-agent-injector"
+            service_account_tokens = {
+              vault-server = { service_account = "vault" }
+            }
+            ready_on = [
+              { kind = "deployment", name = "vault-agent-injector" },
+              { kind = "daemonset", name = "vault-csi-provider" },
+              { kind = "pod", name = "webhook", mode = "wait", labels = ["app.kubernetes.io/instance=vault", "app.kubernetes.io/name=vault-agent-injector", "component=webhook"] }
+            ]
+          }
+        }
+        core-addons = { # depends on cert-manager
+          metrics-server = {
+            version   = "0.6.1",
+            namespace = "kube-system"
+            service_account_tokens = {
+              metrics-server-vault-issuer = { service_account = "metrics-server" }
+            }
+            # Readiness of metrics-server depends on Pods to be deployed, but Pods requires 
+            # vault to be configured to validate the service account token (mandatory to issue
+            # valid aggregation layer server certificates mounted from a Secret managed by 
+            # cert-manager).
+            #
+            # If deployment readiness check is enabled, Vault will depends on metrics-server to
+            # be fully deployed before being correctly configured (chicken'n egg problem).
+            #
+            # We disable readiness check for metrics-server to allow configuring Vault.
+            # Anyway, metrics-server is not required to deploy additional workloads, and can come slightly
+            # later in the bootstrap process.
+            #
+            # ready_on = [
+            #   { kind = "deployment", name = "metrics-server" }
+            # ]
+          }
+          cloud-controller-manager = { # depends on vault-agent-injector
+            version   = "exoscale-0.10.1",
+            namespace = "cloud-controller-manager"
+            ready_on = [
+              { kind = "deployment", name = "exoscale-cloud-controller-manager" }
+            ]
+          }
+        }
+      }
+    }
+  }
+
+  #### TODO: WAITING FOR "exoscale_iam_key" resource
+  platform_exoscale_credentials = {
+    key    = "EXOxxxxxxxxxxxxxxxxxxxxxxxx"
+    secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+
+  platform_ssh_algorithm = {
+    # Key Algorithm (e.g. 'RSA', 'ECDSA' or 'ED25519'), with 'ED25519' as the default.
+    algorithm = "ED25519"
+
+    # May be any of 'P224', 'P256', 'P384' or 'P521', with 'P224' as the default.    
+    # ecdsa_curve = "P521"
+
+    # Defaults to '4096' bits.
+    # rsa_bits = 4096
+  }
+
+  platform_default_tls_algorithm = {
+    # Key Algorithm (e.g. 'RSA', 'ECDSA' or 'ED25519'), with 'ED25519' as the default.
+    algorithm = "RSA"
+
+    # May be any of 'P224', 'P256', 'P384' or 'P521', with 'P224' as the default.    
+    # ecdsa_curve = "P521"
+
+    # Defaults to '4096' bits.
+    rsa_bits = 4096
+  }
+
+  platform_default_tls_ttl = {
+    ca   = 87600 # 10y
+    ica  = 43800 # 5y
+    cert = 96    # 4d
+  }
+
+  # TODO: set your organization details here
+  platform_default_tls_subject = {
+    organizational_unit = "Internal PaaS"
+    organization        = "Organization"
+    street_address      = ["Street Address"]
+    postal_code         = "postal code"
+    locality            = "Locality"
+    province            = "Province"
+    country             = "Country"
+  }
+}
