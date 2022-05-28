@@ -1,0 +1,54 @@
+image:
+  pullPolicy: Always
+
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 50m
+    memory: 192Mi
+
+cni:
+  chainingMode: portmap
+
+containerRuntime:
+  integration: containerd
+
+hostServices:
+  enabled: true
+
+k8sServiceHost: "$kubernetes:apiserver_ipv4$"
+k8sServicePort: "6443"
+kubeProxyReplacement: strict
+
+hubble:
+  enabled: false
+
+ipam:
+  operator:
+    clusterPoolIPv4PodCIDR: "$kubernetes:pod_cidr_ipv4$"
+    clusterPoolIPv6PodCIDR: "$kubernetes:pod_cidr_ipv6$"
+
+ipv6:
+  enabled: true
+
+operator:
+  image:
+    pullPolicy: Always
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: io.cilium/app
+            operator: In
+            values:
+            - operator
+        topologyKey: kubernetes.io/hostname
+  resources:
+    limits:
+      cpu: 50m
+      memory: 50Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
