@@ -30,13 +30,14 @@ resource "exoscale_ssh_key" "management_key" {
 # Admin access
 
 data "http" "operator_ip_address" {
-  url = "http://ipconfig.me"
+  count = try(local.platform_admin_networks == "auto", false) ? 1 : 0
+  url   = "http://ipconfig.me"
 }
 
 resource "exoscale_security_group" "operator" {
   name = "${local.platform_name}-operator"
 
-  external_sources = ["${chomp(data.http.operator_ip_address.body)}/32"]
+  external_sources = try(local.platform_admin_networks == "auto", false) ? ["${chomp(data.http.operator_ip_address[0].body)}/32"] : tolist(local.platform_admin_networks)
 }
 
 # Vault

@@ -2,10 +2,20 @@ locals {
   platform_name = "paas-staging"
   platform_zone = "de-fra-1"
 
-  platform_admin_networks = [
-    "0.0.0.0/0",
-    "::/0"
-  ]
+  # Defaults to the public IP of the device running terraform apply in `terraform-base`.
+  # This calls ipconfig.me to automatically detect this public IP address.
+  platform_admin_networks = "auto"
+
+  # For more privacy, manually set the allowed list of public IPs:
+  # platform_admin_networks = [
+  #   "a.b.c.d/32"
+  # ]  
+
+  # For development purposes (not recommended as this )
+  # platform_admin_networks = [
+  #   "0.0.0.0/0",
+  #   "::/0"
+  # ]
 
   # TODO: set your infrastructure domain here
   platform_domain = "${local.platform_name}.domain.tld"
@@ -72,7 +82,7 @@ locals {
               { kind = "deployment", name = "cert-manager" },
               { kind = "deployment", name = "cert-manager-cainjector" },
               { kind = "deployment", name = "cert-manager-webhook" },
-              { kind = "pod", name = "webhook", mode = "wait" /*, condition = "completed" */, labels = ["app.kubernetes.io/name=webhook", "app.kubernetes.io/instance=cert-manager", "app.kubernetes.io/component=webhook"] },
+              { kind = "pod", name = "webhook", mode = "wait", labels = ["app.kubernetes.io/name=webhook", "app.kubernetes.io/instance=cert-manager", "app.kubernetes.io/component=webhook"] },
             ]
           }
           vault-agent-injector = {
@@ -88,8 +98,8 @@ locals {
             ]
           }
         }
-        core-addons = { # depends on cert-manager
-          metrics-server = {
+        core-addons = {
+          metrics-server = { # depends on cert-manager
             version   = "0.6.1",
             namespace = "kube-system"
             service_account_tokens = {
