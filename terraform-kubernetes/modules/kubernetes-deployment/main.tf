@@ -42,7 +42,7 @@ EOT
 
 resource "null_resource" "deployment" {
   triggers = {
-    apply_command = var.templated == false ? local.apply_untemplated : local.apply_templated
+    apply_command   = var.templated == false ? local.apply_untemplated : local.apply_templated
     delete_command  = var.templated == false ? local.delete_untemplated : local.delete_templated
     kubeconfig_path = var.kubeconfig_path
   }
