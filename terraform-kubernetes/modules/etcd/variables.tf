@@ -16,9 +16,9 @@ variable "template_id" {
 }
 
 variable "instance_type" {
-  description = "Service offering of member instances. `standard.tiny` should be sufficient for use with a small Kubernetes cluster."
+  description = "Service offering of member instances. `standard.micro` should be sufficient for use with a small Kubernetes cluster."
   type        = string
-  default     = "standard.tiny"
+  default     = "standard.micro"
 }
 
 variable "disk_size" {
