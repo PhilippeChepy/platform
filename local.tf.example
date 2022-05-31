@@ -123,7 +123,7 @@ locals {
           }
           cloud-controller-manager = { # depends on vault-agent-injector
             version   = "exoscale-0.10.1",
-            namespace = "cloud-controller-manager"
+            namespace = "exoscale"
             ready_on = [
               { kind = "deployment", name = "exoscale-cloud-controller-manager" }
             ]
