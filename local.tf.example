@@ -86,7 +86,7 @@ locals {
             ]
           }
           vault-agent-injector = {
-            version   = "0.16.0",
+            version   = "0.16.1",
             namespace = "vault-agent-injector"
             service_account_tokens = {
               vault-server = { service_account = "vault" }
