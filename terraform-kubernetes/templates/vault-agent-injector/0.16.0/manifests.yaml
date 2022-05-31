@@ -283,7 +283,7 @@ spec:
       containers:
         - name: sidecar-injector
           
-          image: "hashicorp/vault-k8s:0.16.1"
+          image: "hashicorp/vault-k8s:0.16.0"
           imagePullPolicy: "IfNotPresent"
           securityContext:
             allowPrivilegeEscalation: false
