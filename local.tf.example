@@ -97,6 +97,13 @@ locals {
               { kind = "pod", name = "webhook", mode = "wait", labels = ["app.kubernetes.io/instance=vault", "app.kubernetes.io/name=vault-agent-injector", "component=webhook"] }
             ]
           }
+          reloader = {
+            version   = "0.0.113"
+            namespace = "reloader"
+            ready_on = [
+              { kind = "deployment", name = "reloader" }
+            ]
+          }
         }
         core-addons = {
           metrics-server = { # depends on cert-manager
