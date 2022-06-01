@@ -153,7 +153,7 @@ module "namespaces" {
 module "deployment_core" {
   source     = "./modules/kubernetes-deployment"
   for_each   = local.platform_components.kubernetes.deployments.core
-  depends_on = [module.namespaces]
+  depends_on = [module.namespaces, local_file.kubeconfig]
 
   kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
 
@@ -170,7 +170,7 @@ module "deployment_core" {
 module "deployment_core_addons" {
   source     = "./modules/kubernetes-deployment"
   for_each   = local.platform_components.kubernetes.deployments.core-addons
-  depends_on = [module.deployment_core]
+  depends_on = [module.deployment_core, local_file.kubeconfig]
 
   kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
 
@@ -234,9 +234,9 @@ resource "vault_kubernetes_auth_backend_role" "roles" {
       backend   = "vault-agent-injector"
       namespace = try(local.platform_components.kubernetes.deployments.core-addons["cloud-controller-manager"].namespace, null)
     } } : {},
-    can(local.platform_components.kubernetes.deployments.core-addons["cluster-autoscaler"]) ? { "cluster-autoscaler" = {
+    can(local.platform_components.kubernetes.deployments.core-addons["cluster-autoscaler-secret-sync"]) ? { "cluster-autoscaler" = {
       backend   = "vault-agent-injector"
-      namespace = try(local.platform_components.kubernetes.deployments.core-addons["cluster-autoscaler"].namespace, null)
+      namespace = try(local.platform_components.kubernetes.deployments.core-addons["cluster-autoscaler-secret-sync"].namespace, null)
     } } : {}
   )
 
@@ -292,6 +292,52 @@ module "kubernetes_generic_nodepool" {
   pool_size  = each.value.size
   kubernetes = local.kubernetes_settings
 }
+
+# module "kubernetes_ingress_nodepool" {
+#   source = "git@github.com:PhilippeChepy/terraform-exoscale-kubelet-pool.git"
+#   for_each = {
+#     "default" = {
+#       size          = 2
+#       instance_type = "standard.tiny"
+#       security_group_rules = {
+#         http  = { protocol = "TCP", type = "INGRESS", port = 80, source = exoscale_security_group.external_web.id },
+#         https = { protocol = "TCP", type = "INGRESS", port = 443, source = exoscale_security_group.external_web.id },
+
+#         nginx_admission_controller = { protocol = "TCP", type = "INGRESS", port = 8443, source = module.kubernetes_control_plane.nodes_security_group_id },
+#       }
+#     }
+#   }
+
+#   zone                 = try(each.value.zone, var.zone)
+#   template_id          = var.kubelet_template_id
+#   instance_type        = each.value.instance_type
+#   disk_size            = 10
+#   security_group_rules = merge(local.kubelet_security_group_rules, each.value.security_group_rules, {})
+#   additional_security_groups = [
+#     module.kubernetes_control_plane.nodes_security_group_id
+#   ]
+#   ssh_key = exoscale_ssh_keypair.admin_ssh_keypair.name
+
+#   cluster_name = local.kubernetes_cluster_name
+#   pool_name    = each.key
+#   size         = each.value.size
+#   domainname   = var.domainname
+
+#   apiserver_url        = module.kubernetes_control_plane.apiserver_url
+#   service_ip_range     = local.kubernetes_cluster_svc_ip_range
+#   authentication_token = module.kubernetes_control_plane.node_bootstrap_token
+
+#   labels = { "role.internal/ingress" = each.key }
+#   taints = { "role.internal/ingress" = { value = each.key, effect = "NoSchedule" } }
+
+#   pki = {
+#     mode               = "terraform"
+#     ca_certificate_pem = module.kubernetes_control_plane.node_ca_certificate_pem
+#     controlplane = {
+#       ca_certificate_pem = module.kubernetes_control_plane.controlplane_ca_certificate_pem
+#     }
+#   }
+# }
 
 
 resource "vault_pki_secret_backend_cert" "operator" {
