@@ -145,6 +145,11 @@ locals {
           }
         }
       }
+
+      # TODO: define your ingress pools here
+      ingresses = {
+        default = { label = "platform.example.tld/ingress=default", pool_size = 2 }
+      }
     }
   }
 
