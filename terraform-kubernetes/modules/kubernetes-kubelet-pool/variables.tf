@@ -51,10 +51,16 @@ variable "admin_security_groups" {
   default     = {}
 }
 
-variable "client_security_groups" {
-  description = "A map (key => ID) of security groups authorized to access Vault. Clients of the cluster can be authorized using this variable."
-  type        = map(string)
-  default     = {}
+variable "security_group_rules" {
+  description = "A map (key => specs) of security group rules to add to kubelet security group"
+  type = map(object({
+    protocol          = string
+    type              = string
+    port              = string
+    cidr              = optional(string)
+    security_group_id = optional(string)
+  }))
+  default = {}
 }
 
 variable "ssh_key" {

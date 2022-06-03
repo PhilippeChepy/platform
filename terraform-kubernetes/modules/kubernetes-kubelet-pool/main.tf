@@ -27,6 +27,18 @@ resource "exoscale_security_group_rule" "pool_rule" {
   user_security_group_id = try(each.value.source, null)
 }
 
+resource "exoscale_security_group_rule" "additional_rule" {
+  for_each = var.security_group_rules
+
+  security_group_id      = exoscale_security_group.pool.id
+  protocol               = each.value.protocol
+  type                   = each.value.type
+  start_port             = try(split("-", each.value.port)[0], each.value.port)
+  end_port               = try(split("-", each.value.port)[1], each.value.port)
+  cidr                   = try(each.value.cidr, null)
+  user_security_group_id = try(each.value.security_group_id, null)
+}
+
 resource "exoscale_instance_pool" "pool" {
   zone               = var.zone
   name               = var.name

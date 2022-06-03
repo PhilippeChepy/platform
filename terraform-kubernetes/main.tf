@@ -46,6 +46,14 @@ locals {
     ])
     kubelet_ca_pem = data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"]
   }
+
+  # Ingress nodes
+
+  ingress_security_group_rules = {
+    http                       = { protocol = "TCP", type = "INGRESS", port = 80, cidr = "0.0.0.0/0" },
+    https                      = { protocol = "TCP", type = "INGRESS", port = 443, cidr = "0.0.0.0/0" },
+    nginx_admission_controller = { protocol = "TCP", type = "INGRESS", port = 8443, security_group_id = module.kubernetes_control_plane.cluster_security_group_id },
+  }
 }
 
 data "vault_generic_secret" "kubernetes" {
@@ -255,14 +263,23 @@ module "kubernetes_generic_nodepool" {
     module.kubernetes_control_plane
   ]
 
-  for_each = {
+  for_each = merge({
     "general" = {
-      size                 = 3
-      instance_type        = "standard.small"
-      security_group_rules = {}
-      disk_size            = 20
+      size          = 3
+      instance_type = "standard.small"
+      disk_size     = 20
     }
-  }
+    }, {
+    for name, ingress in local.platform_components.kubernetes.ingresses :
+    "ingress-${name}" => {
+      size                 = ingress.pool_size
+      instance_type        = "standard.small"
+      security_group_rules = local.ingress_security_group_rules
+      disk_size            = 20
+      labels               = { (split("=", ingress.label)[0]) = split("=", ingress.label)[1] }
+      taints               = { (split("=", ingress.label)[0]) = { value = split("=", ingress.label)[1], effect = "NoSchedule" } }
+    }
+  })
 
   zone = local.platform_zone
   name = "${local.platform_name}-${each.key}"
@@ -272,14 +289,12 @@ module "kubernetes_generic_nodepool" {
   admin_security_groups = {
     operator = local.base.operator_security_group
   }
-  client_security_groups = {
-    operator = local.base.operator_security_group,
-  }
   additional_security_groups = {
     vault   = local.vault.client_security_group, # for vault-agent-injector
     kubelet = module.kubernetes_control_plane.kubelet_security_group_id
   }
-  ssh_key = "${local.platform_name}-management"
+  security_group_rules = try(each.value.security_group_rules, {})
+  ssh_key              = "${local.platform_name}-management"
 
   labels = {
     name     = local.platform_name
@@ -294,53 +309,6 @@ module "kubernetes_generic_nodepool" {
   kubelet_labels = try(each.value.labels, {})
   kubelet_taints = try(each.value.taints, {})
 }
-
-# module "kubernetes_ingress_nodepool" {
-#   source = "git@github.com:PhilippeChepy/terraform-exoscale-kubelet-pool.git"
-#   for_each = {
-#     "default" = {
-#       size          = 2
-#       instance_type = "standard.tiny"
-#       security_group_rules = {
-#         http  = { protocol = "TCP", type = "INGRESS", port = 80, source = exoscale_security_group.external_web.id },
-#         https = { protocol = "TCP", type = "INGRESS", port = 443, source = exoscale_security_group.external_web.id },
-
-#         nginx_admission_controller = { protocol = "TCP", type = "INGRESS", port = 8443, source = module.kubernetes_control_plane.nodes_security_group_id },
-#       }
-#     }
-#   }
-
-#   zone                 = try(each.value.zone, var.zone)
-#   template_id          = var.kubelet_template_id
-#   instance_type        = each.value.instance_type
-#   disk_size            = 10
-#   security_group_rules = merge(local.kubelet_security_group_rules, each.value.security_group_rules, {})
-#   additional_security_groups = [
-#     module.kubernetes_control_plane.nodes_security_group_id
-#   ]
-#   ssh_key = exoscale_ssh_keypair.admin_ssh_keypair.name
-
-#   cluster_name = local.kubernetes_cluster_name
-#   pool_name    = each.key
-#   size         = each.value.size
-#   domainname   = var.domainname
-
-#   apiserver_url        = module.kubernetes_control_plane.apiserver_url
-#   service_ip_range     = local.kubernetes_cluster_svc_ip_range
-#   authentication_token = module.kubernetes_control_plane.node_bootstrap_token
-
-#   labels = { "role.internal/ingress" = each.key }
-#   taints = { "role.internal/ingress" = { value = each.key, effect = "NoSchedule" } }
-
-#   pki = {
-#     mode               = "terraform"
-#     ca_certificate_pem = module.kubernetes_control_plane.node_ca_certificate_pem
-#     controlplane = {
-#       ca_certificate_pem = module.kubernetes_control_plane.controlplane_ca_certificate_pem
-#     }
-#   }
-# }
-
 
 resource "vault_pki_secret_backend_cert" "operator" {
   backend     = "pki/platform/kubernetes/client"
