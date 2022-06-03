@@ -14,7 +14,7 @@ injector:
     tag: "0.16.1"
 
 csi:
-  enabled: true
+  enabled: false
 
 server:
   enabled: false
