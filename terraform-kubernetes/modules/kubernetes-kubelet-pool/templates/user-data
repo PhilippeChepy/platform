@@ -27,6 +27,7 @@ write_files:
     resolvConf: "/run/systemd/resolve/resolv.conf"
     providerID: exoscale://{{ ds.meta_data.instance_id }}
     serverTLSBootstrap: true
+    registerNode: true
 - path: /etc/kubernetes/kubelet/bootstrap-kubelet.kubeconfig
   owner: root:root
   permissions: "0600"

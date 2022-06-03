@@ -5,8 +5,6 @@
 {{ kubelet_bin_path }}/kubelet \
   --bootstrap-kubeconfig={{ kubelet_config_path }}/bootstrap-kubelet.kubeconfig \
   --config={{ kubelet_config_path }}/config.yaml \
-  --container-runtime=remote \
   --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
   --kubeconfig={{ kubelet_config_path }}/kubelet.kubeconfig \
-  --register-node=true \
   --v=2
