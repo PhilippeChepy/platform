@@ -7,4 +7,5 @@
   --config={{ kubelet_config_path }}/config.yaml \
   --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
   --kubeconfig={{ kubelet_config_path }}/kubelet.kubeconfig \
+  --node-labels="$KUBELET_NODE_LABELS" \
   --v=2

@@ -28,6 +28,14 @@ write_files:
     providerID: exoscale://{{ ds.meta_data.instance_id }}
     serverTLSBootstrap: true
     registerNode: true
+    %{~ if length(taints) > 0 ~}
+    registerWithTaints:
+    %{~ for key, specs in taints ~}
+      - key: ${ key }
+        value: ${ specs.value }
+        effect: ${ specs.effect }
+    %{~ endfor ~}
+    %{~ endif ~}
 - path: /etc/kubernetes/kubelet/bootstrap-kubelet.kubeconfig
   owner: root:root
   permissions: "0600"
@@ -54,7 +62,9 @@ write_files:
   owner: root:root
   permissions: "0644"
   content: |
-    
+    %{~ if length(labels) > 0 ~}
+    KUBELET_NODE_LABELS="${ labels }"
+    %{~ endif ~}
 - path: /usr/local/bin/wait-apiserver
   owner: root:root
   permissions: "0777"

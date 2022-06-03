@@ -288,9 +288,11 @@ module "kubernetes_generic_nodepool" {
     instance = each.key
   }
 
-  domain     = local.platform_domain
-  pool_size  = each.value.size
-  kubernetes = local.kubernetes_settings
+  domain         = local.platform_domain
+  pool_size      = each.value.size
+  kubernetes     = local.kubernetes_settings
+  kubelet_labels = try(each.value.labels, {})
+  kubelet_taints = try(each.value.taints, {})
 }
 
 # module "kubernetes_ingress_nodepool" {
