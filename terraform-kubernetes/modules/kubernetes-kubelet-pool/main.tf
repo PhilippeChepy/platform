@@ -49,6 +49,8 @@ resource "exoscale_instance_pool" "pool" {
     kube_dns_service_ipv4            = var.kubernetes.dns_service_ipv4
     kube_dns_service_ipv6            = var.kubernetes.dns_service_ipv6
     node_ca_pem_b64                  = base64encode(var.kubernetes.kubelet_ca_pem)
+    labels                           = local.kubelet_labels
+    taints                           = var.kubelet_taints
   })
 
   labels = var.labels

@@ -93,3 +93,18 @@ variable "kubernetes" {
     kubelet_ca_pem               = string
   })
 }
+
+variable "kubelet_labels" {
+  description = "Kubelet labels"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kubelet_taints" {
+  description = "Kubelet Taints"
+  type = map(object({
+    value  = string
+    effect = string
+  }))
+  default = {}
+}
