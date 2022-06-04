@@ -382,7 +382,7 @@ resource "vault_pki_secret_backend_role" "pki_kubernetes" {
     "apiserver--exoscale-cloud-controller-manager" = { # kubeconfig
       name            = "cloud-controller-manager"
       backend         = "control-plane"
-      allowed_domains = ["exoscale-ccm"]
+      allowed_domains = ["exoscale-cloud-controller-manager"]
       server_flag     = false,
       client_flag     = true
     }

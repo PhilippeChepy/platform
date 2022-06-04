@@ -505,7 +505,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_cloud_controller_manager'] }}{% raw %}" "common_name=exoscale-ccm" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_cloud_controller_manager'] }}{% raw %}" "common_name=exoscale-cloud-controller-manager" "ttl=24h" -}}
 apiVersion: v1
 clusters:
 - cluster:
@@ -515,13 +515,13 @@ clusters:
 contexts:
 - context:
     cluster: cluster
-    user: exoscale-ccm
+    user: exoscale-cloud-controller-manager
   name: default
 current-context: default
 kind: Config
 preferences: {}
 users:
-- name: exoscale-ccm
+- name: exoscale-cloud-controller-manager
   user:
     client-certificate-data: {{ base64Encode .Data.certificate }}
     client-key-data: {{ base64Encode .Data.private_key }}
