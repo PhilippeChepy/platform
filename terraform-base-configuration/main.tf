@@ -386,6 +386,13 @@ resource "vault_pki_secret_backend_role" "pki_kubernetes" {
       server_flag     = false,
       client_flag     = true
     }
+    "apiserver--exoscale-cluster-autoscaler" = { # kubeconfig
+      name            = "cluster-autoscaler"
+      backend         = "control-plane"
+      allowed_domains = ["exoscale-cluster-autoscaler"]
+      server_flag     = false,
+      client_flag     = true
+    }
     "apiserver--konnectivity" = { # kubeconfig
       name            = "konnectivity"
       backend         = "control-plane"
@@ -598,6 +605,18 @@ path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/cloud-controller
 }
 
 path "${vault_mount.iam_exoscale.path}/apikey/cloud-controller-manager" {
+  capabilities = ["read"]
+}
+
+# + path "${vault_mount.pki_kubernetes["control-plane"].path}/cert/ca_chain" { capabilities = ["read"] }
+
+## Cluster autoscaler
+
+path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/cluster-autoscaler" {
+  capabilities = ["create", "update"]
+}
+
+path "${vault_mount.iam_exoscale.path}/apikey/cluster-autoscaler" {
   capabilities = ["read"]
 }
 

@@ -238,10 +238,6 @@ resource "vault_kubernetes_auth_backend_role" "roles" {
       namespace       = try(local.platform_components.kubernetes.deployments.core-addons["metrics-server"].namespace, null)
       service_account = "metrics-server"
     } } : {},
-    can(local.platform_components.kubernetes.deployments.core-addons["cluster-autoscaler-secret-sync"]) ? { "cluster-autoscaler" = {
-      backend   = "vault-agent-injector"
-      namespace = try(local.platform_components.kubernetes.deployments.core-addons["cluster-autoscaler-secret-sync"].namespace, null)
-    } } : {}
   )
 
   backend                          = vault_auth_backend.kubernetes[each.value["backend"]].path

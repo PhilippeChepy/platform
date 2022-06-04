@@ -28,6 +28,7 @@
     - kube_controller_manager
     - kube_scheduler
     - exoscale_cloud_controller_manager
+    - exoscale_cluster_autoscaler
     - kubectl
     - exoscale_cli
     - jq

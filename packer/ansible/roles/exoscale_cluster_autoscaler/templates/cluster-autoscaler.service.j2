@@ -1,0 +1,14 @@
+[Unit]
+Description=Cluster Autoscaler
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+
+[Service]
+User={{ exoscale_cluster_autoscaler_user }}
+EnvironmentFile={{ exoscale_cluster_autoscaler_config_path }}/environment
+ExecStart={{ exoscale_cluster_autoscaler_bin_path }}/cluster-autoscaler-launcher
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Exit on missing certificates
+
+if [ ! -f {{ exoscale_cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig ]; then exit 0; fi
+
+{{ exoscale_cluster_autoscaler_bin_path }}/cluster-autoscaler \
+  --cloud-provider=exoscale \
+  --cordon-node-before-terminating \
+  --kubeconfig={{ exoscale_cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig \
+  --stderrthreshold=info
