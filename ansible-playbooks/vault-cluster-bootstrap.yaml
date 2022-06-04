@@ -3,21 +3,21 @@
 - name: Cluster TLS bootstrap
   hosts: vault
   tasks:
-  - include_role:
-      name: vault
-      tasks_from: tls-bootstrap
+    - include_role:
+        name: vault
+        tasks_from: tls-bootstrap
 
 - name: Operator init
   hosts: vault
   tasks:
-  - run_once: true
-    include_role:
-      name: vault
-      tasks_from: operator-init
+    - run_once: true
+      include_role:
+        name: vault
+        tasks_from: operator-init
 
 - name: Operator Unseal
   hosts: vault
   tasks:
-  - include_role:
-      name: vault
-      tasks_from: operator-unseal
+    - include_role:
+        name: vault
+        tasks_from: operator-unseal
