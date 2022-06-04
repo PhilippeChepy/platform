@@ -16,7 +16,7 @@
 
 - name: Pull CSR
   become: true
-  fetch: 
+  ansible.builtin.fetch:
     src: "/etc/vault/tls/server.csr"
     dest: "../artifacts/{{ ansible_host }}.csr"
     flat: true
@@ -33,7 +33,7 @@
 
 - name: Push certificate
   become: true
-  copy:
+  ansible.builtin.copy:
     src: "../artifacts/{{ ansible_host }}.pem"
     dest: "/etc/vault/tls/server.pem"
     owner: vault
@@ -42,7 +42,7 @@
 
 - name: Push certificate
   become: true
-  copy:
+  ansible.builtin.copy:
     src: "../artifacts/ca-certificate.pem"
     dest: "/etc/vault/tls/ca.pem"
     owner: vault
@@ -52,26 +52,26 @@
 - name: Delete local copy of certificate
   connection: local
   delegate_to: localhost
-  file:
+  ansible.builtin.file:
     path: "../artifacts/{{ ansible_host }}.pem"
     state: absent
 
 - name: Delete local copy of CSR
   connection: local
   delegate_to: localhost
-  file:
+  ansible.builtin.file:
     path: "../artifacts/{{ ansible_host }}.csr"
     state: absent
 
 - name: Start server
   become: true
-  systemd:
+  ansible.builtin.systemd:
     name: "vault-server"
     state: started
     enabled: true
 
 - name: Reload server
   become: true
-  systemd:
+  ansible.builtin.systemd:
     name: "vault-server"
     state: reloaded
