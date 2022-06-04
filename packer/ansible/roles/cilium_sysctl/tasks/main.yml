@@ -1,9 +1,11 @@
+---
+
 # issue: https://github.com/cilium/cilium/issues/10645
 - name: Set sysctl configuration
   tags:
     - ciliun-sysctl
   become: true
-  copy:
+  ansible.builtin.copy:
     src: "99-cilium.conf"
     dest: "/etc/sysctl.d/99-cilium.conf"
     force: true

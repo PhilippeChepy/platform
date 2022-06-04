@@ -3,7 +3,7 @@
 - name: Check jq binary file
   tags:
     - jq
-  stat:
+  ansible.builtin.stat:
     path: "{{ jq_bin_path }}/jq"
   become: false
   register: jq_binary
@@ -12,7 +12,7 @@
 - name: "Download jq → {{ jq_url }}"
   tags:
     - jq
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ jq_url }}"
     dest: "{{ jq_bin_path }}/jq"
     timeout: "42"

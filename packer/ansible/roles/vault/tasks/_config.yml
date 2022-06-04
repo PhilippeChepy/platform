@@ -4,7 +4,7 @@
   tags:
     - vault
   become: true
-  template:
+  ansible.builtin.template:
     src: "vault.service.j2"
     dest: "/etc/systemd/system/{{ vault_service_name }}.service"
     force: true

@@ -4,7 +4,7 @@
   tags:
     - kube-controller-manager
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ kube_controller_manager_group }}"
     state: present
 
@@ -12,7 +12,7 @@
   tags:
     - kube-controller-manager
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ kube_controller_manager_user }}"
     comment: "Kubernetes Controller Manager user"
     group: "{{ kube_controller_manager_group }}"
@@ -23,7 +23,7 @@
 - name: Check Kubernetes Controller Manager checksum file
   tags:
     - kube-controller-manager
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/{{ kube_controller_manager_shasums }}"
   become: false
   register: kube_controller_manager_checksum
@@ -31,16 +31,19 @@
 - name: Get Kubernetes Controller Manager checksum file
   tags:
     - kube-controller-manager
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kube_controller_manager_checksum_file_url }}"
     dest: "/tmp/{{ kube_controller_manager_shasums }}"
+    owner: "{{ kube_controller_manager_user }}"
+    group: "{{ kube_controller_manager_group }}"
+    mode: "0666"
   when: not kube_controller_manager_checksum.stat.exists | bool
 
 - name: Get Kubernetes Controller Manager checksum
   tags:
     - kube-controller-manager
     - skip_ansible_lint
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     grep "v{{ kube_controller_manager_version }}/bin/{{ kube_controller_manager_os }}/{{ kube_controller_manager_architecture }}/kube-controller-manager$" "/tmp/{{ kube_controller_manager_shasums }}" | awk '{print $1}'
   args:
@@ -52,7 +55,7 @@
 - name: "Download Kubernetes Controller Manager → {{ kube_controller_manager_url }}"
   tags:
     - kube-controller-manager
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kube_controller_manager_url }}"
     dest: "{{ kube_controller_manager_bin_path }}/kube-controller-manager"
     checksum: "sha256:{{ kube_controller_manager_sha256.stdout }}"
@@ -64,7 +67,7 @@
   tags:
     - kube-controller-manager
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ kube_controller_manager_user }}"
@@ -77,7 +80,7 @@
   tags:
     - kube-controller-manager
   become: true
-  template:
+  ansible.builtin.template:
     src: "kube-controller-manager.service.j2"
     dest: "/etc/systemd/system/kube-controller-manager.service"
     force: true
@@ -90,7 +93,7 @@
   tags:
     - kube-controller-manager
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-controller-manager"
     line: "%{{ kube_controller_manager_user }} ALL= NOPASSWD: /bin/systemctl restart kube-controller-manager"
     owner: "root"
@@ -102,7 +105,7 @@
   tags:
     - kube-controller-manager
   become: true
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ kube_controller_manager_bin_path }}/{{ item }}"
     force: true

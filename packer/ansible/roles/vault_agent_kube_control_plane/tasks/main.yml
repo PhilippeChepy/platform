@@ -4,7 +4,7 @@
   tags:
     - vault-agent-kube-control-plane
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ vault_agent_kube_control_plane_user }}"
@@ -17,7 +17,7 @@
   tags:
     - vault-agent-kube-control-plane
   become: true
-  template:
+  ansible.builtin.template:
     src: "vault.hcl.j2"
     dest: "{{ vault_agent_kube_control_plane_config_path }}/vault.hcl"
     force: true

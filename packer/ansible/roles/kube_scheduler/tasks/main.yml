@@ -4,7 +4,7 @@
   tags:
     - kube-scheduler
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ kube_scheduler_group }}"
     state: present
 
@@ -12,7 +12,7 @@
   tags:
     - kube-scheduler
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ kube_scheduler_user }}"
     comment: "Kubernetes Scheduler user"
     group: "{{ kube_scheduler_group }}"
@@ -23,7 +23,7 @@
 - name: Check Kubernetes Scheduler checksum file
   tags:
     - kube-scheduler
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/{{ kube_scheduler_shasums }}"
   become: false
   register: kube_scheduler_checksum
@@ -31,16 +31,19 @@
 - name: Get Kubernetes Scheduler checksum file
   tags:
     - kube-scheduler
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kube_scheduler_checksum_file_url }}"
     dest: "/tmp/{{ kube_scheduler_shasums }}"
+    owner: "{{ kube_scheduler_user }}"
+    group: "{{ kube_scheduler_group }}"
+    mode: "0666"
   when: not kube_scheduler_checksum.stat.exists | bool
 
 - name: Get Kubernetes Scheduler checksum
   tags:
     - kube-scheduler
     - skip_ansible_lint
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     grep "v{{ kube_scheduler_version }}/bin/{{ kube_scheduler_os }}/{{ kube_scheduler_architecture }}/kube-scheduler$" "/tmp/{{ kube_scheduler_shasums }}" | awk '{print $1}'
   args:
@@ -52,7 +55,7 @@
 - name: "Download Kubernetes Scheduler → {{ kube_scheduler_url }}"
   tags:
     - kube-scheduler
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kube_scheduler_url }}"
     dest: "{{ kube_scheduler_bin_path }}/kube-scheduler"
     checksum: "sha256:{{ kube_scheduler_sha256.stdout }}"
@@ -64,7 +67,7 @@
   tags:
     - kube-scheduler
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ kube_scheduler_user }}"
@@ -77,7 +80,7 @@
   tags:
     - kube-scheduler
   become: true
-  template:
+  ansible.builtin.template:
     src: "kube-scheduler.service.j2"
     dest: "/etc/systemd/system/kube-scheduler.service"
     force: true
@@ -90,7 +93,7 @@
   tags:
     - kube-scheduler
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-scheduler"
     line: "%{{ kube_scheduler_user }} ALL= NOPASSWD: /bin/systemctl restart kube-scheduler"
     owner: "root"
@@ -102,7 +105,7 @@
   tags:
     - kube-scheduler
   become: true
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ kube_scheduler_bin_path }}/{{ item }}"
     force: true

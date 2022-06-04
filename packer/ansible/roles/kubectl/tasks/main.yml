@@ -4,7 +4,7 @@
   tags:
     - kubectl
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ kubectl_group }}"
     state: present
 
@@ -12,7 +12,7 @@
   tags:
     - kubectl
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ kubectl_user }}"
     comment: "Kubernetes client user"
     group: "{{ kubectl_group }}"
@@ -23,7 +23,7 @@
 - name: Check kubectl checksum file
   tags:
     - kubectl
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/{{ kubectl_shasums }}"
   become: false
   register: kubectl_checksum
@@ -31,16 +31,19 @@
 - name: Get kubectl checksum file
   tags:
     - kubectl
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kubectl_checksum_file_url }}"
     dest: "/tmp/{{ kubectl_shasums }}"
+    owner: "{{ kubectl_user }}"
+    group: "{{ kubectl_group }}"
+    mode: "0666"
   when: not kubectl_checksum.stat.exists | bool
 
 - name: Get kubectl checksum
   tags:
     - kubectl
     - skip_ansible_lint
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     grep "v{{ kubectl_version }}/bin/{{ kubectl_os }}/{{ kubectl_architecture }}/kubectl$" "/tmp/{{ kubectl_shasums }}" | awk '{print $1}'
   args:
@@ -52,7 +55,7 @@
 - name: "Download kubectl → {{ kubectl_url }}"
   tags:
     - kubectl
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kubectl_url }}"
     dest: "{{ kubectl_bin_path }}/kubectl"
     checksum: "sha256:{{ kubectl_sha256.stdout }}"
@@ -64,7 +67,7 @@
   tags:
     - kubectl
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ kubectl_user }}"

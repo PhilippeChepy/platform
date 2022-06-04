@@ -2,7 +2,7 @@
 
 - name: enable containerd
   become: true
-  systemd:
+  ansible.builtin.systemd:
     name: containerd
     enabled: true
     state: started

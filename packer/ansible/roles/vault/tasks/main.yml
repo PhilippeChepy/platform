@@ -2,13 +2,13 @@
 
 - name: Add Vault group
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ vault_group }}"
     state: present
 
 - name: Add Vault user
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ vault_user }}"
     comment: "Vault user"
     group: "{{ vault_group }}"
@@ -20,7 +20,7 @@
   tags:
     - vault
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/vault"
     line: "%{{ vault_user }} ALL= NOPASSWD: /bin/systemctl reload {{ vault_service_name }}"
     owner: "root"
@@ -42,7 +42,7 @@
     - skip_ansible_lint  # command is a shell builtin
 
 - name: Get installed Vault version
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     {{ vault_installation.stdout }} -version | cut -d' ' -f2 | tr -d 'v'
   args:
@@ -56,7 +56,7 @@
   include_tasks: _install.yml
 
 - name: extract systemd version
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     systemctl --version systemd | head -n 1 | cut -d' ' -f2
   args:
@@ -71,7 +71,7 @@
     - vault
     - tls-server
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ vault_user }}"
@@ -87,7 +87,7 @@
   tags:
     - vault
   become: true
-  template:
+  ansible.builtin.template:
     src: "vault-server.hcl.j2"
     dest: "{{ vault_config_path }}/vault.hcl"
     force: true
@@ -101,7 +101,7 @@
   tags:
     - vault
   become: true
-  template:
+  ansible.builtin.template:
     src: "vault.j2"
     dest: "/etc/default/vault"
     force: true
@@ -115,7 +115,7 @@
   tags:
     - vault
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ vault_home }}/{{ vault_dotfile }}"
     line: ". /etc/default/vault"
     owner: "{{ vault_user }}"
