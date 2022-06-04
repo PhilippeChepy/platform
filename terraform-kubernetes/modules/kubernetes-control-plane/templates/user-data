@@ -38,11 +38,16 @@ write_files:
   encoding: b64
   permissions: "0600"
   content: ${kubelet_bootstrap_manifests}
-- path: /home/kube/exoscale-ccm-rbac.yaml
+- path: /home/kube/exoscale-cloud-controller-manager-rbac.yaml
   owner: kube:kube
   encoding: b64
   permissions: "0600"
-  content: ${exoscale_ccm_manifests}
+  content: ${exoscale_cloud_controller_manager_manifests}
+- path: /home/kube/exoscale-cluster-autoscaler-rbac.yaml
+  owner: kube:kube
+  encoding: b64
+  permissions: "0600"
+  content: ${exoscale_as_manifests}
 - path: /usr/local/bin/wait-vault
   owner: kube:kube
   permissions: "0777"
@@ -88,4 +93,4 @@ runcmd:
 - [systemctl, start, kube-vault-agent.service]
 - [/usr/local/bin/wait-apiserver]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/kubelet-bootstrap-rbac.yaml]
-- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-ccm.yaml]
+- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cloud-controller-manager.yaml]

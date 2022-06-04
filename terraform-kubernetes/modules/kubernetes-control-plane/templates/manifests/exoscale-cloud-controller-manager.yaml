@@ -108,5 +108,5 @@ roleRef:
   name: system:cloud-controller-manager
 subjects:
 - kind: User
-  name: exoscale-ccm
+  name: exoscale-cloud-controller-manager
   namespace: kube-system
