@@ -38,6 +38,11 @@ write_files:
   encoding: b64
   permissions: "0600"
   content: ${kubelet_bootstrap_manifests}
+- path: /home/kube/exoscale-ccm-rbac.yaml
+  owner: kube:kube
+  encoding: b64
+  permissions: "0600"
+  content: ${exoscale_ccm_manifests}
 - path: /usr/local/bin/wait-vault
   owner: kube:kube
   permissions: "0777"
@@ -75,6 +80,7 @@ runcmd:
 - [sed, -i, "s|CLUSTER_DOMAIN_NAME|${kubernetes_cluster_domain}|g", "/etc/kubernetes/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/kubernetes/vault.hcl"]
 - [sed, -i, "s|CLUSTER_NAME|${kubernetes_cluster_name}|g", "/etc/kubernetes/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${zone}|g", "/etc/kubernetes/vault.hcl"]
 
 - [/usr/local/bin/wait-vault]
 - [/usr/local/bin/wait-etcd]
@@ -82,3 +88,4 @@ runcmd:
 - [systemctl, start, kube-vault-agent.service]
 - [/usr/local/bin/wait-apiserver]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/kubelet-bootstrap-rbac.yaml]
+- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-ccm.yaml]

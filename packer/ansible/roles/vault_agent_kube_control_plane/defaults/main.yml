@@ -24,3 +24,12 @@ vault_agent_kube_control_plane_paths:
   pki_kubelet_ca_chain: 'pki/platform/kubernetes/kubelet/cert/ca_chain'
   pki_kubelet_cert_apiserver: 'pki/platform/kubernetes/kubelet/issue/apiserver'
   kv_kubelet_pki: 'kv/platform/kubernetes/kubelet-pki'
+
+  # Cloud controller manager
+  pki_controlplane_cert_cloud_controller_manager: 'pki/platform/kubernetes/control-plane/issue/cloud-controller-manager'
+
+  ## Cloud controller manager: Exoscale
+  iam_exoscale_cloud_controller_manager: 'iam/exoscale/apikey/cloud-controller-manager'
+
+# TODO: make next sections optional
+# vault_agent_kube_control_plane_provider: None | 'exoscale'

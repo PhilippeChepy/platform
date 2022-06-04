@@ -128,13 +128,6 @@ locals {
             #   { kind = "deployment", name = "metrics-server" }
             # ]
           }
-          cloud-controller-manager = { # depends on vault-agent-injector
-            version   = "exoscale-0.10.1",
-            namespace = "exoscale"
-            ready_on = [
-              { kind = "deployment", name = "exoscale-cloud-controller-manager" }
-            ]
-          }
           cluster-autoscaler-secret-sync = { # depends on vault-agent-injector
             version = "exoscale-1.24.0",
             namespace = "exoscale"

@@ -27,6 +27,7 @@
     - konnectivity_server
     - kube_controller_manager
     - kube_scheduler
+    - exoscale_cloud_controller_manager
     - kubectl
     - exoscale_cli
     - jq

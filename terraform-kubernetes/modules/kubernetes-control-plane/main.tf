@@ -109,6 +109,8 @@ resource "exoscale_instance_pool" "cluster" {
       token_id     = var.kubernetes.bootstrap_token_id
       token_secret = var.kubernetes.bootstrap_token_secret
     }))
+
+    exoscale_ccm_manifests = base64encode(file("${path.module}/templates/manifests/exoscale-ccm.yaml"))
   })
 
   labels = var.labels

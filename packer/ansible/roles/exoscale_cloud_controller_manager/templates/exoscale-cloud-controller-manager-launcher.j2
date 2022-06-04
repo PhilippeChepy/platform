@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Exit on missing certificates
+
+if [ ! -f {{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig ]; then exit 0; fi
+
+{{ exoscale_cloud_controller_manager_bin_path }}/exoscale-cloud-controller-manager \
+  --allow-untagged-cloud \
+  --authentication-kubeconfig={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig \
+  --authorization-kubeconfig={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig \
+  --cloud-provider=exoscale \
+  --kubeconfig={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig \
+  --leader-elect=true
