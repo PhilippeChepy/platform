@@ -397,7 +397,6 @@ EOT
 
 ## konnectivity
 
-
 template {
   contents    = <<EOT
 {% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_konnectivity'] }}{% raw %}" "common_name=system:konnectivity-server" "ttl=24h" -}}
@@ -486,4 +485,50 @@ EOT
   destination = "{{ konnectivity_server_config_path }}/server.pem"
   command     = "sudo systemctl restart konnectivity"
   perms       = 0644
+}
+
+## Cloud controller manager: Exoscale
+
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['iam_exoscale_cloud_controller_manager'] }}{% raw %}" -}}
+EXOSCALE_API_KEY="{{ .Data.api_key }}"
+EXOSCALE_API_SECRET="{{ .Data.api_secret }}"
+EXOSCALE_ZONE="EXOSCALE_CLUSTER_ZONE"
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ exoscale_cloud_controller_manager_config_path }}/environment"
+  command     = "sudo systemctl restart exoscale-cloud-controller-manager"
+  perms       = 0644
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_cloud_controller_manager'] }}{% raw %}" "common_name=exoscale-ccm" "ttl=24h" -}}
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: {{ base64Encode .Data.issuing_ca }}
+    server: https://CLUSTER_MEMBER_ADDRESS:6443
+  name: cluster
+contexts:
+- context:
+    cluster: cluster
+    user: exoscale-ccm
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: exoscale-ccm
+  user:
+    client-certificate-data: {{ base64Encode .Data.certificate }}
+    client-key-data: {{ base64Encode .Data.private_key }}
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig"
+  command     = "sudo systemctl restart exoscale-cloud-controller-manager"
+  perms       = 0600
 }

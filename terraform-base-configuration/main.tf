@@ -382,7 +382,7 @@ resource "vault_pki_secret_backend_role" "pki_kubernetes" {
     "apiserver--exoscale-cloud-controller-manager" = { # kubeconfig
       name            = "cloud-controller-manager"
       backend         = "control-plane"
-      allowed_domains = ["cloud-controller-manager"]
+      allowed_domains = ["exoscale-ccm"]
       server_flag     = false,
       client_flag     = true
     }
@@ -591,6 +591,18 @@ path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/konnectivity-ser
 
 # + path "${vault_mount.pki_kubernetes["control-plane"].path}/cert/ca_chain" { capabilities = ["read"] }
 
+## Exoscale cloud controller manager
+
+path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/cloud-controller-manager" {
+  capabilities = ["create", "update"]
+}
+
+path "${vault_mount.iam_exoscale.path}/apikey/cloud-controller-manager" {
+  capabilities = ["read"]
+}
+
+# + path "${vault_mount.pki_kubernetes["control-plane"].path}/cert/ca_chain" { capabilities = ["read"] }
+
 ## Admin client
 
 path "${vault_mount.pki_kubernetes["client"].path}/cert/ca_chain" {
@@ -617,26 +629,6 @@ path "${vault_mount.pki_kubernetes["aggregation-layer"].path}/cert/ca_chain" {
 
 path "${vault_mount.pki_kubernetes["aggregation-layer"].path}/sign/metrics-server" {
   capabilities = ["create", "update"]
-}
-EOT
-}
-
-resource "vault_policy" "cloud_controller_manager" {
-  name = "platform-kubernetes-cloud-controller-manager"
-
-  policy = <<EOT
-## Exoscale cloud controller manager
-
-path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/cloud-controller-manager" {
-  capabilities = ["create", "update"]
-}
-
-path "${vault_mount.iam_exoscale.path}/apikey/cloud-controller-manager" {
-  capabilities = ["read"]
-}
-
-path "${vault_mount.pki_kubernetes["control-plane"].path}/cert/ca_chain" {
-  capabilities = ["read"]
 }
 EOT
 }

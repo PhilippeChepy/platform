@@ -1,0 +1,81 @@
+---
+
+- name: Ensure Local storage directory exists
+  tags:
+    - exoscale-cloud-controller-manager
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop:
+    - "{{ exoscale_cloud_controller_manager_local_storage }}"
+
+- name: Check Exoscale Cloud Controller Manager package checksum file
+  tags:
+    - exoscale-cloud-controller-manager
+  stat:
+    path: "{{ exoscale_cloud_controller_manager_local_storage }}/{{ exoscale_cloud_controller_manager_shasums }}"
+  become: false
+  register: exoscale_cloud_controller_manager_checksum
+
+- name: Get Exoscale Cloud Controller Manager package checksum file
+  tags:
+    - exoscale-cloud-controller-manager
+  get_url:
+    url: "{{ exoscale_cloud_controller_manager_checksum_file_url }}"
+    dest: "{{ exoscale_cloud_controller_manager_local_storage }}/{{ exoscale_cloud_controller_manager_shasums }}"
+  when: not exoscale_cloud_controller_manager_checksum.stat.exists | bool
+
+- name: Get Exoscale Cloud Controller Manager package checksum
+  tags:
+    - exoscale-cloud-controller-manager
+    - skip_ansible_lint
+  shell: |
+    set -o pipefail
+    grep "{{ exoscale_cloud_controller_manager_pkg }}" "{{ exoscale_cloud_controller_manager_local_storage }}/{{ exoscale_cloud_controller_manager_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: exoscale_cloud_controller_manager_sha256
+
+- name: Check Exoscale Cloud Controller Manager package file
+  tags:
+    - exoscale-cloud-controller-manager
+  stat:
+    path: "{{ exoscale_cloud_controller_manager_local_storage }}/{{ exoscale_cloud_controller_manager_pkg }}"
+  become: false
+  register: exoscale_cloud_controller_manager_package
+
+- name: "Download Exoscale Cloud Controller Manager → {{ exoscale_cloud_controller_manager_tgz_url }}"
+  tags:
+    - exoscale-cloud-controller-manager
+  get_url:
+    url: "{{ exoscale_cloud_controller_manager_tgz_url }}"
+    dest: "{{ exoscale_cloud_controller_manager_local_storage }}/{{ exoscale_cloud_controller_manager_pkg }}"
+    checksum: "sha256:{{ exoscale_cloud_controller_manager_sha256.stdout }}"
+    timeout: "42"
+  when: not exoscale_cloud_controller_manager_package.stat.exists | bool
+
+- name: Unarchive Exoscale Cloud Controller Manager
+  tags:
+    - exoscale-cloud-controller-manager
+  unarchive:
+    remote_src: true
+    src: "{{ exoscale_cloud_controller_manager_local_storage }}/{{ exoscale_cloud_controller_manager_pkg }}"
+    dest: "{{ exoscale_cloud_controller_manager_local_storage }}"
+    creates: "{{ exoscale_cloud_controller_manager_local_storage }}/exoscale-cloud-controller-manager"
+
+- name: Install Exoscale Cloud Controller Manager
+  tags:
+    - exoscale-cloud-controller-manager
+  become: true
+  copy:
+    remote_src: true
+    src: "{{ exoscale_cloud_controller_manager_local_storage }}/exoscale-cloud-controller-manager"
+    dest: "{{ exoscale_cloud_controller_manager_bin_path }}"
+    owner: "{{ exoscale_cloud_controller_manager_user }}"
+    group: "{{ exoscale_cloud_controller_manager_group }}"
+    mode: "0755"
