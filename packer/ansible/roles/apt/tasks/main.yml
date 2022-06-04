@@ -5,12 +5,12 @@
 
 - name: Remove unwanted packages
   become: true
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: absent
     purge: true
   loop: "{{ apt_unwanted_packages }}"
 
 - name: Remove dependencies that are no longer required
-  apt:
+  ansible.builtin.apt:
     autoremove: true

@@ -4,7 +4,7 @@
   tags:
     - healthcheck
   become: true
-  package:
+  ansible.builtin.package:
     name: ['nginx', 'fcgiwrap']
     state: present
     update_cache: true
@@ -12,7 +12,7 @@
 - name: Set healthcheck endpoint configuration
   tags:
     - healthcheck
-  template:
+  ansible.builtin.template:
     src: "default.j2"
     dest: "/etc/nginx/sites-available/default"
     force: true
@@ -23,7 +23,7 @@
 - name: Change fcgiwrap user
   tags:
     - healthcheck
-  replace:
+  ansible.builtin.replace:
     path: /lib/systemd/system/fcgiwrap.service
     regexp: "^User=([a-zA-Z0-9_-]+)$"
     replace: "User={{ healthcheck_user }}"
@@ -31,7 +31,7 @@
 - name: Change fcgiwrap group
   tags:
     - healthcheck
-  replace:
+  ansible.builtin.replace:
     path: /lib/systemd/system/fcgiwrap.service
     regexp: "^Group=([a-zA-Z0-9_-]+)$"
     replace: "Group={{ healthcheck_user }}"

@@ -4,7 +4,7 @@
   tags:
     - vault-agent-vault
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ vault_agent_vault_user }}"
@@ -17,7 +17,7 @@
   tags:
     - vault-agent-vault
   become: true
-  template:
+  ansible.builtin.template:
     src: "vault.hcl.j2"
     dest: "{{ vault_agent_vault_config_path }}/vault.hcl"
     force: true

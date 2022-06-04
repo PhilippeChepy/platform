@@ -3,7 +3,7 @@
 - name: Check runc package signature file
   tags:
     - runc
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/{{ runc_signature }}"
   become: false
   register: runc_signature
@@ -11,15 +11,18 @@
 - name: Get runc signature file
   tags:
     - runc
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ runc_signature_file_url }}"
     dest: "/tmp/{{ runc_signature }}"
+    owner: "root"
+    group: "root"
+    mode: "0666"
   when: not runc_signature.stat.exists | bool
 
 - name: Check runc binary file
   tags:
     - runc
-  stat:
+  ansible.builtin.stat:
     path: "{{ runc_bin_path }}/runc"
   become: false
   register: runc_binary
@@ -27,7 +30,7 @@
 - name: "Download runc → {{ runc_url }}"
   tags:
     - runc
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ runc_url }}"
     dest: "{{ runc_bin_path }}/runc"
     owner: "root"
@@ -38,4 +41,4 @@
 
 # TODO: check GPG signature
 # - name: Check signature
-#   command: gpg --verify /tmp/{{ runc_signature }} {{ runc_bin_path }}/runc
+#   ansible.builtin.command: gpg --verify /tmp/{{ runc_signature }} {{ runc_bin_path }}/runc

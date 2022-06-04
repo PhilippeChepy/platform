@@ -2,13 +2,13 @@
 
 - name: Add etcd group
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ etcd_group }}"
     state: present
 
 - name: Add etcd user
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ etcd_user }}"
     comment: "etcd user"
     group: "{{ etcd_group }}"
@@ -36,7 +36,7 @@
   tags:
     - etcd
   become: true
-  template:
+  ansible.builtin.template:
     src: "etcd.service.j2"
     dest: "/etc/systemd/system/etcd.service"
     force: true
@@ -49,7 +49,7 @@
   tags:
     - etcd
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ etcd_home }}/{{ etcd_dotfile }}"
     line: ". /etc/default/etcdctl"
     owner: "{{ etcd_user }}"
@@ -63,7 +63,7 @@
   tags:
     - etcd
   become: true
-  template:
+  ansible.builtin.template:
     src: "{{ item.name }}.j2"
     dest: "{{ item.dest }}/{{ item.name }}"
     force: true
@@ -78,7 +78,7 @@
   tags:
     - etcd
   become: true
-  copy:
+  ansible.builtin.copy:
     src: "etcd-healthcheck"
     dest: "{{ etcd_bin_path }}/etcd-healthcheck"
     force: true

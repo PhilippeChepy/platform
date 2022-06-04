@@ -3,7 +3,7 @@
 - name: Ensure Local storage directory exists
   tags:
     - vault
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ item }}"
     owner: "root"
@@ -16,7 +16,7 @@
   tags:
     - vault
   become: true
-  package:
+  ansible.builtin.package:
     name: ['unzip', 'acl']
     state: present
     update_cache: true
@@ -24,7 +24,7 @@
 - name: Check Vault package checksum file
   tags:
     - vault
-  stat:
+  ansible.builtin.stat:
     path: "{{ vault_local_storage }}/{{ vault_shasums }}"
   become: false
   register: vault_checksum
@@ -32,16 +32,19 @@
 - name: Get Vault package checksum file
   tags:
     - vault
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ vault_checksum_file_url }}"
     dest: "{{ vault_local_storage }}/{{ vault_shasums }}"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0666"
   when: not vault_checksum.stat.exists | bool
 
 - name: Get Vault package checksum
   tags:
     - vault
     - skip_ansible_lint
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     grep "{{ vault_pkg }}" "{{ vault_local_storage }}/{{ vault_shasums }}" | awk '{print $1}'
   args:
@@ -53,7 +56,7 @@
 - name: Check Vault package file
   tags:
     - vault
-  stat:
+  ansible.builtin.stat:
     path: "{{ vault_local_storage }}/{{ vault_pkg }}"
   become: false
   register: vault_package
@@ -61,16 +64,19 @@
 - name: "Download Vault → {{ vault_zip_url }}"
   tags:
     - vault
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ vault_zip_url }}"
     dest: "{{ vault_local_storage }}/{{ vault_pkg }}"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0666"
     checksum: "sha256:{{ vault_sha256.stdout }}"
   when: not vault_package.stat.exists | bool
 
 - name: Unarchive Vault
   tags:
     - vault
-  unarchive:
+  ansible.builtin.unarchive:
     remote_src: true
     src: "{{ vault_local_storage }}/{{ vault_pkg }}"
     dest: "{{ vault_local_storage }}"
@@ -80,7 +86,7 @@
   tags:
     - vault
   become: true
-  copy:
+  ansible.builtin.copy:
     remote_src: true
     src: "{{ vault_local_storage }}/vault"
     dest: "{{ vault_bin_path }}"
@@ -92,7 +98,7 @@
   tags:
     - vault
   become: true
-  command: "setcap cap_ipc_lock=+ep {{ vault_bin_path }}/vault"
+  ansible.builtin.command: "setcap cap_ipc_lock=+ep {{ vault_bin_path }}/vault"
   changed_when: false  # read-only task
   ignore_errors: true
   register: vault_mlock_capability
@@ -101,14 +107,14 @@
   tags:
     - vault
   become: true
-  command: "setcap cap_ipc_lock=+ep {{ vault_bin_path }}/vault"
+  ansible.builtin.command: "setcap cap_ipc_lock=+ep {{ vault_bin_path }}/vault"
   when: vault_mlock_capability is failed
 
 - name: Create directories
   tags:
     - vault
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ vault_user }}"
@@ -127,7 +133,7 @@
     - vault-plugin
   become: true
   become_user: "{{ vault_user }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ vault_plugin_path }}/{{ item.name }}"
   register: vault_plugins_package
   loop: "{{ vault_external_plugins }}"
@@ -138,10 +144,13 @@
     - vault-plugin
   become: true
   become_user: "{{ vault_user }}"
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ item.archive_url }}"
     dest: "{{ vault_plugin_path }}/archive-{{ item.name }}"
     checksum: "sha256:{{ item.archive_checksum }}"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0666"
   when: not vault_plugins_package.results[item_index].stat.exists | bool
   loop: "{{ vault_external_plugins }}"
   loop_control:
@@ -153,7 +162,7 @@
     - vault-plugin
   become: true
   become_user: "{{ vault_user }}"
-  unarchive:
+  ansible.builtin.unarchive:
     remote_src: true
     src: "{{ vault_plugin_path }}/archive-{{ item.name }}"
     dest: "{{ vault_plugin_path }}"
@@ -171,7 +180,7 @@
     - vault-plugin
   become: true
   become_user: "{{ vault_user }}"
-  file:
+  ansible.builtin.file:
     state: absent
     dest: "{{ vault_plugin_path }}/archive-{{ item.name }}"
   when: not vault_plugins_package.results[item_index].stat.exists | bool

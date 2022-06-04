@@ -2,7 +2,7 @@
 
 - name: "Update APT package cache"
   become: true
-  apt:
+  ansible.builtin.apt:
     update_cache: "{{ apt_update_cache }}"
     cache_valid_time: "{{ apt_cache_valid_time }}"
   retries: 2
@@ -12,7 +12,7 @@
 
 - name: "Upgrade APT to the latest packages"
   become: true
-  apt:
+  ansible.builtin.apt:
     upgrade: safe
   retries: 2
   delay: 5
@@ -21,7 +21,7 @@
 
 - name: "Adjust APT update intervals"
   become: true
-  copy:
+  ansible.builtin.copy:
     src: 10periodic
     dest: /etc/apt/apt.conf.d/10periodic
     owner: root

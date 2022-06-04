@@ -8,3 +8,6 @@ vault_agent_exoscale_etcd_auth_path: null
 vault_agent_exoscale_etcd_paths:
   pki_etcd_cert: 'pki/platform/kubernetes/etcd/issue/server'
   iam_instance_pool: 'iam/exoscale/apikey/etcd-instance-pool'
+
+# TODO: make provider-specific sections optional
+# vault_agent_kube_control_plane_provider: None | 'exoscale'

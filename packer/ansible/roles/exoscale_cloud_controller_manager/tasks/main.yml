@@ -4,7 +4,7 @@
   tags:
     - exoscale-cloud-controller-manager
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ exoscale_cloud_controller_manager_group }}"
     state: present
 
@@ -12,7 +12,7 @@
   tags:
     - exoscale-cloud-controller-manager
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ exoscale_cloud_controller_manager_user }}"
     comment: "Exoscale Cloud Controller Manager user"
     group: "{{ exoscale_cloud_controller_manager_group }}"
@@ -31,7 +31,7 @@
   tags:
     - exoscale-cloud-controller-manager
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ exoscale_cloud_controller_manager_config_path }}"
     state: directory
     owner: "{{ exoscale_cloud_controller_manager_user }}"
@@ -42,7 +42,7 @@
   tags:
     - exoscale-cloud-controller-manager
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/cloud-controller-manager"
     line: "%{{ exoscale_cloud_controller_manager_user }} ALL= NOPASSWD: /bin/systemctl restart exoscale-cloud-controller-manager"
     owner: "root"
@@ -54,7 +54,7 @@
   tags:
     - exoscale-cloud-controller-manager
   become: true
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ exoscale_cloud_controller_manager_bin_path }}/{{ item }}"
     force: true
@@ -68,7 +68,7 @@
   tags:
     - exoscale-cloud-controller-manager
   become: true
-  template:
+  ansible.builtin.template:
     src: "exoscale-cloud-controller-manager.service.j2"
     dest: "/etc/systemd/system/exoscale-cloud-controller-manager.service"
     force: true

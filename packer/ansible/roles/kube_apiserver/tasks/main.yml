@@ -4,7 +4,7 @@
   tags:
     - kube-apiserver
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ kube_apiserver_group }}"
     state: present
 
@@ -12,7 +12,7 @@
   tags:
     - kube-apiserver
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ kube_apiserver_user }}"
     comment: "Kubernetes API Server user"
     group: "{{ kube_apiserver_group }}"
@@ -23,7 +23,7 @@
 - name: Check Kubernetes API Server checksum file
   tags:
     - kube-apiserver
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/{{ kube_apiserver_shasums }}"
   become: false
   register: kube_apiserver_checksum
@@ -31,16 +31,19 @@
 - name: Get Kubernetes API Server checksum file
   tags:
     - kube-apiserver
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kube_apiserver_checksum_file_url }}"
     dest: "/tmp/{{ kube_apiserver_shasums }}"
+    owner: "{{ kube_apiserver_user }}"
+    group: "{{ kube_apiserver_group }}"
+    mode: "0666"
   when: not kube_apiserver_checksum.stat.exists | bool
 
 - name: Get Kubernetes API Server checksum
   tags:
     - kube-apiserver
     - skip_ansible_lint
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     grep "v{{ kube_apiserver_version }}/bin/{{ kube_apiserver_os }}/{{ kube_apiserver_architecture }}/kube-apiserver$" "/tmp/{{ kube_apiserver_shasums }}" | awk '{print $1}'
   args:
@@ -52,7 +55,7 @@
 - name: "Download Kubernetes API Server → {{ kube_apiserver_url }}"
   tags:
     - kube-apiserver
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kube_apiserver_url }}"
     dest: "{{ kube_apiserver_bin_path }}/kube-apiserver"
     checksum: "sha256:{{ kube_apiserver_sha256.stdout }}"
@@ -64,7 +67,7 @@
   tags:
     - kube-apiserver
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "root"
@@ -77,7 +80,7 @@
   tags:
     - kube-apiserver
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ kube_apiserver_user }}"
@@ -90,7 +93,7 @@
   tags:
     - kube-apiserver
   become: true
-  template:
+  ansible.builtin.template:
     src: "kube-apiserver.service.j2"
     dest: "/etc/systemd/system/kube-apiserver.service"
     force: true
@@ -103,7 +106,7 @@
   tags:
     - kube-apiserver
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-apiserver"
     line: "%{{ kube_apiserver_user }} ALL= NOPASSWD: /bin/systemctl restart kube-apiserver"
     owner: "root"
@@ -115,7 +118,7 @@
   tags:
     - kube-apiserver
   become: true
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ kube_apiserver_bin_path }}/{{ item }}"
     force: true

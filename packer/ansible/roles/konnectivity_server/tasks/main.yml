@@ -4,7 +4,7 @@
   tags:
     - konnectivity-server
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ konnectivity_group }}"
     state: present
 
@@ -12,7 +12,7 @@
   tags:
     - konnectivity-server
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ konnectivity_user }}"
     comment: "Kubernetes user"
     group: "{{ konnectivity_group }}"
@@ -23,7 +23,7 @@
 - name: "Copy proxy-server binary"
   tags:
     - konnectivity-server
-  copy:
+  ansible.builtin.copy:
     src: "{{ konnectivity_server_binary }}"
     dest: "{{ konnectivity_server_bin_path }}/proxy-server"
     owner: "{{ konnectivity_user }}"
@@ -34,7 +34,7 @@
   tags:
     - konnectivity-server
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "{{ konnectivity_user }}"
@@ -47,7 +47,7 @@
   tags:
     - konnectivity-server
   become: true
-  template:
+  ansible.builtin.template:
     src: "konnectivity.service.j2"
     dest: "/etc/systemd/system/konnectivity.service"
     force: true
@@ -60,7 +60,7 @@
   tags:
     - konnectivity-server
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/konnectivity-server"
     line: "%{{ konnectivity_user }} ALL= NOPASSWD: /bin/systemctl restart konnectivity"
     owner: "root"
@@ -72,7 +72,7 @@
   tags:
     - konnectivity-server
   become: true
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ konnectivity_server_bin_path }}/{{ item }}"
     force: true

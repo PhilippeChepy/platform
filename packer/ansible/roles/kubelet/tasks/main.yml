@@ -3,7 +3,7 @@
 - name: Check Kubelet checksum file
   tags:
     - kubelet
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/{{ kubelet_shasums }}"
   become: false
   register: kubelet_checksum
@@ -11,16 +11,19 @@
 - name: Get Kubelet checksum file
   tags:
     - kubelet
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kubelet_checksum_file_url }}"
     dest: "/tmp/{{ kubelet_shasums }}"
+    owner: "root"
+    group: "root"
+    mode: "0666"
   when: not kubelet_checksum.stat.exists | bool
 
 - name: Get Kubelet checksum
   tags:
     - kubelet
     - skip_ansible_lint
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     grep "v{{ kubelet_version }}/bin/{{ kubelet_os }}/{{ kubelet_architecture }}/kubelet$" "/tmp/{{ kubelet_shasums }}" | awk '{print $1}'
   args:
@@ -32,7 +35,7 @@
 - name: "Download Kubelet → {{ kubelet_url }}"
   tags:
     - kubelet
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ kubelet_url }}"
     dest: "{{ kubelet_bin_path }}/kubelet"
     checksum: "sha256:{{ kubelet_sha256.stdout }}"
@@ -44,7 +47,7 @@
   tags:
     - kubelet
   become: true
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: "root"
@@ -57,7 +60,7 @@
   tags:
     - kubelet
   become: true
-  template:
+  ansible.builtin.template:
     src: "kubelet.service.j2"
     dest: "/etc/systemd/system/kubelet.service"
     force: true
@@ -70,7 +73,7 @@
   tags:
     - kubelet
   become: true
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ kubelet_bin_path }}/{{ item }}"
     force: true

@@ -2,7 +2,7 @@
 
 - name: Ensure sshd_config setting
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "/etc/ssh/sshd_config"
     regexp: "{{ item }}"
     line: "{{ sshd_settings[item] }}"

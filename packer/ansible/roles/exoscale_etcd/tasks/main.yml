@@ -4,7 +4,7 @@
   tags:
     - exoscale-etcd
   become: true
-  copy:
+  ansible.builtin.copy:
     src: "etcd-exoscale-pool"
     dest: "{{ etcd_bin_path }}/etcd-exoscale-pool"
     force: true
@@ -16,7 +16,7 @@
   tags:
     - exoscale-etcd
   become: true
-  template:
+  ansible.builtin.template:
     src: "exoscale-etcd-init.j2"
     dest: "{{ etcd_bin_path }}/exoscale-etcd-init"
     force: true
