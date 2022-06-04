@@ -1,0 +1,14 @@
+---
+
+# Package variables
+# extracted from k8s.gcr.io/autoscaling/cluster-autoscaler:v1.24.0, then compressed
+exoscale_cluster_autoscaler_binary: "cluster-autoscaler-v1.24.0-linux-amd64.gz"
+
+# Paths
+exoscale_cluster_autoscaler_bin_path: /usr/local/bin
+exoscale_cluster_autoscaler_config_path: /etc/exoscale/cluster-autoscaler
+
+# System user and group
+exoscale_cluster_autoscaler_user: kube
+exoscale_cluster_autoscaler_group: kube
+exoscale_cluster_autoscaler_groups: null

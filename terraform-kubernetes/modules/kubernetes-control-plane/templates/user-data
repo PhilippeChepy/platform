@@ -47,7 +47,7 @@ write_files:
   owner: kube:kube
   encoding: b64
   permissions: "0600"
-  content: ${exoscale_as_manifests}
+  content: ${exoscale_cluster_autoscaler_manifests}
 - path: /usr/local/bin/wait-vault
   owner: kube:kube
   permissions: "0777"
@@ -94,3 +94,4 @@ runcmd:
 - [/usr/local/bin/wait-apiserver]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/kubelet-bootstrap-rbac.yaml]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cloud-controller-manager.yaml]
+- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cluster-autoscaler-rbac.yaml]

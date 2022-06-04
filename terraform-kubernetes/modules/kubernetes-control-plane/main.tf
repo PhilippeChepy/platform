@@ -111,6 +111,7 @@ resource "exoscale_instance_pool" "cluster" {
     }))
 
     exoscale_cloud_controller_manager_manifests = base64encode(file("${path.module}/templates/manifests/exoscale-cloud-controller-manager.yaml"))
+    exoscale_cluster_autoscaler_manifests       = base64encode(file("${path.module}/templates/manifests/exoscale-cluster-autoscaler.yaml"))
   })
 
   labels = var.labels

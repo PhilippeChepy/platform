@@ -128,14 +128,6 @@ locals {
             #   { kind = "deployment", name = "metrics-server" }
             # ]
           }
-          cluster-autoscaler-secret-sync = { # depends on vault-agent-injector
-            version = "exoscale-1.24.0",
-            namespace = "exoscale"
-          }
-          cluster-autoscaler = { # depends on cluster-autoscaler-secret-sync
-            version = "exoscale-1.24.0",
-            namespace = "kube-system"
-          }
         }
       }
 
