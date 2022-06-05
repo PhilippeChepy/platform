@@ -786,3 +786,16 @@ spec:
       - name: cilium-config-path
         configMap:
           name: cilium-config
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cilium-operator
+  namespace: kube-system
+  labels:
+    name: cilium-operator
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      name: cilium-operator

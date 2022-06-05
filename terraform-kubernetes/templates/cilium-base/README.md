@@ -12,4 +12,6 @@ helm template cilium cilium/cilium --version "${VERSION}" \
   --namespace kube-system \
   -f values.yaml \
     > "${VERSION}/manifests.yaml"
+
+cat pdb.yaml >> "${VERSION}/manifests.yaml"
 ```

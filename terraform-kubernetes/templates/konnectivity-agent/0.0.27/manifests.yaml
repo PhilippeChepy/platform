@@ -23,6 +23,19 @@ metadata:
     kubernetes.io/cluster-service: "true"
     addonmanager.kubernetes.io/mode: Reconcile
 ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: konnectivity-agent
+  namespace: kube-system
+  labels:
+    k8s-app: konnectivity-agent
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      k8s-app: konnectivity-agent
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
