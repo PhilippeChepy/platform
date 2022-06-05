@@ -35,6 +35,11 @@ ipv6:
 operator:
   image:
     pullPolicy: Always
+  # TODO: As of v1.11.4, this settings is available in default settings.yaml but is not taken into account,
+  # So we have to inject the PDB manifest ourself, to allow the cluster autoscaler to work properly
+  #
+  # podDisruptionBudget:
+  #   enabled: true
   affinity:
     podAntiAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
