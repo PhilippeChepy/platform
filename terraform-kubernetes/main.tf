@@ -192,6 +192,28 @@ module "deployment_core_addons" {
   templated        = try(each.value.templated, true)
 }
 
+module "deployment_ingresses" {
+  source = "./modules/kubernetes-deployment"
+  for_each = local.platform_components.kubernetes.ingresses
+  depends_on = [module.deployment_core, local_file.kubeconfig]
+
+  kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
+
+  deployment_namespace = "ingress-nginx-${each.key}"
+  deployment_manifest_file = "${path.module}/templates/${try(each.value.ingress, "nginx-ingress-controller")}/${local.platform_components.kubernetes.deployments.ingress[try(each.value.ingress, "nginx-ingress-controller")].version}/manifests.yaml"
+
+  deployment_variables = merge(local.deployment_variables, {
+    "ingress:namespace" = "ingress-nginx-${each.key}"
+    "ingress:class_suffix" = each.key
+    "ingress:node_label_name" = split("=", each.value.label)[0]
+    "ingress:node_label_value" = split("=", each.value.label)[1]
+    "ingress:node_taint_name" = split("=", each.value.label)[0]
+    "ingress:node_taint_value" = split("=", each.value.label)[1]
+  })
+
+  templated = true
+}
+
 resource "vault_auth_backend" "kubernetes" {
   for_each = toset(concat(
     can(local.platform_components.kubernetes.deployments.core["cert-manager"]) ? [
@@ -248,6 +270,65 @@ resource "vault_kubernetes_auth_backend_role" "roles" {
   token_ttl                        = 3600
 }
 
+resource "exoscale_nlb" "ingress" {
+  for_each = local.platform_components.kubernetes.ingresses
+
+  zone = local.platform_zone
+  name = "${local.platform_name}-ingress-${each.key}"
+  description = "Ingress load balancer (${each.key})"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "exoscale_nlb_service" "ingress_http" {
+  for_each = local.platform_components.kubernetes.ingresses
+
+  zone = local.platform_zone
+  name = "${local.platform_name}-ingress-${each.key}-http"
+
+  nlb_id = exoscale_nlb.ingress[each.key].id
+  instance_pool_id = module.kubernetes_generic_nodepool["ingress-${each.key}"].instance_pool_id
+
+  protocol       = "tcp"
+  port           = 80
+  target_port    = 80
+  strategy       = "round-robin"
+
+  healthcheck {
+    mode     = "tcp"
+    port     = 80
+    interval = 5
+    timeout  = 3
+    retries  = 1
+  }
+}
+
+resource "exoscale_nlb_service" "ingress_https" {
+  for_each = local.platform_components.kubernetes.ingresses
+
+  zone = local.platform_zone
+  name = "${local.platform_name}-ingress-${each.key}-https"
+
+  nlb_id = exoscale_nlb.ingress[each.key].id
+  instance_pool_id = module.kubernetes_generic_nodepool["ingress-${each.key}"].instance_pool_id
+
+  protocol       = "tcp"
+  port           = 443
+  target_port    = 443
+  strategy       = "round-robin"
+
+  healthcheck {
+    mode     = "tcp"
+    port     = 443
+    interval = 5
+    timeout  = 3
+    retries  = 1
+  }
+}
+
+# TODO: rename to kubernetes_nodepool
 module "kubernetes_generic_nodepool" {
   source = "./modules/kubernetes-kubelet-pool"
 

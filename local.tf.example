@@ -129,11 +129,14 @@ locals {
             # ]
           }
         }
+        ingress = {
+          nginx-ingress-controller = { version = "1.2.1" }
+        }
       }
 
       # TODO: define your ingress pools here
       ingresses = {
-        default = { label = "platform.example.tld/ingress=default", pool_size = 2 }
+        default = { label = "platform.example.tld/ingress=default", pool_size = 2, ingress = "nginx-ingress-controller" }
       }
     }
   }
