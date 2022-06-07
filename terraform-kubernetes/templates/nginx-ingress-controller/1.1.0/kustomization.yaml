@@ -1,0 +1,70 @@
+resources:
+  - https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.0/deploy/static/provider/baremetal/deploy.yaml
+  - custom-backend.yaml
+
+patchesStrategicMerge:
+  - patch-service.yaml
+  - patch-deployment.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: ingress-nginx-controller
+    patch: |-
+      - op: replace
+        path: /kind
+        value: DaemonSet
+  - target:
+      kind: Job
+      name: ingress-nginx-admission-patch
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args/1
+        value: --webhook-name=ingress-nginx-$ingress:class_suffix$-admission
+  - target:
+      kind: ClusterRole
+      name: ingress-nginx
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: ingress-nginx-$ingress:class_suffix$
+  - target:
+      kind: ClusterRole
+      name: ingress-nginx-admission
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: ingress-nginx-$ingress:class_suffix$-admission
+  - target:
+      kind: ClusterRoleBinding
+      name: ingress-nginx
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: ingress-nginx-$ingress:class_suffix$
+  - target:
+      kind: ClusterRoleBinding
+      name: ingress-nginx-admission
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: ingress-nginx-$ingress:class_suffix$-admission
+  - target:
+      kind: IngressClass
+      name: nginx
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: nginx-$ingress:class_suffix$
+      - op: replace
+        path: /spec/controller
+        value: k8s.io/ingress-nginx-$ingress:class_suffix$
+  - target:
+      kind: ValidatingWebhookConfiguration
+      name: ingress-nginx-admission
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: ingress-nginx-$ingress:class_suffix$-admission
+
+namespace: $ingress:namespace$
