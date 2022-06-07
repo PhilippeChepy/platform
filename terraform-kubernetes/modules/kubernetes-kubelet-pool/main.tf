@@ -66,4 +66,11 @@ resource "exoscale_instance_pool" "pool" {
   })
 
   labels = var.labels
+
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to size, because cluster autoscaler updates it based on workload presure.
+      size,
+    ]
+  }
 }
