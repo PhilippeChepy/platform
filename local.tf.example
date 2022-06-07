@@ -11,7 +11,7 @@ locals {
   #   "a.b.c.d/32"
   # ]  
 
-  # For development purposes (not recommended as this )
+  # For development purposes (not recommended as this open administration services to the world)
   # platform_admin_networks = [
   #   "0.0.0.0/0",
   #   "::/0"
