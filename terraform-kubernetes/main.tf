@@ -285,8 +285,8 @@ resource "vault_kubernetes_auth_backend_role" "roles" {
 resource "exoscale_nlb" "ingress" {
   for_each = local.platform_components.kubernetes.ingresses
 
-  zone = local.platform_zone
-  name = "${local.platform_name}-ingress-${each.key}"
+  zone        = local.platform_zone
+  name        = "${local.platform_name}-ingress-${each.key}"
   description = "Ingress load balancer (${each.key})"
 
   lifecycle {
@@ -300,13 +300,13 @@ resource "exoscale_nlb_service" "ingress_http" {
   zone = local.platform_zone
   name = "${local.platform_name}-ingress-${each.key}-http"
 
-  nlb_id = exoscale_nlb.ingress[each.key].id
+  nlb_id           = exoscale_nlb.ingress[each.key].id
   instance_pool_id = module.kubernetes_generic_nodepool["ingress-${each.key}"].instance_pool_id
 
-  protocol       = "tcp"
-  port           = 80
-  target_port    = 80
-  strategy       = "round-robin"
+  protocol    = "tcp"
+  port        = 80
+  target_port = 80
+  strategy    = "round-robin"
 
   healthcheck {
     mode     = "tcp"
@@ -323,13 +323,13 @@ resource "exoscale_nlb_service" "ingress_https" {
   zone = local.platform_zone
   name = "${local.platform_name}-ingress-${each.key}-https"
 
-  nlb_id = exoscale_nlb.ingress[each.key].id
+  nlb_id           = exoscale_nlb.ingress[each.key].id
   instance_pool_id = module.kubernetes_generic_nodepool["ingress-${each.key}"].instance_pool_id
 
-  protocol       = "tcp"
-  port           = 443
-  target_port    = 443
-  strategy       = "round-robin"
+  protocol    = "tcp"
+  port        = 443
+  target_port = 443
+  strategy    = "round-robin"
 
   healthcheck {
     mode     = "tcp"

@@ -5,5 +5,5 @@ output "client_security_group_id" {
 
 output "instance_pool_id" {
   description = "The instance-pool ID"
-  value = exoscale_instance_pool.pool.id
+  value       = exoscale_instance_pool.pool.id
 }
