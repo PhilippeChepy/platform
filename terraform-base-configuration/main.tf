@@ -652,26 +652,6 @@ path "${vault_mount.pki_kubernetes["aggregation-layer"].path}/sign/metrics-serve
 EOT
 }
 
-resource "vault_policy" "cluster_autoscaler" {
-  name = "platform-kubernetes-cluster-autoscaler"
-
-  policy = <<EOT
-## Cluster Autoscaler
-
-path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/cluster-autoscaler" {
-  capabilities = ["create", "update"]
-}
-
-path "${vault_mount.iam_exoscale.path}/apikey/cluster-autoscaler" {
-  capabilities = ["read"]
-}
-
-path "${vault_mount.pki_kubernetes["control-plane"].path}/cert/ca_chain" {
-  capabilities = ["read"]
-}
-EOT
-}
-
 # Authentication Methods
 
 ## User / pass (WIP)
