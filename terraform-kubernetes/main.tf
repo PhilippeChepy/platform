@@ -194,21 +194,33 @@ module "deployment_core_addons" {
 
 module "deployment_ingresses" {
   source = "./modules/kubernetes-deployment"
-  for_each = local.platform_components.kubernetes.ingresses
+  for_each = merge(flatten([
+    for ingress_pool_name in keys(local.platform_components.kubernetes.ingresses) : [
+      for deployment_name in try(local.platform_components.kubernetes.ingresses[ingress_pool_name].deployments, ["nginx-ingress-controller"]) : {
+        "${ingress_pool_name}|${deployment_name}" = {
+          ingress_pool_name = ingress_pool_name
+          ingress_pool      = local.platform_components.kubernetes.ingresses[ingress_pool_name]
+          deployment_name   = deployment_name
+          deployment        = local.platform_components.kubernetes.deployments.ingress[deployment_name]
+        }
+      }
+    ]
+  ])...)
+
   depends_on = [module.deployment_core, local_file.kubeconfig]
 
   kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
 
-  deployment_namespace = "ingress-nginx-${each.key}"
-  deployment_manifest_file = "${path.module}/templates/${try(each.value.ingress, "nginx-ingress-controller")}/${local.platform_components.kubernetes.deployments.ingress[try(each.value.ingress, "nginx-ingress-controller")].version}/manifests.yaml"
+  deployment_namespace     = "ingress-nginx-${each.value.ingress_pool_name}"
+  deployment_manifest_file = "${path.module}/templates/${each.value.deployment_name}/${each.value.deployment.version}/manifests.yaml"
 
   deployment_variables = merge(local.deployment_variables, {
-    "ingress:namespace" = "ingress-nginx-${each.key}"
-    "ingress:class_suffix" = each.key
-    "ingress:node_label_name" = split("=", each.value.label)[0]
-    "ingress:node_label_value" = split("=", each.value.label)[1]
-    "ingress:node_taint_name" = split("=", each.value.label)[0]
-    "ingress:node_taint_value" = split("=", each.value.label)[1]
+    "ingress:namespace"        = "ingress-nginx-${each.value.ingress_pool_name}"
+    "ingress:class_suffix"     = each.value.ingress_pool_name
+    "ingress:node_label_name"  = split("=", each.value.ingress_pool.label)[0]
+    "ingress:node_label_value" = split("=", each.value.ingress_pool.label)[1]
+    "ingress:node_taint_name"  = split("=", each.value.ingress_pool.label)[0]
+    "ingress:node_taint_value" = split("=", each.value.ingress_pool.label)[1]
   })
 
   templated = true

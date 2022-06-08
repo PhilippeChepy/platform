@@ -129,14 +129,25 @@ locals {
             # ]
           }
         }
+        # Ingress instance-pool related deployments
         ingress = {
           nginx-ingress-controller = { version = "1.2.1" }
+          cert-manager-http01      = { version = "0.0.1" }
         }
       }
 
       # TODO: define your ingress pools here
       ingresses = {
-        default = { label = "platform.example.tld/ingress=default", pool_size = 2, ingress = "nginx-ingress-controller" }
+        default = {
+          label     = "platform.example.tld/ingress=default",
+          pool_size = 2
+        }
+        internal = {
+          label       = "platform.example.tld/ingress=internal",
+          pool_size   = 2,
+          domain      = "internal.example.tld"
+          deployments = ["cert-manager-http01", "nginx-ingress-controller"]
+        }
       }
     }
   }
