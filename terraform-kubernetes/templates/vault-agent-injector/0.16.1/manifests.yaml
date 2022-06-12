@@ -187,7 +187,7 @@ spec:
             - name: AGENT_INJECT_VAULT_AUTH_PATH
               value: $vault:auth_path$
             - name: AGENT_INJECT_VAULT_IMAGE
-              value: "hashicorp/vault:1.10.3"
+              value: "hashicorp/vault:1.10.4"
             - name: AGENT_INJECT_TLS_AUTO
               value: vault-agent-injector-cfg
             - name: AGENT_INJECT_TLS_AUTO_HOSTS
