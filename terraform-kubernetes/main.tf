@@ -215,12 +215,14 @@ module "deployment_ingresses" {
   deployment_manifest_file = "${path.module}/templates/${each.value.deployment_name}/${each.value.deployment.version}/manifests.yaml"
 
   deployment_variables = merge(local.deployment_variables, {
-    "ingress:namespace"        = "ingress-nginx-${each.value.ingress_pool_name}"
-    "ingress:class_suffix"     = each.value.ingress_pool_name
-    "ingress:node_label_name"  = split("=", each.value.ingress_pool.label)[0]
-    "ingress:node_label_value" = split("=", each.value.ingress_pool.label)[1]
-    "ingress:node_taint_name"  = split("=", each.value.ingress_pool.label)[0]
-    "ingress:node_taint_value" = split("=", each.value.ingress_pool.label)[1]
+    "ingress:namespace"             = "ingress-nginx-${each.value.ingress_pool_name}"
+    "ingress:class_suffix"          = each.value.ingress_pool_name
+    "ingress:node_label_name"       = split("=", each.value.ingress_pool.label)[0]
+    "ingress:node_label_value"      = split("=", each.value.ingress_pool.label)[1]
+    "ingress:node_taint_name"       = split("=", each.value.ingress_pool.label)[0]
+    "ingress:node_taint_value"      = split("=", each.value.ingress_pool.label)[1]
+    "cert-manager:namespace"        = try(local.platform_components.kubernetes.deployments.core.cert-manager.namespace, "")
+    "cert-manager:cloudflare_token" = try(local.platform_credentials.cloudflare.token, "")
   })
 
   templated = true

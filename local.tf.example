@@ -146,16 +146,34 @@ locals {
           label       = "platform.example.tld/ingress=internal",
           pool_size   = 2,
           domain      = "internal.example.tld"
-          deployments = ["cert-manager-http01", "nginx-ingress-controller"]
+          deployments = ["cert-manager-http01", "cert-manager-dns01-cloudflare", "nginx-ingress-controller"]
         }
       }
     }
   }
 
-  #### TODO: WAITING FOR "exoscale_iam_key" resource
-  platform_exoscale_credentials = {
-    key    = "EXOxxxxxxxxxxxxxxxxxxxxxxxx"
-    secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  platform_credentials = {
+    ## TODO: WAITING FOR "exoscale_iam_key" resource
+    exoscale = {
+      key    = "EXOxxxxxxxxxxxxxxxxxxxxxxxx"
+      secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+
+    ## If using cloudflare, you can deploy cert-manager-dns101-cloudflare on ingress controllers
+    #
+    # REF: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/#api-tokens
+    #
+    # Tokens can be created at User Profile > API Tokens > API Tokens. The following settings are recommended:
+    #
+    # Permissions:
+    #   Zone - DNS - Edit
+    #   Zone - Zone - Read
+    # Zone Resources:
+    #   Include - All Zones
+    #
+    cloudflare = {
+      token = "<API Token>"
+    }
   }
 
   platform_ssh_algorithm = {

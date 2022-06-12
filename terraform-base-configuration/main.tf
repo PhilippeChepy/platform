@@ -24,8 +24,8 @@ resource "vault_generic_endpoint" "iam_exoscale_config_root" {
   disable_delete = true
   data_json = jsonencode({
     api_environment = "api"
-    root_api_key    = local.platform_exoscale_credentials.key,
-    root_api_secret = local.platform_exoscale_credentials.secret,
+    root_api_key    = local.platform_credentials.exoscale.key,
+    root_api_secret = local.platform_credentials.exoscale.secret,
     zone            = local.platform_zone
   })
 }
@@ -689,8 +689,8 @@ resource "vault_generic_endpoint" "auth_exoscale_config" {
   disable_delete = true
   data_json = jsonencode({
     api_environment = "api"
-    api_key         = local.platform_exoscale_credentials.key,
-    api_secret      = local.platform_exoscale_credentials.secret,
+    api_key         = local.platform_credentials.exoscale.key,
+    api_secret      = local.platform_credentials.exoscale.secret,
     approle_mode    = true,
     zone            = local.platform_zone
   })
