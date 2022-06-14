@@ -221,8 +221,11 @@ module "deployment_ingresses" {
     "ingress:node_label_value"      = split("=", each.value.ingress_pool.label)[1]
     "ingress:node_taint_name"       = split("=", each.value.ingress_pool.label)[0]
     "ingress:node_taint_value"      = split("=", each.value.ingress_pool.label)[1]
+    "ingress:domain"                = try(each.value.ingress_pool.domain, "")
     "cert-manager:namespace"        = try(local.platform_components.kubernetes.deployments.core.cert-manager.namespace, "")
     "cert-manager:cloudflare_token" = try(local.platform_credentials.cloudflare.token, "")
+    "external-dns:namespace"        = "ingress-nginx-${each.value.ingress_pool_name}"
+    "external-dns:cloudflare_token" = try(local.platform_credentials.cloudflare.token, "")
   })
 
   templated = true

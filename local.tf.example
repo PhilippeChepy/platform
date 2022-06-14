@@ -134,6 +134,7 @@ locals {
           nginx-ingress-controller      = { version = "1.2.1" }
           cert-manager-http01           = { version = "0.0.1" }
           cert-manager-dns01-cloudflare = { version = "0.0.1" }
+          external-dns-cloudflare       = { version = "0.12.0" }
         }
       }
 
@@ -147,7 +148,7 @@ locals {
           label       = "platform.example.tld/ingress=internal",
           pool_size   = 2,
           domain      = "internal.example.tld"
-          deployments = ["cert-manager-http01", "cert-manager-dns01-cloudflare", "nginx-ingress-controller"]
+          deployments = ["cert-manager-http01", "cert-manager-dns01-cloudflare", "external-dns-cloudflare", "nginx-ingress-controller"]
         }
       }
     }
