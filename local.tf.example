@@ -93,7 +93,6 @@ locals {
             }
             ready_on = [
               { kind = "deployment", name = "vault-agent-injector" },
-              { kind = "daemonset", name = "vault-csi-provider" },
               { kind = "pod", name = "webhook", mode = "wait", labels = ["app.kubernetes.io/instance=vault", "app.kubernetes.io/name=vault-agent-injector", "component=webhook"] }
             ]
           }
