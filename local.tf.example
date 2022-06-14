@@ -75,7 +75,7 @@ locals {
             ]
           }
           cert-manager = {
-            version   = "1.8.0",
+            version   = "1.8.1",
             namespace = "cert-manager",
             templated = false
             ready_on = [

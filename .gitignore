@@ -2,6 +2,7 @@
 .env
 .terraform*
 .virtual-env
+.helm
 artifacts/*.json
 artifacts/*.key
 artifacts/*.pem

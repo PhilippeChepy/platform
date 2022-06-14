@@ -1,15 +1,7 @@
 # Cert-Manager template 
 
 How to build a new template:
-
-```shell
-helm repo add jetstack https://charts.jetstack.io
-
-VERSION=1.8.0
-
-mkdir -p "${VERSION}"
-helm template cert-manager jetstack/cert-manager --version "${VERSION}" \
-  --namespace cert-manager \
-  -f values.yaml \
-    > "${VERSION}/manifests.yaml"
-```
+- you need to have `helm` and `kustomize` cli tools installed
+- create a new version directory, based on the latest
+- update the `kustomization.yaml` file to match the new version
+- render the manifest bundle file: `kustomize build --enable-helm ./<new-version>/ > <new-version>/manifests.yaml`
