@@ -14,7 +14,7 @@ This platform is based on:
 - [Full provisioning instructions](./doc/Initial-Provisioning.md)
 - [Upgrading the Vault cluster](./doc/Upgrading-Vault-Instances.md)
 - *Coming soon:* Upgrading the Etcd cluster
-- *Coming soon:* Upgrading the Kubernetes control plane
+- [Upgrading the Kubernetes control plane](./doc/Upgrade-Kubernetes-ControlPlane.md)
 - *Coming soon:* Upgrading the Kubernetes instance pools
 - *Coming soon:* Destroying the whole infrastructure
 
