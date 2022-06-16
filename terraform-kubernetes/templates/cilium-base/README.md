@@ -1,17 +1,7 @@
 # Cilium template 
 
 How to build a new template:
-
-```shell
-helm repo add cilium https://helm.cilium.io/
-
-VERSION=1.11.5
-
-mkdir -p "${VERSION}"
-helm template cilium cilium/cilium --version "${VERSION}" \
-  --namespace kube-system \
-  -f values.yaml \
-    > "${VERSION}/manifests.yaml"
-
-cat pdb.yaml >> "${VERSION}/manifests.yaml"
-```
+- you need to have `helm` and `kustomize` cli tools installed
+- create a new version directory, based on the latest
+- update the `kustomization.yaml` file to match the new version
+- render the manifest bundle file: `kustomize build --enable-helm ./<new-version>/ > <new-version>/manifests.yaml`
