@@ -51,7 +51,7 @@ locals {
       deployments = {
         core = {
           cilium-base = {
-            version   = "1.11.5",
+            version   = "1.11.6",
             namespace = "kube-system",
             ready_on = [
               { kind = "daemonset", name = "cilium" },
