@@ -15,7 +15,7 @@ This platform is based on:
 - [Upgrading the Vault cluster](./doc/Upgrading-Vault-Instances.md)
 - *Coming soon:* Upgrading the Etcd cluster
 - [Upgrading the Kubernetes control plane](./doc/Upgrade-Kubernetes-ControlPlane.md)
-- *Coming soon:* Upgrading the Kubernetes instance pools
+- [Upgrading the Kubernetes Nodes instance pools](./doc/Upgrading-Kubernetes-Node-InstancePool.md)
 - *Coming soon:* Destroying the whole infrastructure
 
 # Packer
