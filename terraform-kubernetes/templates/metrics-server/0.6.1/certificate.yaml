@@ -1,0 +1,26 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: metrics-server
+spec:
+  secretName: metrics-server-cert
+  duration: 24h
+  renewBefore: 18h
+  subject:
+    organizations:
+      - metrics-server
+  commonName: metrics-server.kube-system.svc
+  isCA: false
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    size: 4096
+  usages:
+    - server auth
+  dnsNames:
+    - metrics-server.kube-system.svc
+  issuerRef:
+    name: platform-kubernetes-metrics-server
+    kind: Issuer
+    group: cert-manager.io

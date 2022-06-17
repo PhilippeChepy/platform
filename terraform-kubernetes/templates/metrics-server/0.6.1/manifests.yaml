@@ -36,11 +36,14 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - nodes/metrics
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - pods
   - nodes
-  - nodes/metrics
-  - namespaces
-  - configmaps
   verbs:
   - get
   - list
@@ -93,6 +96,15 @@ subjects:
   namespace: kube-system
 ---
 apiVersion: v1
+data:
+  aggregationlayer-server-ca.pem: $kubernetes:aggregationlayer_ca_cert$
+  kubelet-server-ca.pem: $kubernetes:kubelet_ca_cert$
+kind: Secret
+metadata:
+  name: metrics-server-ca
+type: Opaque
+---
+apiVersion: v1
 kind: Service
 metadata:
   labels:
@@ -107,19 +119,6 @@ spec:
     targetPort: https
   selector:
     k8s-app: metrics-server
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: metrics-server
-  namespace: kube-system
-  labels:
-    k8s-app: metrics-server
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      k8s-app: metrics-server
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -141,6 +140,13 @@ spec:
       labels:
         k8s-app: metrics-server
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                k8s-app: metrics-server
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - --kubelet-certificate-authority=/var/run/secrets/platform/ca/kubelet-server-ca.pem
@@ -152,7 +158,7 @@ spec:
         - --tls-private-key-file=/var/run/secrets/platform/cert/tls.key
         - --secure-port=4443
         image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -174,34 +180,23 @@ spec:
           initialDelaySeconds: 20
           periodSeconds: 10
         resources:
-          limits:
-            cpu: 100m
-            memory: 50Mi
           requests:
             cpu: 100m
-            memory: 50Mi
+            memory: 200Mi
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1000
-          capabilities:
-            drop:
-            - ALL
         volumeMounts:
-          - name: ca
-            mountPath: /var/run/secrets/platform/ca
-          - name: cert
-            mountPath: /var/run/secrets/platform/cert
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - topologyKey: kubernetes.io/hostname
-            labelSelector:
-              matchLabels:
-                k8s-app: metrics-server
+        - mountPath: /var/run/secrets/platform/ca
+          name: ca
+        - mountPath: /var/run/secrets/platform/cert
+          name: cert
       nodeSelector:
         kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      serviceAccountName: metrics-server
       volumes:
       - name: ca
         secret:
@@ -209,17 +204,19 @@ spec:
       - name: cert
         secret:
           secretName: metrics-server-cert
-      priorityClassName: system-cluster-critical
-      serviceAccountName: metrics-server
 ---
-apiVersion: v1
-kind: Secret
+apiVersion: policy/v1
+kind: PodDisruptionBudget
 metadata:
-  name: metrics-server-ca
-type: Opaque
-data:
-  kubelet-server-ca.pem: $kubernetes:kubelet_ca_cert$
-  aggregationlayer-server-ca.pem: $kubernetes:aggregationlayer_ca_cert$
+  labels:
+    k8s-app: metrics-server
+  name: metrics-server
+  namespace: kube-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      k8s-app: metrics-server
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
@@ -228,10 +225,10 @@ metadata:
     k8s-app: metrics-server
   name: v1beta1.metrics.k8s.io
 spec:
+  caBundle: $kubernetes:aggregationlayer_ca_cert$
   group: metrics.k8s.io
   groupPriorityMinimum: 100
   insecureSkipTLSVerify: false
-  caBundle: $kubernetes:aggregationlayer_ca_cert$
   service:
     name: metrics-server
     namespace: kube-system
@@ -239,44 +236,44 @@ spec:
   versionPriority: 100
 ---
 apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: metrics-server
+spec:
+  commonName: metrics-server.kube-system.svc
+  dnsNames:
+  - metrics-server.kube-system.svc
+  duration: 24h
+  isCA: false
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: platform-kubernetes-metrics-server
+  privateKey:
+    algorithm: RSA
+    rotationPolicy: Always
+    size: 4096
+  renewBefore: 18h
+  secretName: metrics-server-cert
+  subject:
+    organizations:
+    - metrics-server
+  usages:
+  - server auth
+---
+apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: platform-kubernetes-metrics-server
 spec:
   vault:
-    path: $vault:path_pki_sign:aggregation_layer$
-    server: $vault:cluster_addr$
-    caBundle: $vault:cluster_ca_cert$
     auth:
       kubernetes:
-        role: metrics-server
         mountPath: /v1/auth/kubernetes/cert-manager/
+        role: metrics-server
         secretRef:
-          name: metrics-server-vault-issuer
           key: token
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: metrics-server
-spec:
-  secretName: metrics-server-cert
-  duration: 24h
-  renewBefore: 18h
-  subject:
-    organizations:
-      - metrics-server
-  commonName: metrics-server.kube-system.svc
-  isCA: false
-  privateKey:
-    rotationPolicy: Always
-    algorithm: RSA
-    size: 4096
-  usages:
-    - server auth
-  dnsNames:
-    - metrics-server.kube-system.svc
-  issuerRef:
-    name: platform-kubernetes-metrics-server
-    kind: Issuer
-    group: cert-manager.io
+          name: metrics-server-vault-issuer
+    caBundle: $vault:cluster_ca_cert$
+    path: $vault:path_pki_sign:aggregation_layer$
+    server: $vault:cluster_addr$
