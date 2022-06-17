@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-kube_apiserver_version: "1.24.1"
+kube_apiserver_version: "1.24.2"
 kube_apiserver_architecture_map:
   amd64: amd64
   x86_64: amd64
