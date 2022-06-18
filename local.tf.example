@@ -68,7 +68,7 @@ locals {
             ]
           }
           core-dns = {
-            version   = "1.9.2",
+            version   = "1.9.3",
             namespace = "kube-system"
             ready_on = [
               { kind = "deployment", name = "coredns" }
