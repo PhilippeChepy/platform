@@ -12,7 +12,7 @@ Once your backup is made and stored in a safe location, you can proceed with the
   value for the cleanup step
   - move to the `terraform-base` directory
   - run `terraform apply`, this should update the instance-pool template ID
-3. With `exo` CLI, or by other means, get the list of current Vault instance. These instances are using the old template:
+3. With `exo` CLI, or by other means, get the list of current Vault instances. These instances are using the old template:
     ```bash  
     exo compute instance list |grep vault
     # 【output】
@@ -50,7 +50,7 @@ Once your backup is made and stored in a safe location, you can proceed with the
     # paas-staging-vault-addab-slqku    89.145.163.92:8201    follower    true
     ```
 10. Repeat operations from step 4 for other cluster members found in step 3.
-11. Once the cluster is fully update, enable TLS renewal from vault-agent:
+11. Once the cluster is fully updated, enable TLS renewal from vault-agent:
   - move to this repository's root directory
   - run `ansible-playbook -i artifacts/inventory_vault.yml ansible-playbooks/vault-cluster-tls-agent.yaml`
 12. Delete the older template (value before the step 2 update) as it's not used anymore:
