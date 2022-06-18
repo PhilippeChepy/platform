@@ -1,13 +1,7 @@
-# reloader template 
+# Reloader template 
 
 How to build a new template:
-
-- update `kustomization.yaml` to match the expected version
-- build manifests
-
-```shell
-VERSION=0.0.114
-
-mkdir -p "${VERSION}"
-kustomize build > "${VERSION}/manifests.yaml"
-```
+- you need to have the `kustomize` cli tool installed
+- create a new version directory, based on the latest
+- update the `kustomization.yaml` file to match the new version
+- render the manifest bundle file: `kustomize build ./<new-version>/ > <new-version>/manifests.yaml`

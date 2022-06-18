@@ -2,12 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.114/deployments/kubernetes/manifests/clusterrole.yaml
-  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.114/deployments/kubernetes/manifests/clusterrolebinding.yaml
-  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.114/deployments/kubernetes/manifests/role.yaml
-  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.114/deployments/kubernetes/manifests/rolebinding.yaml
-  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.114/deployments/kubernetes/manifests/serviceaccount.yaml
-  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.114/deployments/kubernetes/manifests/deployment.yaml
+  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.114/deployments/kubernetes/reloader.yaml
 
 namespace: reloader
 
