@@ -40,3 +40,4 @@
     - systemd
     - vault
     - vault_agent_vault
+    - rclone

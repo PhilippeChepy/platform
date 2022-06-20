@@ -1,0 +1,77 @@
+---
+
+- name: Check rclone package checksum file
+  tags:
+    - rclone
+  ansible.builtin.stat:
+    path: "/tmp/{{ rclone_shasums }}"
+  become: false
+  register: rclone_checksum
+
+- name: Get rclone package checksum file
+  tags:
+    - rclone
+  ansible.builtin.get_url:
+    url: "{{ rclone_checksum_file_url }}"
+    dest: "/tmp/{{ rclone_shasums }}"
+    owner: root
+    group: root
+    mode: "0666"
+  when: not rclone_checksum.stat.exists | bool
+
+- name: Get rclone package checksum
+  tags:
+    - rclone
+    - skip_ansible_lint
+  ansible.builtin.shell: |
+    set -o pipefail
+    grep "{{ rclone_pkg }}" "/tmp/{{ rclone_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: rclone_sha256
+
+- name: Check rclone package file
+  tags:
+    - rclone
+  ansible.builtin.stat:
+    path: "/tmp/{{ rclone_pkg }}"
+  become: false
+  register: rclone_package
+
+- name: "Download rclone → {{ rclone_zip_url }}"
+  tags:
+    - rclone
+  ansible.builtin.get_url:
+    url: "{{ rclone_zip_url }}"
+    dest: "/tmp/{{ rclone_pkg }}"
+    owner: root
+    group: root
+    mode: "0666"
+    checksum: "sha256:{{ rclone_sha256.stdout }}"
+    timeout: "42"
+  when: not rclone_package.stat.exists | bool
+
+- name: Unarchive rclone
+  tags:
+    - rclone
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "/tmp/{{ rclone_pkg }}"
+    dest: "/tmp/"
+    creates: "/tmp/rclone-v{{ rclone_version }}-{{ rclone_os }}-{{ rclone_architecture }}/rclone"
+    include:
+    - "rclone-v{{ rclone_version }}-{{ rclone_os }}-{{ rclone_architecture }}/rclone"
+
+- name: Install rclone
+  tags:
+    - rclone
+  become: true
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/tmp/rclone-v{{ rclone_version }}-{{ rclone_os }}-{{ rclone_architecture }}/rclone"
+    dest: "{{ rclone_bin_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"

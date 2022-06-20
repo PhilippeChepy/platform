@@ -1,0 +1,19 @@
+---
+
+# Package variables
+rclone_version: "1.58.1"
+rclone_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+rclone_architecture: "{{ rclone_architecture_map[ansible_architecture] }}"
+rclone_os: "{{ ansible_system|lower }}"
+rclone_pkg: "rclone-v{{ rclone_version }}-{{ rclone_os }}-{{ rclone_architecture }}.zip"
+
+rclone_shasums: "{{ rclone_os }}-{{ rclone_architecture }}.zip.sha256"
+rclone_zip_url: "https://github.com/rclone/rclone/releases/download/v{{ rclone_version }}/rclone-v{{ rclone_version }}-{{ rclone_os }}-{{ rclone_architecture }}.zip"
+rclone_checksum_file_url: "https://github.com/rclone/rclone/releases/download/v{{ rclone_version }}/SHA256SUMS"
+
+# Paths
+rclone_bin_path: /usr/local/bin

@@ -19,3 +19,6 @@ apt_unwanted_packages:
   - udisks2
   - ufw
   - unattended-upgrades
+
+apt_wanted_packages:
+  - unzip
