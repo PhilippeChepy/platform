@@ -33,3 +33,4 @@
     - exoscale_etcd
     - vault_agent_exoscale_etcd
     - rclone
+    - node_exporter

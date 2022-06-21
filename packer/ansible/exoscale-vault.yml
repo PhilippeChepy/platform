@@ -41,3 +41,4 @@
     - vault
     - vault_agent_vault
     - rclone
+    - node_exporter

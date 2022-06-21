@@ -1,0 +1,90 @@
+---
+
+- name: Check Node exporter checksum file
+  tags:
+    - node-exporter
+  ansible.builtin.stat:
+    path: "/tmp/{{ node_exporter_shasums }}"
+  become: false
+  register: node_exporter_checksum
+
+- name: Get Node exporter checksum file
+  tags:
+    - node-exporter
+  ansible.builtin.get_url:
+    url: "{{ node_exporter_checksum_file_url }}"
+    dest: "/tmp/{{ node_exporter_shasums }}"
+    owner: "root"
+    group: "root"
+    mode: "0666"
+  when: not node_exporter_checksum.stat.exists | bool
+
+- name: Get Node exporter checksum
+  tags:
+    - node-exporter
+    - skip_ansible_lint
+  ansible.builtin.shell: |
+    set -o pipefail
+    grep "{{ node_exporter_pkg }}$" "/tmp/{{ node_exporter_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: node_exporter_sha256
+
+- name: Check Node exporter package file
+  tags:
+    - node-exporter
+  ansible.builtin.stat:
+    path: "/tmp/{{ node_exporter_pkg }}"
+  become: false
+  register: node_exporter_package
+
+- name: "Download Node exporter → {{ node_exporter_url }}"
+  tags:
+    - node-exporter
+  ansible.builtin.get_url:
+    url: "{{ node_exporter_url }}"
+    dest: "/tmp/{{ node_exporter_pkg }}"
+    owner: "root"
+    group: "root"
+    mode: "0666"
+    checksum: "sha256:{{ node_exporter_sha256.stdout }}"
+    timeout: "42"
+  when: not node_exporter_package.stat.exists | bool
+
+- name: Unarchive Node exporter
+  tags:
+    - node-exporter
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "/tmp/{{ node_exporter_pkg }}"
+    dest: "/tmp"
+    creates: "/tmp/node_exporter-{{ node_exporter_version }}.{{ node_exporter_os }}-{{ node_exporter_architecture }}/node_exporter"
+
+- name: Install Node exporter
+  tags:
+    - node-exporter
+  become: true
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.{{ node_exporter_os }}-{{ node_exporter_architecture }}/node_exporter"
+    dest: "{{ node_exporter_bin_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: systemd unit
+  tags:
+    - node-exporter
+  become: true
+  ansible.builtin.template:
+    src: "node-exporter.service.j2"
+    dest: "/etc/systemd/system/node-exporter.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - enable node-exporter

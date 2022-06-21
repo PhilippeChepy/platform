@@ -1,0 +1,8 @@
+---
+
+- name: enable node-exporter
+  become: true
+  ansible.builtin.systemd:
+    name: node-exporter
+    enabled: true
+    state: started
