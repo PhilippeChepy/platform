@@ -97,7 +97,7 @@ locals {
             ]
           }
           reloader = {
-            version   = "0.0.114"
+            version   = "0.0.117"
             namespace = "reloader"
             ready_on = [
               { kind = "deployment", name = "reloader" }
