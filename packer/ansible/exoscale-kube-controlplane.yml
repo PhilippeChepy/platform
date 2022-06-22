@@ -16,6 +16,19 @@
     healthcheck_script_path: "{{ kube_apiserver_bin_path }}/kube-healthcheck"
     # kubernetes control plane components integration with vault agent
     vault_agent_kube_control_plane_auth_path: auth/exoscale
+    # monitoring
+    ssl_exporter_kubeconfigs:
+      cloud-controller-manager-kubeconfig: "{{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig"
+      cluster-autoscaler-kubeconfig: "{{ exoscale_cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig"
+      konnectivity-server-kubeconfig: "{{ konnectivity_server_config_path }}/konnectivity-server.kubeconfig"
+      kube-apiserver-kubeconfig: "/home/{{ kubectl_user }}/.kube/config"
+      kube-controller-manager-kubeconfig: "{{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig"
+      kube-scheduler-kubeconfig: "{{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig"
+    ssl_exporter_certificates:
+      konnectivity-server-certificates: "{{ konnectivity_server_config_path }}/*.pem"
+      kube-apiserver-certificates: "{{ kube_apiserver_config_path }}/*.pem"
+      kube-controller-manager-certificates: "{{ kube_controller_manager_config_path }}/*.pem"
+      kube-scheduler-certificates: "{{ kube_scheduler_config_path }}/*.pem"
   roles:
     - apt
     - sshd
@@ -33,4 +46,5 @@
     - exoscale_cli
     - jq
     - vault_agent_kube_control_plane
+    - ssl_exporter
     - node_exporter

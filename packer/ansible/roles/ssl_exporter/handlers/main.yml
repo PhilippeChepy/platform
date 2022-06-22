@@ -1,0 +1,8 @@
+---
+
+- name: enable ssl-exporter
+  become: true
+  ansible.builtin.systemd:
+    name: ssl-exporter
+    enabled: true
+    state: started

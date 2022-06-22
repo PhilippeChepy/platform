@@ -1,0 +1,11 @@
+modules:
+{% for name, target in ssl_exporter_certificates.items() %}
+  "{{ name }}":
+    prober: "file"
+    target: "{{ target }}"
+{% endfor %}
+{% for name, target in ssl_exporter_kubeconfigs.items() %}
+  "{{ name }}":
+    prober: "kubeconfig"
+    target: "{{ target }}"
+{% endfor %}

@@ -1,0 +1,13 @@
+[Unit]
+Description=SSL Exporter
+Documentation=https://github.com/ribbybibby/ssl_exporter
+After=network-online.target time-sync.target
+Requires=network-online.target time-sync.target
+
+[Service]
+ExecStart={{ ssl_exporter_bin_path }}/ssl_exporter --config.file="{{ ssl_exporter_config_path }}/ssl-exporter.yaml"
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

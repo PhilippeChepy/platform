@@ -36,9 +36,13 @@
     vault_mode: agent
     # vault integration with vault agent
     vault_agent_vault_auth_path: auth/exoscale
+    # monitoring
+    ssl_exporter_certificates:
+      vault-certificates: "{{ vault_tls_config_path }}/*.pem"
   roles:
     - systemd
     - vault
     - vault_agent_vault
     - rclone
+    - ssl_exporter
     - node_exporter

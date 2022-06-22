@@ -1,0 +1,23 @@
+---
+
+# Package variables
+ssl_exporter_version: "2.4.1"
+ssl_exporter_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  aarch64: arm64
+
+ssl_exporter_architecture: "{{ ssl_exporter_architecture_map[ansible_architecture] }}"
+ssl_exporter_os: "{{ ansible_system|lower }}"
+ssl_exporter_shasums: "ssl_exporter.SHA256SUMS"
+ssl_exporter_pkg: "ssl_exporter_{{ ssl_exporter_version }}_{{ ssl_exporter_os }}_{{ ssl_exporter_architecture }}.tar.gz"
+ssl_exporter_url: "https://github.com/ribbybibby/ssl_exporter/releases/download/v{{ ssl_exporter_version }}/ssl_exporter_{{ ssl_exporter_version }}_{{ ssl_exporter_os }}_{{ ssl_exporter_architecture }}.tar.gz"
+ssl_exporter_checksum_file_url: "https://github.com/ribbybibby/ssl_exporter/releases/download/v{{ ssl_exporter_version }}/ssl_exporter_{{ ssl_exporter_version }}_checksums.txt"
+
+# Paths
+ssl_exporter_bin_path: /usr/local/bin
+ssl_exporter_config_path: /etc/ssl-exporter
+
+# Targets
+ssl_exporter_kubeconfigs: {}
+ssl_exporter_certificates: {}

@@ -23,6 +23,9 @@
     healthcheck_script_path: "{{ etcd_bin_path }}/etcd-healthcheck"
     # etcd integration with vault agent
     vault_agent_exoscale_etcd_auth_path: auth/exoscale
+    # monitoring
+    ssl_exporter_certificates:
+      etcd-certificates: "{{ etcd_certs_path }}/*.pem"
   roles:
     - systemd
     - vault
@@ -33,4 +36,5 @@
     - exoscale_etcd
     - vault_agent_exoscale_etcd
     - rclone
+    - ssl_exporter
     - node_exporter

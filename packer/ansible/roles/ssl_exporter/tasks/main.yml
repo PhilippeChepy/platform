@@ -1,0 +1,115 @@
+---
+
+- name: Check SSL exporter checksum file
+  tags:
+    - ssl-exporter
+  ansible.builtin.stat:
+    path: "/tmp/{{ ssl_exporter_shasums }}"
+  become: false
+  register: ssl_exporter_checksum
+
+- name: Get SSL exporter checksum file
+  tags:
+    - ssl-exporter
+  ansible.builtin.get_url:
+    url: "{{ ssl_exporter_checksum_file_url }}"
+    dest: "/tmp/{{ ssl_exporter_shasums }}"
+    owner: "root"
+    group: "root"
+    mode: "0666"
+  when: not ssl_exporter_checksum.stat.exists | bool
+
+- name: Get SSL exporter checksum
+  tags:
+    - ssl-exporter
+    - skip_ansible_lint
+  ansible.builtin.shell: |
+    set -o pipefail
+    grep "{{ ssl_exporter_pkg }}$" "/tmp/{{ ssl_exporter_shasums }}" | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: false
+  register: ssl_exporter_sha256
+
+- name: Check SSL exporter package file
+  tags:
+    - ssl-exporter
+  ansible.builtin.stat:
+    path: "/tmp/{{ ssl_exporter_pkg }}"
+  become: false
+  register: ssl_exporter_package
+
+- name: "Download SSL exporter → {{ ssl_exporter_url }}"
+  tags:
+    - ssl-exporter
+  ansible.builtin.get_url:
+    url: "{{ ssl_exporter_url }}"
+    dest: "/tmp/{{ ssl_exporter_pkg }}"
+    owner: "root"
+    group: "root"
+    mode: "0666"
+    checksum: "sha256:{{ ssl_exporter_sha256.stdout }}"
+    timeout: "42"
+  when: not ssl_exporter_package.stat.exists | bool
+
+- name: Unarchive SSL exporter
+  tags:
+    - ssl-exporter
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "/tmp/{{ ssl_exporter_pkg }}"
+    dest: "/tmp"
+    creates: "/tmp/ssl_exporter"
+
+- name: Install SSL exporter
+  tags:
+    - ssl-exporter
+  become: true
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/tmp/ssl_exporter"
+    dest: "{{ ssl_exporter_bin_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Create directories
+  tags:
+    - ssl-exporter
+  become: true
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: 0700
+  loop:
+    - "{{ ssl_exporter_config_path }}"
+
+- name: Render configuration file
+  tags:
+    - ssl-exporter
+  become: true
+  ansible.builtin.template:
+    src: "ssl-exporter.yaml.j2"
+    dest: "{{ ssl_exporter_config_path }}/ssl-exporter.yaml"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: systemd unit
+  tags:
+    - ssl-exporter
+  become: true
+  ansible.builtin.template:
+    src: "ssl-exporter.service.j2"
+    dest: "/etc/systemd/system/ssl-exporter.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - enable ssl-exporter
