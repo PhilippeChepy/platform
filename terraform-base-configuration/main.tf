@@ -1,3 +1,20 @@
+resource "exoscale_iam_access_key" "iam_api_key" {
+  name = "${local.platform_name}-vault-iam"
+  # TODO: restrict key to required API for exoscale-ccm, exoscale-cluster-autoscaler, and the etcd cluster discovery script
+}
+
+resource "exoscale_iam_access_key" "auth_api_key" {
+  name = "${local.platform_name}-vault-auth"
+  operations = [
+    "list-zones",
+    "list-instances",
+    "list-security-groups",
+    "get-instance",
+    "get-instance-pool",
+    "get-security-group"
+  ]
+}
+
 # Exoscale plugin: secret engine
 
 resource "vault_generic_endpoint" "exoscale_secret_plugin_register" {
@@ -24,8 +41,8 @@ resource "vault_generic_endpoint" "iam_exoscale_config_root" {
   disable_delete = true
   data_json = jsonencode({
     api_environment = "api"
-    root_api_key    = local.platform_credentials.exoscale.key,
-    root_api_secret = local.platform_credentials.exoscale.secret,
+    root_api_key    = exoscale_iam_access_key.iam_api_key.key
+    root_api_secret = exoscale_iam_access_key.iam_api_key.secret
     zone            = local.platform_zone
   })
 }
@@ -689,8 +706,8 @@ resource "vault_generic_endpoint" "auth_exoscale_config" {
   disable_delete = true
   data_json = jsonencode({
     api_environment = "api"
-    api_key         = local.platform_credentials.exoscale.key,
-    api_secret      = local.platform_credentials.exoscale.secret,
+    api_key         = exoscale_iam_access_key.auth_api_key.key
+    api_secret      = exoscale_iam_access_key.auth_api_key.secret
     approle_mode    = true,
     zone            = local.platform_zone
   })

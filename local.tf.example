@@ -154,12 +154,6 @@ locals {
   }
 
   platform_credentials = {
-    ## TODO: WAITING FOR "exoscale_iam_key" resource
-    exoscale = {
-      key    = "EXOxxxxxxxxxxxxxxxxxxxxxxxx"
-      secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    }
-
     ## If using cloudflare, you can deploy cert-manager-dns101-cloudflare on ingress controllers
     #
     # REF: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/#api-tokens
