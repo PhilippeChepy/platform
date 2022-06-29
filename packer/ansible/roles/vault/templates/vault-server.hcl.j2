@@ -15,6 +15,10 @@ listener "tcp" {
   tls_cert_file      = "{{ vault_tls_config_path }}/server.pem"
   tls_key_file       = "{{ vault_tls_config_path }}/server.key"
   tls_client_ca_file = "{{ vault_tls_config_path }}/ca.pem"
+
+  telemetry {
+    unauthenticated_metrics_access = true
+  }
 }
 
 storage "raft" {
@@ -26,4 +30,9 @@ storage "raft" {
     leader_api_addr       = "https://CLUSTER_EIP_ADDRESS:8200"
     leader_ca_cert_file   = "{{ vault_tls_config_path }}/ca.pem"
   }
+}
+
+telemetry {
+  prometheus_retention_time = "24h"
+  disable_hostname = true
 }
