@@ -3,12 +3,6 @@
 - name: Update base OS settings
   hosts: default
   become: true
-  vars:
-    # monitoring
-    ssl_exporter_kubeconfigs:
-      kubelet-kubeconfig: "{{ kubelet_config_path }}/kubelet.kubeconfig"
-    ssl_exporter_certificates:
-      kubelet-certificates: "{{ kubelet_config_path }}/*.pem"
   roles:
     - apt
     - sshd
@@ -19,4 +13,4 @@
     - containerd
     - kubelet
     - cilium_sysctl
-    - ssl_exporter
+
