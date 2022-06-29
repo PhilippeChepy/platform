@@ -1,0 +1,25 @@
+helmGlobals:
+  chartHome: .helm
+  configHome: .helm
+
+helmCharts:
+- name: cert-manager
+  repo: https://charts.jetstack.io
+  releaseName: cert-manager
+  namespace: cert-manager
+  version: 1.8.2
+  valuesInline:
+    installCRDs: true
+    global:
+      leaderElection:
+        namespace: cert-manager
+
+images:
+- name: quay.io/jetstack/cert-manager-controller
+  newTag: v1.8.2
+- name: quay.io/jetstack/cert-manager-cainjector
+  newTag: v1.8.2
+- name: quay.io/jetstack/cert-manager-webhook
+  newTag: v1.8.2
+- name: quay.io/jetstack/cert-manager-ctl
+  newTag: v1.8.2
