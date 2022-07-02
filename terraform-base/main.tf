@@ -104,23 +104,6 @@ resource "local_sensitive_file" "ssh_private_key" {
   file_permission = 0600
 }
 
-resource "local_file" "properties_base" {
-  content = jsonencode({
-    operator_security_group = exoscale_security_group.operator.id
-  })
-  filename = "${path.module}/../artifacts/properties-base.json"
-}
-
-resource "local_file" "properties_vault" {
-  content = jsonencode({
-    client_security_group = module.vault_cluster.client_security_group_id
-    server_security_group = module.vault_cluster.server_security_group_id
-    url                   = module.vault_cluster.url
-    ip_address            = module.vault_cluster.ip_address
-  })
-  filename = "${path.module}/../artifacts/properties-vault.json"
-}
-
 resource "local_file" "cluster_inventory" {
   content  = <<-EOT
 all:
@@ -129,8 +112,16 @@ all:
     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
     ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
     
+    base_operator_security_group: "${exoscale_security_group.operator.id}"
+    rclone_backup_vault_bucket: "${aws_s3_bucket.backup["vault"].bucket}"
+    rclone_backup_vault_zone: "${local.platform_backup_zone}"
+    rclone_backup_etcd_bucket: "${aws_s3_bucket.backup["etcd"].bucket}"
+    rclone_backup_etcd_zone: "${local.platform_backup_zone}"
     vault_cluster_name: "${local.platform_name}-vault"
-    vault_ip_address: ${module.vault_cluster.ip_address}
+    vault_ip_address: "${module.vault_cluster.ip_address}"
+    vault_url: "${module.vault_cluster.url}"
+    vault_client_security_group_id: "${module.vault_cluster.client_security_group_id}"
+    vault_server_security_group_id: "${module.vault_cluster.server_security_group_id}"
   children:
     vault:
       hosts:
@@ -139,5 +130,5 @@ all:
           ansible_host: ${instance.public_ip_address~}
 %{endfor}
 EOT
-  filename = "${path.module}/../artifacts/inventory_vault.yml"
+  filename = "${path.module}/../artifacts/inventory.yml"
 }

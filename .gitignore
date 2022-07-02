@@ -8,7 +8,7 @@ artifacts/*.key
 artifacts/*.pem
 artifacts/*.kubeconfig
 artifacts/id_*
-artifacts/inventory_vault.yml
+artifacts/inventory.yml
 artifacts/root-token.txt
 artifacts/vault-*
 build.log
