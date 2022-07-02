@@ -5,5 +5,5 @@ vault_agent_vault_user: "{{ vault_user }}"
 vault_agent_vault_group: "{{ vault_group }}"
 
 vault_agent_vault_auth_path: null
-vault_agent_kubelet_paths:
+vault_agent_vault_paths:
   pki_vault_cert: 'pki/platform/vault/issue/server'
