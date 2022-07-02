@@ -1,6 +1,7 @@
 locals {
-  platform_name = "paas-staging"
-  platform_zone = "de-fra-1"
+  platform_name        = "my-own-paas"
+  platform_zone        = "de-fra-1"
+  platform_backup_zone = "de-muc-1"
 
   # Defaults to the public IP of the device running terraform apply in `terraform-base`.
   # This calls ipconfig.me to automatically detect this public IP address.

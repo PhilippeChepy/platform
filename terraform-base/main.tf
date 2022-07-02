@@ -40,6 +40,29 @@ resource "exoscale_security_group" "operator" {
   external_sources = try(local.platform_admin_networks == "auto", false) ? ["${chomp(data.http.operator_ip_address[0].body)}/32"] : tolist(local.platform_admin_networks)
 }
 
+# Backup buckets
+
+resource "random_string" "random_id" {
+  length  = 6
+  lower   = true
+  number  = true
+  special = false
+  upper   = false
+}
+
+resource "aws_s3_bucket" "backup" {
+  for_each = toset(["vault", "etcd"])
+  provider = aws.sos
+  bucket   = "${local.platform_name}-${random_string.random_id.result}-${each.value}-backups.${local.platform_backup_zone}"
+
+  # Disable unsupported features
+  lifecycle {
+    ignore_changes = [
+      object_lock_configuration,
+    ]
+  }
+}
+
 # Vault
 
 module "vault_cluster" {
