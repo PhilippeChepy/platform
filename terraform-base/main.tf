@@ -45,7 +45,7 @@ resource "exoscale_security_group" "operator" {
 resource "random_string" "random_id" {
   length  = 6
   lower   = true
-  number  = true
+  numeric = true
   special = false
   upper   = false
 }

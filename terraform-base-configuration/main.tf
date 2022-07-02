@@ -217,7 +217,7 @@ EOT
 resource "random_string" "token_id" {
   length  = 6
   lower   = true
-  number  = true
+  numeric = true
   special = false
   upper   = false
 }
@@ -225,7 +225,7 @@ resource "random_string" "token_id" {
 resource "random_string" "token_secret" {
   length  = 16
   lower   = true
-  number  = true
+  numeric = true
   special = false
   upper   = false
 }
