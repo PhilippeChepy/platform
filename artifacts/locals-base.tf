@@ -16,17 +16,17 @@ data "local_file" "inventory" {
 
 locals {
   inventory_vars = yamldecode(data.local_file.inventory.content).all.vars
-  
-  base   = {
+
+  base = {
     operator_security_group = local.inventory_vars.base_operator_security_group
   }
 
-  vault  = {
+  vault = {
     client_security_group = local.inventory_vars.vault_client_security_group_id
     server_security_group = local.inventory_vars.vault_server_security_group_id
     url                   = local.inventory_vars.vault_url
     ip_address            = local.inventory_vars.vault_ip_address
-    token = data.local_file.root_token.content
+    token                 = data.local_file.root_token.content
   }
 
   rclone = {

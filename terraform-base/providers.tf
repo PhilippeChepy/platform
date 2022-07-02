@@ -5,7 +5,7 @@ provider "aws" {
     s3 = "https://sos-${local.platform_backup_zone}.exo.io"
   }
 
-  region                   = local.platform_backup_zone
+  region = local.platform_backup_zone
 
   # Skip AWS validations
   skip_credentials_validation = true

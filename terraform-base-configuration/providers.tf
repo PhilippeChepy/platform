@@ -1,4 +1,4 @@
-provider "exoscale" { 
+provider "exoscale" {
 }
 
 provider "random" {
