@@ -1,3 +1,9 @@
+provider "exoscale" { 
+}
+
+provider "random" {
+}
+
 provider "vault" {
   address      = local.vault.url
   token        = local.vault.token
