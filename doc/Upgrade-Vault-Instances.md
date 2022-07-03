@@ -1,4 +1,4 @@
-# HCP Vault cluster upgrade procedure
+# Hashicorp Vault cluster upgrade procedure
 
 **IMPORTANT** First, you need to perform a backup of your Vault cluster, this would help you easily rollback in case of disaster.
 Once your backup is made and stored in a safe location, you can proceed with the next steps.
@@ -30,15 +30,15 @@ Once your backup is made and stored in a safe location, you can proceed with the
 5. A new instance will be automatically created to replace the one you just deleted:
   - Wait for the new instance to be running and reachable through SSH.
   - Copy this new instance's hostname for later
-6. Update the `artifacts/inventory_vault.yml`:
+6. Update the `artifacts/inventory.yml`:
   - move to the `terraform-base` directory
   - run `terraform apply`, this should update the inventory file with actual instance-pool members properties.
 7. Initialize TLS for the new instance:
   - move to this repository's root directory
-  - run `ansible-playbook -i artifacts/inventory_vault.yml ansible-playbooks/vault-cluster-tls-bootstrap.yaml -l <hostname-from-step-5>`
+  - run `ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-tls-bootstrap.yaml -l <hostname-from-step-5>`
 8. Unseal the new instance:
   - move to this repository's root directory
-  - run `ansible-playbook -i artifacts/inventory_vault.yml ansible-playbooks/vault-cluster-unseal.yaml -l <hostname-from-step-5>`
+  - run `ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-unseal.yaml -l <hostname-from-step-5>`
 9. Wait for new cluster peer becomes a voter (can be checked from another node, running `vault operator raft list-peers`):
     ```bash
     vault operator raft list-peers
@@ -52,7 +52,7 @@ Once your backup is made and stored in a safe location, you can proceed with the
 10. Repeat operations from step 4 for other cluster members found in step 3.
 11. Once the cluster is fully updated, enable TLS renewal from vault-agent:
   - move to this repository's root directory
-  - run `ansible-playbook -i artifacts/inventory_vault.yml ansible-playbooks/vault-cluster-tls-agent.yaml`
+  - run `ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml`
 12. Delete the older template (value before the step 2 update) as it's not used anymore:
     ```bash
     exo compute template delete -z de-fra-1 212a49ca-9951-4f84-9609-800aafe5c0b5

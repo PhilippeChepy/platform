@@ -2,7 +2,7 @@
 
 This repository implements a minimal PaaS hosted in the Exoscale public cloud.
 This platform is based on:
-- HCP Vault for secret management
+- Hashicorp Vault for secret management
 - Kubernetes for workloads orchestration
 
 ### Global overview
@@ -59,7 +59,7 @@ The whole infrastructure is provisioned by applying 3 configurations, one after 
 
 This configuration creates all required elements for other parts of the platform:
 - a CA certificate and the related private key
-- an operator security group (allows to access SSH, and clients of services: `HCP Vault`, `Etcd`, and `Kubernetes` API server)
+- an operator security group (allows to access SSH, and clients of services: `Hashicorp Vault`, `Etcd`, and `Kubernetes` API server)
 - an SSH keypair
 - a Vault cluster, which needs to be initialized and unsealed
 
@@ -83,7 +83,7 @@ The Vault module allows the provisioning of a Vault cluster:
 Both previous tasks can be performed using the `vault-cluster-bootstrap.yaml` Ansible playbook:
 
 ```bash
-ansible-playbook -i artifacts/inventory_vault.yml playbooks/vault-cluster-bootstrap.yaml
+ansible-playbook -i artifacts/inventory.yml playbooks/vault-cluster-bootstrap.yaml
 ```
 
 ## Base configuration (terraform-base-configuration)
@@ -136,7 +136,7 @@ Once resources from this sub-directory are created, you can start vault-agent (`
 This task can be performed using the `vault-cluster-tls-agent.yaml` Ansible playbook:
 
 ```bash
-ansible-playbook -i artifacts/inventory_vault.yml playbooks/vault-cluster-tls-agent.yaml
+ansible-playbook -i artifacts/inventory.yml playbooks/vault-cluster-tls-agent.yaml
 ```
 
 ## Etcd & Kubernetes cluster (terraform-kubernetes)
