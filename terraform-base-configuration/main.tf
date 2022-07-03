@@ -1,6 +1,14 @@
 resource "exoscale_iam_access_key" "iam_api_key" {
   name = "${local.platform_name}-vault-iam"
-  # TODO: restrict key to required API for exoscale-ccm, exoscale-cluster-autoscaler, and the etcd cluster discovery script
+  # TODO: restrict key to required APIs for:
+  # exoscale-ccm, 
+  # exoscale-cluster-autoscaler, 
+  # etcd cluster discovery script
+  # etcd backup script
+  # vault backup script
+  #
+  # operations = ["put-sos-object", "put-sos-object-acl", "delete-sos-object", "list-sos-bucket"]
+  # resources  = ["sos/bucket:${local.rclone.vault.bucket}", "sos/bucket:${local.rclone.etcd.bucket}"]
 }
 
 resource "exoscale_iam_access_key" "auth_api_key" {
@@ -58,29 +66,28 @@ resource "vault_generic_endpoint" "iam_exoscale_config_lease" {
 }
 
 resource "vault_generic_endpoint" "iam_exoscale_role_etcd_instance_pool" {
-  depends_on   = [vault_mount.iam_exoscale]
-  path         = "${vault_mount.iam_exoscale.path}/role/etcd-instance-pool"
-  disable_read = true
-  data_json = jsonencode({
-    operations = []
-  })
-}
+  for_each = {
+    # TODO: restrict operations for Kubernetes components
+    etcd-instance-pool       = { operations = [] }
+    cloud-controller-manager = { operations = [] }
+    cluster-autoscaler       = { operations = [] }
+    vault-backup = {
+      operations = ["list-sos-bucket", "create-sos-bucket", "put-sos-object", "get-sos-object", "delete-sos-object"],
+      resources  = ["sos/bucket:${local.rclone.vault.bucket}"]
+    }
+    etcd-backup = {
+      operations = ["list-sos-bucket", "create-sos-bucket", "put-sos-object", "get-sos-object", "delete-sos-object"],
+      resources  = ["sos/bucket:${local.rclone.etcd.bucket}"]
+    }
+  }
 
-resource "vault_generic_endpoint" "iam_exoscale_role_cloud_controller_manager" {
   depends_on   = [vault_mount.iam_exoscale]
-  path         = "${vault_mount.iam_exoscale.path}/role/cloud-controller-manager"
+  path         = "${vault_mount.iam_exoscale.path}/role/${each.key}"
   disable_read = true
   data_json = jsonencode({
-    operations = []
-  })
-}
-
-resource "vault_generic_endpoint" "iam_exoscale_role_cluster_autoscaler" {
-  depends_on   = [vault_mount.iam_exoscale]
-  path         = "${vault_mount.iam_exoscale.path}/role/cluster-autoscaler"
-  disable_read = true
-  data_json = jsonencode({
-    operations = []
+    operations = try(each.value.operations, [])
+    resources  = try(each.value.resources, [])
+    tags       = try(each.value.tags, null)
   })
 }
 
@@ -171,6 +178,44 @@ resource "vault_pki_secret_backend_config_urls" "pki_vault" {
   issuing_certificates = ["https://${local.platform_components.vault.endpoint}/v1/${vault_mount.pki_vault.path}/ca"]
 }
 
+## Backups
+
+resource "vault_mount" "secret_rclone_backup" {
+  path        = "kv/platform/backup"
+  description = "Backup Secrets"
+
+  type                      = "kv"
+  default_lease_ttl_seconds = local.platform_default_tls_ttl.cert * 3600
+  max_lease_ttl_seconds     = local.platform_default_tls_ttl.cert * 3600
+}
+
+resource "tls_private_key" "backup" {
+  for_each    = toset(["etcd", "vault"])
+  algorithm   = local.platform_default_tls_algorithm.algorithm
+  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+}
+
+resource "vault_generic_secret" "backup_public" {
+  for_each   = tls_private_key.backup
+  depends_on = [vault_mount.secret_rclone_backup]
+  path       = "${vault_mount.secret_rclone_backup.path}/${each.key}-public"
+
+  data_json = jsonencode({
+    key = tls_private_key.backup[each.key].public_key_pem
+  })
+}
+
+resource "vault_generic_secret" "backup_private" {
+  for_each   = tls_private_key.backup
+  depends_on = [vault_mount.secret_rclone_backup]
+  path       = "${vault_mount.secret_rclone_backup.path}/${each.key}-private"
+
+  data_json = jsonencode({
+    key = tls_private_key.backup[each.key].private_key_pem
+  })
+}
+
 ## Vault roles
 
 resource "vault_pki_secret_backend_role" "pki_vault" {
@@ -208,6 +253,14 @@ resource "vault_policy" "vault_server" {
   policy = <<EOT
 path "${vault_mount.pki_vault.path}/issue/server" {
   capabilities = ["create", "update"]
+}
+
+path "${vault_mount.iam_exoscale.path}/apikey/vault-backup" {
+  capabilities = ["read"]
+}
+
+path "${vault_generic_secret.backup_public["vault"].path}" {
+  capabilities = ["read"]
 }
 EOT
 }
@@ -517,6 +570,14 @@ path "${vault_mount.pki_kubernetes["etcd"].path}/issue/server" {
 }
 
 path "${vault_mount.iam_exoscale.path}/apikey/etcd-instance-pool" {
+  capabilities = ["read"]
+}
+
+path "${vault_mount.iam_exoscale.path}/apikey/etcd-backup" {
+  capabilities = ["read"]
+}
+
+path "${vault_generic_secret.backup_public["etcd"].path}" {
   capabilities = ["read"]
 }
 EOT
