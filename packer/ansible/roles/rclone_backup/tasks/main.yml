@@ -1,0 +1,29 @@
+---
+
+- name: Install rclone-backup helper scripts
+  tags:
+    - rclone-backup
+  become: true
+  ansible.builtin.copy:
+    src: "rclone-backup"
+    dest: "{{ rclone_backup_bin_path }}/rclone-backup"
+    force: true
+    owner: root
+    group: root
+    mode: "0777"
+
+- name: systemd unit & timer
+  tags:
+    - rclone-backup
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+  loop:
+    - rclone-backup.service
+    - rclone-backup.timer

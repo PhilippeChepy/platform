@@ -1,0 +1,281 @@
+#!/bin/bash
+set -e -o pipefail
+SCRIPT="${0##*/}"
+# shellcheck disable=SC2034
+SCRIPT_DIR="$(dirname "$(readlink -e "${0}")")"
+trap 'echo "ERROR[${SCRIPT}]: Internal error (${RCLONE_BACKUP_fullname:-n/a})" >&2' ERR
+
+## Defaults
+: "${RCLONE_BACKUP_NAME:=$(hostname -s)}"
+: "${RCLONE_BACKUP_TIMESTAMP_FORMAT:=%Y%m%d}"
+: "${RCLONE_BACKUP_ENCRYPT_KEY_PUBLIC:=/etc/rclone/backup-public-key.pem}"
+: "${RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE:=/etc/rclone/backup-private-key.pem}"
+: "${RCLONE_BACKUP_RCLONE_CONFIG:=/etc/rclone/backup.conf}"
+: "${RCLONE_BACKUP_RCLONE_PROFILE:=profile}"
+: "${RCLONE_BACKUP_REMOTE_PATH:=$(hostname -d | tr '.' '\n' | tac | tr '\n' '.').backup}"
+: "${RCLONE_BACKUP_SOURCE_PATH:=/var/backups}"
+: "${RCLONE_BACKUP_RETENTION_KEEP:=0}"
+
+
+## Usage
+__USAGE() {
+  cat >&2 <<EOF
+USAGE: ${SCRIPT} [<options>] {backup|restore|clean|list|env}
+
+SYNOPSIS:
+  Encrypt and backup the given source directory to a S3 compatible storage using Rclone.
+  Data is encrypted using Rclone 'crypt' module, with the (symmetric) passwords
+  being generated randomly for each backup and asymmetrically encrypted to be
+  stored along the (remote) backup data (folder).
+
+OPTIONS:
+
+  -n, --name, env:RCLONE_BACKUP_NAME
+    Backup name (default: hostname -s), corresponding to the remote (timestamped) folder
+    created to host the backup material
+
+  -t, --timestamp, env:RCLONE_BACKUP_TIMESTAMP
+    Backup timestamp (digits only!) (default: date +<timestamp-format>)
+
+  -tf, --timestamp-format, env:RCLONE_BACKUP_TIMESTAMP_FORMAT
+    Backup timestamp format (default: %Y%m%d)
+
+  -u, --key-public, env:RCLONE_BACKUP_ENCRYPT_KEY_PUBLIC
+    Public (asymmetric) encryption key (default: /etc/rclone/backup-pub.pem)
+
+  -v, --key-private, env:RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE
+    Private (asymmetric) encryption key (default: /etc/rclone/backup-key.pem)
+
+  -c, --config, env:RCLONE_BACKUP_RCLONE_CONFIG
+    Rclone configuration file path (default: /etc/rclone/backup.conf)
+
+  -p, --profile, env:RCLONE_BACKUP_RCLONE_PROFILE
+    Rclone (non-encrypted) profile name (default: sos)
+    The crypted profile will be automatically computed by adding the '_crypt' suffix (example: sos_crypt)
+
+  -r, --remote, env:RCLONE_BACKUP_REMOTE_PATH
+    Remote path, including bucket name and optional sub-directories (default: rclone-backup)
+
+  -s, --source, env:RCLONE_BACKUP_SOURCE_PATH
+    Source folder path (default: /var/backups)
+
+  -d, --restore, env:RCLONE_BACKUP_RESTORE_PATH
+    Restore folder path (default: timestamped backup name in current directory)
+
+  -k, --keep, env:RCLONE_BACKUP_RETENTION_KEEP
+    Quantity of (former) backups to keep, in addition to the current one (default: 0)
+    If lower than zero, no cleanup is performed
+
+  -e, --environment-file
+    Load options from environment file and RCLONE_BACKUP_* variables (default: none)
+    WARNING: Order in respect with other options matters!
+
+EOF
+}
+[ $# -lt 1 ] && __USAGE && exit 1
+
+# Arguments
+RCLONE_BACKUP_action=
+__OPTION() {
+  [ -z "${2}" ] && echo "ERROR[${SCRIPT}]: Missing option parameter (${1})" >&2 && exit 1
+  return 0
+}
+while [ -n "${1}" ]; do
+  case "${1}" in
+    'help'|'--help'|'-h')
+      __USAGE; exit 1;;
+    '-n'|'--name')
+      __OPTION "${@}"; RCLONE_BACKUP_NAME="${2}"; shift;;
+    '-t'|'--timestamp')
+      __OPTION "${@}"; RCLONE_BACKUP_TIMESTAMP="${2}"; shift;;
+    '-tf'|'--timestamp-format')
+      __OPTION "${@}"; RCLONE_BACKUP_TIMESTAMP_FORMAT="${2}"; shift;;
+    '-u'|'--key-public')
+      __OPTION "${@}"; RCLONE_BACKUP_ENCRYPT_KEY_PUBLIC="${2}"; shift;;
+    '-v'|'--key-private')
+      __OPTION "${@}"; RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE="${2}"; shift;;
+    '-c'|'--config')
+      __OPTION "${@}"; RCLONE_BACKUP_RCLONE_CONFIG="${2}"; shift;;
+    '-p'|'--profile')
+      __OPTION "${@}"; RCLONE_BACKUP_RCLONE_PROFILE="${2}"; shift;;
+    '-r'|'--remote')
+      __OPTION "${@}"; RCLONE_BACKUP_REMOTE_PATH="${2}"; shift;;
+    '-s'|'--source')
+      __OPTION "${@}"; RCLONE_BACKUP_SOURCE_PATH="${2}"; shift;;
+    '-d'|'--restore')
+      __OPTION "${@}"; RCLONE_BACKUP_RESTORE_PATH="${2}"; shift;;
+    '-k'|'--keep')
+      __OPTION "${@}"; RCLONE_BACKUP_RETENTION_KEEP="${2}"; shift;;
+    '-e'|'--environment-file')
+      # shellcheck source=rclone-backup.default
+      source <(sed -nE "s/^\s*(RCLONE_BACKUP[_A-Z]*=([0-9]*|'[^']*'))\s*(#.*)?\$/\1/p" "${2}")
+      shift;;
+    -*)
+      echo "ERROR[${SCRIPT}]: Invalid option (${1})" >&2 && exit 1;;
+    *)
+      if [ -z "${RCLONE_BACKUP_action}" ]; then
+        RCLONE_BACKUP_action="${1}"
+      else
+        echo "ERROR[${SCRIPT}]: Invalid argument (${1})" >&2 && exit 1
+      fi
+      ;;
+  esac
+  shift
+done
+
+# (context)
+SCRIPT="${SCRIPT}(${RCLONE_BACKUP_NAME})"
+
+# Validation
+case "${RCLONE_BACKUP_action}" in
+  'backup'|'restore'|'clean'|'ls'|'list'|'env') ;;
+  *) echo "ERROR[${SCRIPT}]: Invalid action (${RCLONE_BACKUP_action:-n/a})" >&2 && exit 1
+esac
+
+
+## Helpers
+
+# Rclone password generator
+__rclone_crypt_password() {
+  # WARNING: 'rclone config' will choke on (obscured) password starting with '-'!
+  local password
+  while [ -z "${password}" ] || [ "${password:0:1}" == '-' ]; do
+    password="$(openssl rand -base64 24 | rclone obscure -)"
+  done
+  echo "${password}"
+}
+
+
+## Setup
+
+# Environment
+if [ "${RCLONE_BACKUP_action}" == 'env' ]; then
+  cat <<EOF
+RCLONE_BACKUP_NAME='${RCLONE_BACKUP_NAME}'
+RCLONE_BACKUP_TIMESTAMP_FORMAT='${RCLONE_BACKUP_TIMESTAMP_FORMAT}'
+RCLONE_BACKUP_ENCRYPT_KEY_PUBLIC='${RCLONE_BACKUP_ENCRYPT_KEY_PUBLIC}'
+RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE='${RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE}'
+RCLONE_BACKUP_RCLONE_CONFIG='${RCLONE_BACKUP_RCLONE_CONFIG}'
+RCLONE_BACKUP_RCLONE_PROFILE='${RCLONE_BACKUP_RCLONE_PROFILE}'
+RCLONE_BACKUP_REMOTE_PATH='${RCLONE_BACKUP_REMOTE_PATH}'
+RCLONE_BACKUP_SOURCE_PATH='${RCLONE_BACKUP_SOURCE_PATH}'
+RCLONE_BACKUP_RETENTION_KEEP=${RCLONE_BACKUP_RETENTION_KEEP}
+EOF
+  exit 0
+fi
+
+# Configuration
+RCLONE_CONFIG="$(mktemp --suffix='.rclone.conf')"
+# shellcheck disable=SC2064
+trap "rm -f '${RCLONE_CONFIG}'" EXIT
+cat "${RCLONE_BACKUP_RCLONE_CONFIG}" > "${RCLONE_CONFIG}"
+export RCLONE_CONFIG
+
+# Timestamp
+if [ -z "${RCLONE_BACKUP_TIMESTAMP}" ]; then
+  RCLONE_BACKUP_TIMESTAMP="$(date +"${RCLONE_BACKUP_TIMESTAMP_FORMAT}")"
+fi
+
+# Path/name
+RCLONE_BACKUP_fullname="${RCLONE_BACKUP_TIMESTAMP}-${RCLONE_BACKUP_NAME}"
+RCLONE_BACKUP_rclone_plain_path="${RCLONE_BACKUP_RCLONE_PROFILE}:/${RCLONE_BACKUP_REMOTE_PATH%%/}"
+if [ "${RCLONE_BACKUP_action}" == 'restore' ]; then
+  [ -z "${RCLONE_BACKUP_RESTORE_PATH}" ] && RCLONE_BACKUP_RESTORE_PATH="./${RCLONE_BACKUP_fullname}.d"
+  mkdir -p "${RCLONE_BACKUP_RESTORE_PATH}"
+  if [ -n "$(find "${RCLONE_BACKUP_RESTORE_PATH}" -mindepth 1)" ]; then
+    echo "ERROR[${SCRIPT}]: Restoration folder is not empty (${RCLONE_BACKUP_RESTORE_PATH})" >&2
+    exit 1
+  fi
+fi
+
+
+## Main
+
+# List
+if [ "${RCLONE_BACKUP_action}" == 'ls' ] || [ "${RCLONE_BACKUP_action}" == 'list' ]; then
+  rclone lsf "${RCLONE_BACKUP_rclone_plain_path}/" \
+    | sed -nE "s|^([0-9]{4,}-${RCLONE_BACKUP_NAME}).d/\$|\1|p"
+  exit 0
+fi
+
+# Crypted backend
+# REF: https://rclone.org/crypt/
+if [ "${RCLONE_BACKUP_action}" == 'backup' ] || [ "${RCLONE_BACKUP_action}" == 'restore' ]; then
+  if [ "${RCLONE_BACKUP_action}" == 'backup' ]; then
+    # Generate random backup (symmetric) passwords
+    RCLONE_BACKUP_rclone_crypt_password="$(__rclone_crypt_password)"
+    RCLONE_BACKUP_rclone_crypt_password2="$(__rclone_crypt_password)"
+  else
+    # Retrieve and decrypt (asymmetrically) encrypted backup (symmetric) passwords
+    RCLONE_BACKUP_rclone_crypt_password="$(
+      rclone cat "${RCLONE_BACKUP_rclone_plain_path}/${RCLONE_BACKUP_fullname}.key" \
+      | base64 -d \
+      | openssl pkeyutl -decrypt -inkey "${RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE}"
+    )"
+    echo "INFO[${SCRIPT}]: Encryption key retrieval successful (${RCLONE_BACKUP_fullname}.key)"
+    RCLONE_BACKUP_rclone_crypt_password2="${RCLONE_BACKUP_rclone_crypt_password#*:}"
+    RCLONE_BACKUP_rclone_crypt_password="${RCLONE_BACKUP_rclone_crypt_password%:*}"
+  fi
+  rclone config create --no-obscure "${RCLONE_BACKUP_RCLONE_PROFILE}_crypt" crypt \
+    remote "${RCLONE_BACKUP_RCLONE_PROFILE}:" \
+    filename_encryption off \
+    directory_name_encryption false \
+    password "${RCLONE_BACKUP_rclone_crypt_password}" \
+    password2 "${RCLONE_BACKUP_rclone_crypt_password2}" \
+  >/dev/null
+  RCLONE_BACKUP_rclone_crypt_path="${RCLONE_BACKUP_RCLONE_PROFILE}_crypt:/${RCLONE_BACKUP_REMOTE_PATH%%/}"
+  echo "INFO[${SCRIPT}]: Crypted backend configuration successful (${RCLONE_BACKUP_RCLONE_PROFILE}_crypt)"
+fi
+
+# Backup/restore
+if [ "${RCLONE_BACKUP_action}" == 'backup' ]; then
+  # (cleanup; REQUIRED; Encryption keys change at each run!)
+  if [ -n "$(rclone lsf "${RCLONE_BACKUP_rclone_plain_path}/${RCLONE_BACKUP_fullname}.d")" ]; then
+    echo "WARNING[${SCRIPT}]: Purging previous backup (${RCLONE_BACKUP_fullname}.d)" >&2
+    rclone purge "${RCLONE_BACKUP_rclone_plain_path}/${RCLONE_BACKUP_fullname}.d"
+  fi
+  if [ -n "$(rclone lsf "${RCLONE_BACKUP_rclone_plain_path}/${RCLONE_BACKUP_fullname}.key")" ]; then
+    rclone deletefile "${RCLONE_BACKUP_rclone_plain_path}/${RCLONE_BACKUP_fullname}.key"
+  fi
+
+  # (backup)
+  rclone copy "${RCLONE_BACKUP_SOURCE_PATH}" "${RCLONE_BACKUP_rclone_crypt_path}/${RCLONE_BACKUP_fullname}.d"
+  echo "INFO[${SCRIPT}]: Backup successful (${RCLONE_BACKUP_fullname}.d)"
+elif [ "${RCLONE_BACKUP_action}" == 'restore' ]; then
+  rclone copy "${RCLONE_BACKUP_rclone_crypt_path}/${RCLONE_BACKUP_fullname}.d" "${RCLONE_BACKUP_RESTORE_PATH}"
+  echo "INFO[${SCRIPT}]: Restore successful (${RCLONE_BACKUP_RESTORE_PATH})"
+fi
+
+# Asymmetrically encrypt and backup (symmetric) passwords
+if [ "${RCLONE_BACKUP_action}" == 'backup' ]; then
+  echo "${RCLONE_BACKUP_rclone_crypt_password}:${RCLONE_BACKUP_rclone_crypt_password2}" \
+    | openssl pkeyutl -encrypt -pubin -inkey "${RCLONE_BACKUP_ENCRYPT_KEY_PUBLIC}" \
+    | base64 \
+    | rclone rcat "${RCLONE_BACKUP_rclone_plain_path}/${RCLONE_BACKUP_fullname}.key"
+  echo "INFO[${SCRIPT}]: Encryption key backup successful (${RCLONE_BACKUP_fullname}.key)"
+fi
+
+# Retention
+if [ "${RCLONE_BACKUP_action}" == 'clean' ]; then
+  file="${RCLONE_BACKUP_fullname}"
+  echo "INFO[${SCRIPT}]: Deleting old backup resources (${file}.{d,key}) ..."
+  rclone deletefile "${RCLONE_BACKUP_rclone_plain_path}/${file}.key" || true
+  rclone purge "${RCLONE_BACKUP_rclone_plain_path}/${file}.d" || true
+elif [ "${RCLONE_BACKUP_action}" == 'backup' ] && [ "${RCLONE_BACKUP_RETENTION_KEEP}" -ge 0 ]; then
+  i=0
+  while read -r file; do
+    i="$((i+1))"
+    [ "${i}" -le "${RCLONE_BACKUP_RETENTION_KEEP}" ] && continue
+    echo "INFO[${SCRIPT}]: Deleting old backup resources (${file%.d/}.{d,key})"
+    rclone purge "${RCLONE_BACKUP_rclone_plain_path}/${file%/}" || true
+    rclone deletefile "${RCLONE_BACKUP_rclone_plain_path}/${file%.d/}.key" || true
+  done < <(
+    rclone lsf "${RCLONE_BACKUP_rclone_plain_path}/" \
+      | grep -E "^[0-9]{4,}-${RCLONE_BACKUP_NAME}.d/\$" \
+      | grep -v "^${RCLONE_BACKUP_fullname}.d/\$" \
+      | sort -r
+  )
+fi
+
+## Done
+exit 0

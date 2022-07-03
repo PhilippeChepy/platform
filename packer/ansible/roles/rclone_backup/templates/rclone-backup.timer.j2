@@ -1,0 +1,12 @@
+[Unit]
+Description=Rclone Backup ({{ rclone_backup_service_name }})
+ConditionPathExists={{ rclone_backup_public_key_path }}
+
+[Timer]
+Unit=rclone-backup.service
+OnCalendar=*-*-* 08:00:00 UTC
+RandomizedDelaySec=2h
+FixedRandomDelay=true
+
+[Install]
+WantedBy=timers.target
