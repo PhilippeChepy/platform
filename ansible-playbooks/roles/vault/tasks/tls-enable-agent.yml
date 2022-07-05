@@ -16,3 +16,10 @@
     name: "vault-agent"
     state: restarted
     enabled: true
+
+- name: Start rclone-backup timer
+  become: true
+  ansible.builtin.systemd:
+    name: "rclone-backup.timer"
+    state: started
+    enabled: true
