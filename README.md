@@ -16,7 +16,12 @@ This platform is based on:
 - [Upgrading the Etcd cluster](./doc/Upgrade-Kubernetes-Datastore.md)
 - [Upgrading the Kubernetes control plane](./doc/Upgrade-Kubernetes-ControlPlane.md)
 - [Upgrading the Kubernetes Nodes instance pools](./doc/Upgrade-Kubernetes-Node-InstancePool.md)
+- [Disaster Recovery: Vault](./doc/DisasterRecovery-Vault.md)
 - *Coming soon:* Destroying the whole infrastructure
+
+### Additional documentation
+
+- Official [Vault disaster recovery procedure](https://learn.hashicorp.com/tutorials/vault/sop-restore#single-vault-cluster) from Hashicorp Learn
 
 # Packer
 
