@@ -89,3 +89,11 @@ variable "vault" {
     healthcheck_url    = string
   })
 }
+
+variable "backup" {
+  description = "Backup target (S3 bucket and zone)"
+  type = object({
+    bucket = string
+    zone   = string
+  })
+}

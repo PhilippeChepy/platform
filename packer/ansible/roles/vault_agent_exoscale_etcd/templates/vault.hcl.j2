@@ -61,3 +61,26 @@ EOT
   destination = "{{ etcd_config_path }}/exoscale-environment"
   perms       = 0600
 }
+
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_exoscale_etcd_paths['iam_backup'] }}{% raw %}"  -}}
+AWS_ACCESS_KEY="{{ .Data.api_key }}"
+AWS_SECRET_KEY="{{ .Data.api_secret }}"
+{{ end }}
+{% endraw %}
+EOT
+  destination = "/etc/rclone/credentials"
+  perms       = 0600
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_exoscale_etcd_paths['kv_backup_encryption'] }}{% raw %}"  -}}
+{{ .Data.key }}
+{{ end }}
+{% endraw %}
+EOT
+  destination = "/etc/rclone/backup-public-key.pem"
+  perms       = 0600
+}

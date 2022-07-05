@@ -71,6 +71,8 @@ resource "exoscale_instance_pool" "cluster" {
     vault_cluster_address           = var.vault.url
     vault_cluster_name              = var.vault.cluster_name
     vault_cluster_healthcheck_url   = var.vault.healthcheck_url
+    backup_bucket                   = var.backup.bucket
+    backup_zone                     = var.backup.zone
   })
 
   labels = var.labels

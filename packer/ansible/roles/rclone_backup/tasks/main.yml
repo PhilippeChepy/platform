@@ -1,5 +1,19 @@
 ---
 
+- name: Prepare rclone-backup directories
+  tags:
+    - rclone-backup
+  become: true
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ rclone_backup_user }}"
+    group: "{{ rclone_backup_group }}"
+    mode: 0750
+  loop:
+  - "{{ rclone_config_path }}"
+  - "{{ rclone_backup_path }}"
+
 - name: Install rclone-backup helper scripts
   tags:
     - rclone-backup

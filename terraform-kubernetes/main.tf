@@ -95,6 +95,10 @@ module "etcd_cluster" {
   cluster_size = 3
 
   vault = local.vault_settings
+  backup = {
+    bucket = local.rclone.etcd.bucket
+    zone   = local.rclone.etcd.zone
+  }
 }
 
 module "kubernetes_control_plane" {

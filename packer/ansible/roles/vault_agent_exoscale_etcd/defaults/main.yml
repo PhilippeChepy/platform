@@ -6,8 +6,10 @@ vault_agent_exoscale_etcd_group: "{{ vault_group }}"
 
 vault_agent_exoscale_etcd_auth_path: null
 vault_agent_exoscale_etcd_paths:
+  iam_instance_pool: "iam/exoscale/apikey/etcd-instance-pool"
+  iam_backup: "iam/exoscale/apikey/etcd-backup"
+  kv_backup_encryption: "kv/platform/backup/etcd-public"
   pki_etcd_cert: 'pki/platform/kubernetes/etcd/issue/server'
-  iam_instance_pool: 'iam/exoscale/apikey/etcd-instance-pool'
 
 # TODO: make provider-specific sections optional
 # vault_agent_kube_control_plane_provider: None | 'exoscale'

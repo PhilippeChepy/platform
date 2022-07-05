@@ -5,8 +5,10 @@ StartLimitIntervalSec=900
 StartLimitBurst=3
 
 [Service]
+User={{ rclone_backup_user }}
+Group={{ rclone_backup_group }}
 EnvironmentFile=-/etc/default/rclone-backup
-EnvironmentFile=-/etc/rclone/credentials
+EnvironmentFile=-{{ rclone_config_path }}/credentials
 {% for command in rclone_backup_service_snapshot_commands %}
 ExecStartPre={{ command }}
 {% endfor %}

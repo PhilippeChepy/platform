@@ -23,6 +23,14 @@
     healthcheck_script_path: "{{ etcd_bin_path }}/etcd-healthcheck"
     # etcd integration with vault agent
     vault_agent_exoscale_etcd_auth_path: auth/exoscale
+    # backups
+    rclone_backup_service_name: "etcd"
+    rclone_backup_service_snapshot_commands:
+      - "/bin/sh -c \". /etc/default/etcdctl && etcdctl defrag\""
+      - "/bin/sh -c \". /etc/default/etcdctl && etcdctl snapshot save /var/backups/etcd/etcd.snapshot\""
+    rclone_backup_path: /var/backups/etcd
+    rclone_backup_user: "{{ etcd_user }}"
+    rclone_backup_group: "{{ etcd_group }}"
     # monitoring
     ssl_exporter_certificates:
       etcd-certificates: "{{ etcd_certs_path }}/*.pem"
@@ -36,5 +44,6 @@
     - exoscale_etcd
     - vault_agent_exoscale_etcd
     - rclone
+    - rclone_backup
     - ssl_exporter
     - node_exporter

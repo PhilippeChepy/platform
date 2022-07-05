@@ -6,3 +6,9 @@ rclone_backup_service_snapshot_commands: null
 rclone_backup_public_key_path: "/etc/rclone/backup-public-key.pem"
 
 rclone_backup_bin_path: /usr/local/bin
+
+rclone_config_path: /etc/rclone
+rclone_backup_path: null
+
+rclone_backup_user: null
+rclone_backup_group: null
