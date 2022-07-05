@@ -49,11 +49,17 @@ Once your backup is made and stored in a safe location, you can proceed with the
     # paas-staging-vault-addab-jppqr    89.145.162.86:8201    follower    true
     # paas-staging-vault-addab-slqku    89.145.163.92:8201    follower    true
     ```
-10. Repeat operations from step 4 for other cluster members found in step 3.
-11. Once the cluster is fully updated, enable TLS renewal from vault-agent:
+10. If the instance you removed in step 4 is still present in the list, remove it from the cluster, running `vault operator raft remove-peer <hostname-from-step-4>`.
+    ```bash
+    vault operator raft remove-peer paas-staging-vault-addab-jppqr
+    # 【output】
+    # Peer removed successfully!
+    ```
+11. Repeat operations from step 4 for other cluster members found in step 3.
+12. Once the cluster is fully updated, enable TLS renewal from vault-agent:
   - move to this repository's root directory
   - run `ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml`
-12. Delete the older template (value before the step 2 update) as it's not used anymore:
+13. Delete the older template (value before the step 2 update) as it's not used anymore:
     ```bash
     exo compute template delete -z de-fra-1 212a49ca-9951-4f84-9609-800aafe5c0b5
     # 【output】
