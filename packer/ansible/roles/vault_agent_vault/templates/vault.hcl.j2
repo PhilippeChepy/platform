@@ -15,6 +15,20 @@ auto_auth {
   }
 }
 
+# Required for backups through the local unix socket
+# Requests are forwarded to the leader through the vault-agent socket
+cache {
+  use_auto_auth_token = true
+}
+
+listener "unix" {
+  address = "/run/vault/vault-agent.sock"
+  tls_disable = true
+  socket_mode = "0600"
+  socket_user = "vault"
+  socket_group = "vault"
+}
+
 template {
   contents    = <<EOT
 {% raw %}{{ with secret "{% endraw %}{{ vault_agent_vault_paths['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
@@ -49,5 +63,28 @@ template {
 EOT
   destination = "{{ vault_tls_config_path }}/server.key"
   command     = "sudo systemctl reload vault-server"
+  perms       = 0600
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_vault_paths['iam_backup'] }}{% raw %}"  -}}
+AWS_ACCESS_KEY="{{ .Data.api_key }}"
+AWS_SECRET_KEY="{{ .Data.api_secret }}"
+{{ end }}
+{% endraw %}
+EOT
+  destination = "/etc/rclone/credentials"
+  perms       = 0600
+}
+
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_vault_paths['kv_backup_encryption'] }}{% raw %}"  -}}
+{{ .Data.key }}
+{{ end }}
+{% endraw %}
+EOT
+  destination = "/etc/rclone/backup-public-key.pem"
   perms       = 0600
 }

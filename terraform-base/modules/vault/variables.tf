@@ -74,3 +74,11 @@ variable "cluster_size" {
   type        = number
   default     = 3
 }
+
+variable "backup" {
+  description = "Backup target (S3 bucket and zone)"
+  type = object({
+    bucket = string
+    zone   = string
+  })
+}

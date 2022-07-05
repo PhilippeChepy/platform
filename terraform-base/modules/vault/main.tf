@@ -69,6 +69,8 @@ resource "exoscale_instance_pool" "cluster" {
     domain             = var.domain
     cluster_name       = var.name
     cluster_ip_address = exoscale_elastic_ip.endpoint.ip_address
+    backup_bucket      = var.backup.bucket
+    backup_zone        = var.backup.zone
   })
 
   labels = var.labels

@@ -262,6 +262,12 @@ path "${vault_mount.iam_exoscale.path}/apikey/vault-backup" {
 path "${vault_generic_secret.backup_public["vault"].path}" {
   capabilities = ["read"]
 }
+
+# Raft snapshots
+path "sys/storage/raft/snapshot"
+{
+  capabilities = ["read"]
+}
 EOT
 }
 

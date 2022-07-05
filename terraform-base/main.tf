@@ -83,6 +83,10 @@ module "vault_cluster" {
 
   domain       = local.platform_domain
   cluster_size = var.vault_cluster_size
+  backup = {
+    bucket = aws_s3_bucket.backup["vault"].bucket
+    zone   = local.platform_backup_zone
+  }
 }
 
 # Local artifacts

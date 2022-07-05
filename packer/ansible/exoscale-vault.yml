@@ -36,6 +36,13 @@
     vault_mode: agent
     # vault integration with vault agent
     vault_agent_vault_auth_path: auth/exoscale
+    # backups
+    rclone_backup_service_name: "vault"
+    rclone_backup_service_snapshot_commands:
+      - "/bin/sh -c \". /etc/default/vault && vault operator raft snapshot save /var/backups/vault/vault.snapshot\""
+    rclone_backup_path: /var/backups/vault
+    rclone_backup_user: "{{ vault_user }}"
+    rclone_backup_group: "{{ vault_group }}"
     # monitoring
     ssl_exporter_certificates:
       vault-certificates: "{{ vault_tls_config_path }}/*.pem"
@@ -44,5 +51,6 @@
     - vault
     - vault_agent_vault
     - rclone
+    - rclone_backup
     - ssl_exporter
     - node_exporter

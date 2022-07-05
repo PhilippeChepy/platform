@@ -24,6 +24,7 @@ NoNewPrivileges=yes
 ExecStart=/bin/sh -c 'exec {{ vault_bin_path }}/vault {{ vault_mode }} -config={{ vault_config_path }} -log-level={{ vault_log_level | lower }}'
 {% else %}
 ExecStart=/bin/sh -c 'exec {{ vault_bin_path }}/vault {{ vault_mode }} -config={{ vault_main_config }} -log-level={{ vault_log_level | lower }}'
+RuntimeDirectory=vault
 {% endif %}
 ExecReload=/bin/kill --signal HUP $MAINPID
 KillMode=process
