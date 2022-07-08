@@ -61,7 +61,7 @@ locals {
             ]
           }
           konnectivity-agent = {
-            version   = "0.0.31",
+            version   = "0.0.32",
             namespace = "kube-system"
             ready_on = [
               { kind = "deployment", name = "konnectivity-agent" },
