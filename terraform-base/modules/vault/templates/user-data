@@ -35,6 +35,7 @@ write_files:
     RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE="/etc/rclone/backup-private-key.pem"
     RCLONE_BACKUP_RCLONE_PROFILE="sos-backup"
     RCLONE_BACKUP_RETENTION_KEEP=7
+    VAULT_AGENT_ADDR=unix:///run/vault/vault-agent.sock
 
 bootcmd:
 # Vault CLI
