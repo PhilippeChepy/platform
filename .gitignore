@@ -1,6 +1,7 @@
 .DS_Store
 .env
-.terraform*
+.terraform
+.terraform.tfstate*
 .virtual-env
 .helm
 artifacts/*.json
