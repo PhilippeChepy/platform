@@ -1,14 +1,10 @@
 resource "exoscale_iam_access_key" "iam_api_key" {
   name = "${local.platform_name}-vault-iam"
-  # TODO: restrict key to required APIs for:
-  # exoscale-ccm, 
-  # exoscale-cluster-autoscaler, 
-  # etcd cluster discovery script
-  # etcd backup script
-  # vault backup script
-  #
-  # operations = ["put-sos-object", "put-sos-object-acl", "delete-sos-object", "list-sos-bucket"]
-  # resources  = ["sos/bucket:${local.rclone.vault.bucket}", "sos/bucket:${local.rclone.etcd.bucket}"]
+
+  operations = concat([for name, role in local.iam_role : try(role.operations, [])]...)
+
+  # TODO: enable this attribute once the provider's bug is fixed
+  # resources  = concat([for name, resource in local.iam_role : try(resource.resources, [])]...)
 }
 
 resource "exoscale_iam_access_key" "auth_api_key" {
@@ -67,18 +63,12 @@ resource "vault_generic_endpoint" "iam_exoscale_config_lease" {
 
 resource "vault_generic_endpoint" "iam_exoscale_role_etcd_instance_pool" {
   for_each = {
-    # TODO: restrict operations for Kubernetes components
-    etcd-instance-pool       = { operations = [] }
-    cloud-controller-manager = { operations = [] }
-    cluster-autoscaler       = { operations = [] }
-    vault-backup = {
-      operations = ["list-sos-bucket", "create-sos-bucket", "put-sos-object", "get-sos-object", "delete-sos-object"],
-      resources  = ["sos/bucket:${local.rclone.vault.bucket}"]
-    }
-    etcd-backup = {
-      operations = ["list-sos-bucket", "create-sos-bucket", "put-sos-object", "get-sos-object", "delete-sos-object"],
-      resources  = ["sos/bucket:${local.rclone.etcd.bucket}"]
-    }
+    etcd-instance-pool       = local.iam_role.etcd_instance_pool,
+    vault-instance-pool      = local.iam_role.vault_instance_pool,
+    cloud-controller-manager = local.iam_role.cloud_controller_manager,
+    cluster-autoscaler       = local.iam_role.cluster_autoscaler,
+    vault-backup             = local.iam_role.vault_backup,
+    etcd-backup              = local.iam_role.etcd_backup,
   }
 
   depends_on   = [vault_mount.iam_exoscale]

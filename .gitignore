@@ -14,7 +14,7 @@ artifacts/root-token.txt
 artifacts/vault-*
 build.log
 id_rsa
-locals.tf
+/locals.tf
 terraform.tfstate*
 terraform.tfvars
 vars.hcl
