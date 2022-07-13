@@ -18,23 +18,23 @@ locals {
   #   "::/0"
   # ]
 
-  # TODO: set your infrastructure domain here
+  # Set your infrastructure domain here
   platform_domain = "${local.platform_name}.domain.tld"
 
   platform_components = {
     vault = {
       endpoint = "vault.${local.platform_domain}"
-      # TODO: Set the template id returned by packer when building the vault template (from exoscale-vault.pkr.hcl)
+      # Set the template id returned by packer when building the vault template (from exoscale-vault.pkr.hcl)
       template = "<vault-template-id>"
     }
     kubernetes = {
       endpoint = "apiserver.kubernetes.${local.platform_domain}"
       templates = {
-        # TODO: Set the template id returned by packer when building the etcd template (from exoscale-etcd.pkr.hcl)
+        # Set the template id returned by packer when building the etcd template (from exoscale-etcd.pkr.hcl)
         etcd          = "<etcd-template-id>"
-        # TODO: Set the template id returned by packer when building the kubernetes control plane template (from exoscale-kube-controlplane.pkr.hcl)
+        # Set the template id returned by packer when building the kubernetes control plane template (from exoscale-kube-controlplane.pkr.hcl)
         control_plane = "<kubernetes-control-plane-template-id>"
-        # TODO: Set the template id returned by packer when building the kubelet template (from exoscale-kube-node.pkr.hcl)
+        # Set the template id returned by packer when building the kubelet template (from exoscale-kube-node.pkr.hcl)
         kubelet       = "<kubernetes-node-template-id>"
       }
       # cluster settings
@@ -138,7 +138,7 @@ locals {
         }
       }
 
-      # TODO: define your ingress pools here
+      # Define your ingress pools here
       ingresses = {
         default = {
           label     = "platform.example.tld/ingress=default",
@@ -200,7 +200,7 @@ locals {
     cert = 96    # 4d
   }
 
-  # TODO: set your organization details here
+  # Set your organization details here
   platform_default_tls_subject = {
     organizational_unit = "Internal PaaS"
     organization        = "Organization"

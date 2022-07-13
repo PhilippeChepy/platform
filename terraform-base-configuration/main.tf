@@ -435,7 +435,7 @@ resource "vault_pki_secret_backend_role" "pki_kubernetes" {
     }
     "apiserver" = {
       backend         = "control-plane"
-      allowed_domains = [local.platform_components.kubernetes.endpoint, "kubernetes", "kubernetes.default", "kubernetes.default.svc", /* TODO: remove "kubernetes.default.svc.cluster",*/ "kubernetes.default.svc.${local.platform_components.kubernetes.cluster_domain}"]
+      allowed_domains = [local.platform_components.kubernetes.endpoint, "kubernetes", "kubernetes.default", "kubernetes.default.svc", "kubernetes.default.svc.${local.platform_components.kubernetes.cluster_domain}"]
       server_flag     = true
       client_flag     = false
     }

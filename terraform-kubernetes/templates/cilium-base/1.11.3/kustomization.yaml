@@ -49,7 +49,7 @@ helmCharts:
     operator:
       image:
         pullPolicy: Always
-      # TODO: As of v1.11.3, this settings is available in default settings.yaml but is still not taken into account,
+      # NOTE: As of v1.11.3, this settings is available in default settings.yaml but is still not taken into account,
       # So we have to inject the PDB manifest ourself, to allow the cluster autoscaler to work properly
       #
       # podDisruptionBudget:
