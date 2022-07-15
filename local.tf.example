@@ -133,7 +133,7 @@ locals {
         ingress = {
           nginx-ingress-controller      = { version = "1.3.0" }
           cert-manager-http01           = { version = "0.0.1" }
-          cert-manager-dns01-cloudflare = { version = "0.0.1" }
+          cert-manager-dns01-cloudflare = { version = "0.0.1", namespace = "cert-manager"  }
           external-dns-cloudflare       = { version = "0.12.0" }
         }
       }

@@ -215,7 +215,7 @@ module "deployment_ingresses" {
 
   kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
 
-  deployment_namespace     = "ingress-nginx-${each.value.ingress_pool_name}"
+  deployment_namespace     = try(each.value.deployment.namespace, "ingress-nginx-${each.value.ingress_pool_name}")
   deployment_manifest_file = "${path.module}/templates/${each.value.deployment_name}/${each.value.deployment.version}/manifests.yaml"
 
   deployment_variables = merge(local.deployment_variables, {
