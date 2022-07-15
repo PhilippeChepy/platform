@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-ssl_exporter_version: "2.4.1"
+ssl_exporter_version: "2.4.2"
 ssl_exporter_architecture_map:
   amd64: amd64
   x86_64: amd64
