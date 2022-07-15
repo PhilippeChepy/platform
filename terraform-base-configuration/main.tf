@@ -729,16 +729,148 @@ EOT
 
 # Authentication Methods
 
-## User / pass (WIP)
+## User / pass
 
-# resource "vault_auth_backend" "userpass" {
-#   type = "userpass"
+resource "vault_auth_backend" "userpass" {
+  type = "userpass"
 
-#   tune {
-#     max_lease_ttl      = "86400s"
-#     listing_visibility = "unauth"
-#   }
-# }
+  tune {
+    max_lease_ttl      = "86400s"
+    listing_visibility = "unauth"
+  }
+}
+
+resource "random_password" "user_initial_password" {
+  for_each = local.platform_authentication["provider"] == "vault" ? local.platform_authentication["users"] : {}
+  length   = 10
+  lower    = true
+  upper    = true
+  numeric  = true
+  special  = true
+}
+
+// The user password is set as separate resource to avoid re-setting the initial password
+// when a user policy list is updated
+resource "vault_generic_endpoint" "user_base" {
+  for_each = local.platform_authentication["provider"] == "vault" ? local.platform_authentication["users"] : {}
+  path     = "auth/${vault_auth_backend.userpass.path}/users/${each.key}"
+
+  disable_read = true
+
+  data_json = jsonencode({
+    "password" = random_password.user_initial_password[each.key].result
+  })
+}
+
+
+resource "vault_generic_endpoint" "user_policies" {
+  for_each   = local.platform_authentication["provider"] == "vault" ? local.platform_authentication["users"] : {}
+  depends_on = [vault_generic_endpoint.user_base]
+  path       = "auth/${vault_auth_backend.userpass.path}/users/${each.key}"
+
+  disable_read   = true
+  disable_delete = true
+
+  data_json = jsonencode({
+    "policies" = concat(
+      ["default"],
+      [for policy in vault_policy.vault_user : policy.name],
+      [for resource in try(each.value.groups, []) : "platform-vault-user-${resource}"]
+    )
+  })
+}
+
+resource "vault_policy" "vault_user_group" {
+  for_each = local.platform_authentication["provider"] == "vault" ? {
+    "administrator" : {
+      policy = <<EOT
+# Secrets engines
+path "sys/mounts" {
+  capabilities = ["read"]
+}
+
+path "sys/mounts/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+path "iam/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+path "kv/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+path "pki/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# System health
+
+path "sys/health" {
+  capabilities = ["read", "sudo"]
+}
+
+# Policies
+
+path "sys/policies/acl" {
+  capabilities = ["list"]
+}
+
+path "sys/policies/acl/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# Authentication
+
+path "sys/auth" {
+  capabilities = ["read"]
+}
+
+path "sys/auth/*" {
+  capabilities = ["create", "update", "delete", "sudo"]
+}
+
+path "auth/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# Identity
+
+path "identity/oidc/client/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+EOT
+    }
+    "developer" : {
+      policy = <<EOT
+# nothing yet
+EOT
+    }
+  } : {}
+
+  name   = "platform-vault-user-${each.key}"
+  policy = each.value["policy"]
+}
+
+resource "vault_policy" "vault_user" {
+  for_each = local.platform_authentication["provider"] == "vault" ? {
+    "edit-password" : {
+      policy = <<EOT
+path "auth/userpass/users/{{identity.entity.aliases.${vault_auth_backend.userpass.accessor}.name}}" {
+  capabilities = [ "update" ]
+  allowed_parameters = {
+    "password" = []
+  }
+}
+EOT
+    }
+  } : {}
+
+  name   = "platform-vault-user-${each.key}"
+  policy = each.value["policy"]
+}
 
 ## Exoscale auth
 
