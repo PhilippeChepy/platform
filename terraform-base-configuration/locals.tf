@@ -1,5 +1,8 @@
 locals {
   iam_role = {
+    vault_iam = {
+      tags = ["iam"]
+    }
     etcd_instance_pool = {
       operations = [
         "get-instance-pool",

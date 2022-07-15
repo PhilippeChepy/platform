@@ -5,6 +5,7 @@ resource "exoscale_iam_access_key" "iam_api_key" {
 
   # TODO: enable this attribute once the provider's bug is fixed
   # resources  = concat([for name, resource in local.iam_role : try(resource.resources, [])]...)
+  tags = concat([for tag, role in local.iam_role : try(role.tags, [])]...)
 }
 
 resource "exoscale_iam_access_key" "auth_api_key" {
