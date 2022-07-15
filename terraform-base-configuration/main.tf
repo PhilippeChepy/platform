@@ -468,22 +468,6 @@ resource "vault_pki_secret_backend_role" "pki_kubernetes" {
       server_flag     = false
       client_flag     = true
     }
-    "konnectivity--apiserver" = {
-      name            = "konnectivity-apiserver-egress"
-      backend         = "control-plane"
-      allowed_domains = ["kube-apiserver-konnectivity-client"]
-      organization    = "system:masters"
-      server_flag     = false
-      client_flag     = true
-    }
-    "konnectivity-server-apiserver" = {
-      name            = "konnectivity-server-apiserver"
-      backend         = "control-plane"
-      allowed_domains = ["konnectivity"]
-      organization    = "konnectivity"
-      server_flag     = true,
-      client_flag     = false
-    }
     "konnectivity-server-cluster" = {
       name            = "konnectivity-server-cluster"
       backend         = "control-plane"
@@ -605,10 +589,6 @@ path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/apiserver" {
   capabilities = ["create", "update"]
 }
 
-path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/konnectivity-apiserver-egress" {
-  capabilities = ["create", "update"]
-}
-
 path "${vault_mount.pki_kubernetes["aggregation-layer"].path}/cert/ca_chain" {
   capabilities = ["read"]
 }
@@ -660,10 +640,6 @@ path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/scheduler" {
 ## Konnectivity (server)
 
 path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/konnectivity" {
-  capabilities = ["create", "update"]
-}
-
-path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/konnectivity-server-apiserver" {
   capabilities = ["create", "update"]
 }
 

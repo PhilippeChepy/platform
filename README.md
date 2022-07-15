@@ -120,8 +120,6 @@ It sets a PKI secret engine for Vault: the ICA path for this PKI is `pki/platfor
 | /pki/platform/kubernetes/control-plane     | scheduler                     | control-plane (scheduler)                      | client certificate
 | /pki/platform/kubernetes/control-plane     | cloud-controller-manager      | cloud-controller-manager                       | client certificate
 | /pki/platform/kubernetes/control-plane     | konnectivity                  | control-plane (apiserver-network-proxy)        | client certificate, konnectivity
-| /pki/platform/kubernetes/control-plane     | konnectivity-apiserver-egress | control-plane (api-server)                     | client certificate 
-| /pki/platform/kubernetes/control-plane     | konnectivity-server-apiserver | control-plane (apiserver-network-proxy)        | server certificate, konnectivity
 | /pki/platform/kubernetes/control-plane     | konnectivity-server-cluster   | control-plane (apiserver-network-proxy)        | server certificate, konnectivity
 | /pki/platform/kubernetes/control-plane     | konnectivity-agent            |                                                | server certificate, **Not yet in use**
 | /pki/platform/kubernetes/aggregation-layer | metrics-server                | metrics-server                                 | server certificate

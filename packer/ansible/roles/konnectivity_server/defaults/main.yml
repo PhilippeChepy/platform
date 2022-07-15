@@ -6,7 +6,7 @@ konnectivity_server_binary: "proxy-server-v0.0.32-linux-amd64"
 
 # Paths
 konnectivity_server_bin_path: /usr/local/bin
-konnectivity_server_config_path: /etc/kubernetes/konnectivity
+konnectivity_server_config_path: /etc/kubernetes/konnectivity-server
 
 # System user and group
 konnectivity_user: kube

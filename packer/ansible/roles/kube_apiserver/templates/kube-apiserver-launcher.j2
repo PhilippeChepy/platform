@@ -15,8 +15,6 @@ if [ ! -f {{ kube_apiserver_config_path }}/server-ca.pem ]; then exit 0; fi
 if [ ! -f {{ kube_apiserver_config_path }}/server.key ]; then exit 0; fi
 if [ ! -f {{ kube_apiserver_config_path }}/server.pem ]; then exit 0; fi
 if [ ! -f {{ kube_apiserver_config_path }}/service-account-key.pem ]; then exit 0; fi
-if [ ! -f {{ kube_apiserver_config_path }}/konnectivity-client.pem ]; then exit 0; fi
-if [ ! -f {{ kube_apiserver_config_path }}/konnectivity-client.key ]; then exit 0; fi
 
 # Build egress selector configuration for Konnectivity
 
@@ -30,14 +28,10 @@ metadata:
 egressSelections:
 - name: cluster
   connection:
-    proxyProtocol: HTTPConnect
+    proxyProtocol: GRPC
     transport:
-      tcp:
-        url: https://${PUBLIC_IP}:8090
-        tlsConfig:
-          caBundle: {{ kube_apiserver_config_path }}/server-ca.pem
-          clientCert: {{ kube_apiserver_config_path }}/konnectivity-client.pem
-          clientKey: {{ kube_apiserver_config_path }}/konnectivity-client.key
+      uds:
+        udsName: /var/run/konnectivity-server/konnectivity-server.socket
 EOF
 
 # Launch apiserver

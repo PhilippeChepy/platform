@@ -97,30 +97,6 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_konnectivity_egress'] }}{% raw %}" "common_name=kube-apiserver-konnectivity-client" "ttl=24h" -}}
-{{ .Data.certificate }}
-{{- end }}
-{% endraw %}
-EOT
-  destination = "{{ kube_apiserver_config_path }}/konnectivity-client.pem"
-  command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0644
-}
-
-template {
-  contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_konnectivity_egress'] }}{% raw %}" "common_name=kube-apiserver-konnectivity-client" "ttl=24h" -}}
-{{ .Data.private_key }}
-{{- end }}
-{% endraw %}
-EOT
-  destination = "{{ kube_apiserver_config_path }}/konnectivity-client.key"
-  command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0600
-}
-
-template {
-  contents    = <<EOT
 {% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_aggregationlayer_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.issuing_ca }}
 {{- end }}
@@ -447,42 +423,6 @@ template {
 {% endraw %}
 EOT
   destination = "{{ konnectivity_server_config_path }}/cluster.pem"
-  command     = "sudo systemctl restart konnectivity"
-  perms       = 0644
-}
-
-template {
-  contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_konnectivity_cert_apiserver'] }}{% raw %}" "common_name=konnectivity" "alt_names=konnectivity" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS,127.0.0.1" "ttl=24h" -}}
-{{ .Data.issuing_ca }}
-{{- end }}
-{% endraw %}
-EOT
-  destination = "{{ konnectivity_server_config_path }}/server-ca.pem"
-  command     = "sudo systemctl restart konnectivity"
-  perms       = 0644
-}
-
-template {
-  contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_konnectivity_cert_apiserver'] }}{% raw %}" "common_name=konnectivity" "alt_names=konnectivity" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS,127.0.0.1" "ttl=24h" -}}
-{{ .Data.private_key }}
-{{- end }}
-{% endraw %}
-EOT
-  destination = "{{ konnectivity_server_config_path }}/server.key"
-  command     = "sudo systemctl restart konnectivity"
-  perms       = 0600
-}
-
-template {
-  contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_konnectivity_cert_apiserver'] }}{% raw %}" "common_name=konnectivity" "alt_names=konnectivity" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS,127.0.0.1" "ttl=24h" -}}
-{{ .Data.certificate }}
-{{- end }}
-{% endraw %}
-EOT
-  destination = "{{ konnectivity_server_config_path }}/server.pem"
   command     = "sudo systemctl restart konnectivity"
   perms       = 0644
 }
