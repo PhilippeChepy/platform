@@ -20,6 +20,11 @@ This platform is based on:
 - *Coming soon:* Disaster Recovery: Etcd
 - *Coming soon:* Destroying the whole infrastructure
 
+## Known issues (and workarounds)
+
+- [Expired Kubernetes admin client configuration](./doc/Known-Issues.md#expired-kubernetes-admin-client-configuration)
+- [Missing service-account token for `metrics-server` or `vault-agent-injector`](./doc/Known-Issues.md#missing-service-account-tokens)
+
 ### Additional documentation
 
 - Official [Vault disaster recovery procedure](https://learn.hashicorp.com/tutorials/vault/sop-restore#single-vault-cluster) from Hashicorp Learn
@@ -138,7 +143,7 @@ It sets a PKI secret engine for Vault: the ICA path for this PKI is `pki/platfor
 
 ## Post-provisioning tasks
 
-Once resources from this sub-directory are created, you can start vault-agent (`systemctl start vault-agent`) on each  vault instance. Vault agent will authenticate using the [Exoscale Vault authentication plugin](https://github.com/exoscale/vault-plugin-auth-exoscale). It will automatically renew Vault server certificates and reload the server service.
+Once resources from this sub-directory are created, you can start vault-agent (`systemctl start vault-agent`) on each vault instance. Vault agent will authenticate using the [Exoscale Vault authentication plugin](https://github.com/exoscale/vault-plugin-auth-exoscale). It will automatically renew Vault server certificates and reload the server service.
 
 This task can be performed using the `vault-cluster-tls-agent.yaml` Ansible playbook:
 
