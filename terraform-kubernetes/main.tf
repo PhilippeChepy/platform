@@ -366,7 +366,7 @@ module "kubernetes_nodepool" {
     for name, ingress in local.platform_components.kubernetes.ingresses :
     "ingress-${name}" => {
       size                 = ingress.pool_size
-      instance_type        = "standard.small"
+      instance_type        = "standard.tiny"
       security_group_rules = local.ingress_security_group_rules
       disk_size            = 20
       labels               = { (split("=", ingress.label)[0]) = split("=", ingress.label)[1] }
