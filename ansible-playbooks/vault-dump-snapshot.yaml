@@ -1,0 +1,9 @@
+---
+
+- name: Retrieve a fresh snapshot
+  hosts: vault
+  tasks:
+  - run_once: true
+    include_role:
+        name: vault
+        tasks_from: dump-snapshot

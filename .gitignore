@@ -4,6 +4,7 @@
 .terraform.tfstate*
 .virtual-env
 .helm
+/artifacts/*.snapshot
 /artifacts/*.json
 /artifacts/*.key
 /artifacts/*.pem

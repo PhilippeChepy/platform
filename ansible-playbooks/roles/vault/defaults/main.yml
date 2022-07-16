@@ -9,6 +9,8 @@ vault_root_token_file: "{{ playbook_dir }}/../artifacts/root-token.txt"
 vault_cluster_name:
 vault_user: vault
 
+vault_agent_socket_path: /run/vault/vault-agent.sock
+
 vault_unseal_key: []
 
 vault_environment:
