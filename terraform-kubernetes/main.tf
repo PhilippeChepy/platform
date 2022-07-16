@@ -310,7 +310,7 @@ resource "exoscale_nlb_service" "ingress_http" {
   name = "${local.platform_name}-ingress-${each.key}-http"
 
   nlb_id           = exoscale_nlb.ingress[each.key].id
-  instance_pool_id = module.kubernetes_generic_nodepool["ingress-${each.key}"].instance_pool_id
+  instance_pool_id = module.kubernetes_nodepool["ingress-${each.key}"].instance_pool_id
 
   protocol    = "tcp"
   port        = 80
@@ -333,7 +333,7 @@ resource "exoscale_nlb_service" "ingress_https" {
   name = "${local.platform_name}-ingress-${each.key}-https"
 
   nlb_id           = exoscale_nlb.ingress[each.key].id
-  instance_pool_id = module.kubernetes_generic_nodepool["ingress-${each.key}"].instance_pool_id
+  instance_pool_id = module.kubernetes_nodepool["ingress-${each.key}"].instance_pool_id
 
   protocol    = "tcp"
   port        = 443
@@ -349,8 +349,7 @@ resource "exoscale_nlb_service" "ingress_https" {
   }
 }
 
-# TODO: rename to kubernetes_nodepool
-module "kubernetes_generic_nodepool" {
+module "kubernetes_nodepool" {
   source = "./modules/kubernetes-kubelet-pool"
 
   depends_on = [
