@@ -10,7 +10,7 @@
 /artifacts/*.pem
 /artifacts/*.kubeconfig
 /artifacts/id_*
-/artifacts/inventory.yml
+/artifacts/*inventory.yml
 /artifacts/root-token.txt
 /artifacts/vault-*
 /locals.tf

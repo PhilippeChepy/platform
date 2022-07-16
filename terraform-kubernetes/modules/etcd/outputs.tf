@@ -12,3 +12,8 @@ output "cluster_ip_address" {
   description = "Cluster IP address."
   value       = exoscale_elastic_ip.endpoint.ip_address
 }
+
+output "instances" {
+  description = "Cluster's instances"
+  value       = exoscale_instance_pool.cluster.instances
+}

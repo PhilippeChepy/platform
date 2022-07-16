@@ -434,3 +434,21 @@ users:
 EOT
   filename = "${path.module}/../artifacts/admin.kubeconfig"
 }
+
+resource "local_file" "etcd_cluster_inventory" {
+  content  = <<-EOT
+all:
+  vars:
+    ansible_ssh_user: ubuntu
+    ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
+    ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
+  children:
+    etcd:
+      hosts:
+%{~for instance in module.etcd_cluster.instances}
+        ${instance.name}:
+          ansible_host: ${instance.public_ip_address~}
+%{endfor}
+EOT
+  filename = "${path.module}/../artifacts/etcd-inventory.yml"
+}

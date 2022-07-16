@@ -1,0 +1,13 @@
+- name: Create a fresh Etcd snapshot
+  become: true
+  become_user: "{{ etcd_user }}"
+  ansible.builtin.shell: |
+    . /etc/default/etcdctl
+    etcdctl snapshot save /home/{{ etcd_user }}/etcd.snapshot
+
+- name: Retrieve the snapshot locally
+  become: true
+  ansible.builtin.fetch:
+    src: "/home/{{ etcd_user }}/etcd.snapshot"
+    dest: "../artifacts/latest-etcd.snapshot"
+    flat: true
