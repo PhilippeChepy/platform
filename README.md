@@ -12,6 +12,8 @@ This platform is based on:
 ### Runbooks
 
 - [Full provisioning instructions](./doc/Initial-Provisioning.md)
+- [Building a fresh Vault snapshot & retrieving it locally](./doc/Snapshots.md#vault-snapshots)
+- [Building a fresh Etcd snapshot & retrieving it locally](./doc/Snapshots.md#etcd-snapshots)
 - [Upgrading the Vault cluster](./doc/Upgrade-Vault-Instances.md)
 - [Upgrading the Etcd cluster](./doc/Upgrade-Kubernetes-Datastore.md)
 - [Upgrading the Kubernetes control plane](./doc/Upgrade-Kubernetes-ControlPlane.md)
