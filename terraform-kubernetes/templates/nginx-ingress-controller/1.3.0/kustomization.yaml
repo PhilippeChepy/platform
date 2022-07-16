@@ -1,6 +1,7 @@
 resources:
   - https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.0/deploy/static/provider/baremetal/deploy.yaml
   - custom-backend.yaml
+  - pod-disruption-budget.yaml
 
 patchesStrategicMerge:
   - patch-service.yaml
