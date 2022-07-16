@@ -42,6 +42,13 @@ patches:
       - op: replace
         path: /metadata/name
         value: coredns
+  - target:
+      kind: Service
+      name: coredns-coredns
+    patch: |-
+      - op: replace
+        path: /spec/clusterIP
+        value: $kubernetes:dns_service_ipv4$
 
 helmGlobals:
   chartHome: .helm

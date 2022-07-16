@@ -96,6 +96,7 @@ metadata:
     kubernetes.io/name: CoreDNS
   name: coredns
 spec:
+  clusterIP: $kubernetes:dns_service_ipv4$
   ports:
   - name: udp-53
     port: 53
