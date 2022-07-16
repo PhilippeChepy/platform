@@ -1,14 +1,14 @@
-## Vault Disaster recovery
+# Vault Disaster recovery
 
 This procedure is based on the official [Vault disaster recovery procedure](https://learn.hashicorp.com/tutorials/vault/sop-restore#single-vault-cluster)
 
-### Prerequisites
+## Prerequisites
 
 - you need a snapshot (from backup for ex.) available on one of the cluster peer
 - you need to perform a copy of your root-token.txt: keep it on a secure storage!
 - you need to perform a copy of your unseal keys (artifacts/vault-unseal-key-*): keept them on a secure storage!
 
-### Procedure
+## Procedure
 
 1. Reset each member Vault storage. On each hosts:
     ```bash
@@ -47,16 +47,14 @@ From now, your cluster contains the content of your snapshot, but it's back in s
     ```bash
     ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-unseal.yaml
     # 【output】
-    # ... TRUNCATED ...
-    # PLAY RECAP ***********************************************************************************************************************************
+    # ... truncated ...
     # paas-staging-vault-addab-mklsr : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     # paas-staging-vault-addab-nvxka : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     # paas-staging-vault-addab-utxcg : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     #
     ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml
     # 【output】
-    # ... TRUNCATED ...
-    # PLAY RECAP ***********************************************************************************************************************************
+    # ... truncated ...
     # paas-staging-vault-addab-mklsr : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     # paas-staging-vault-addab-nvxka : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     # paas-staging-vault-addab-utxcg : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
