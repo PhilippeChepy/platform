@@ -12,7 +12,7 @@
     vault_group: kube
     # kubernetes apiserver healthcheck reverse-proxy for EIP
     healthcheck_port: 6444
-    healthcheck_user: kube
+    healthcheck_user: "{{ kube_apiserver_user }}"
     healthcheck_script_path: "{{ kube_apiserver_bin_path }}/kube-healthcheck"
     # kubernetes control plane components integration with vault agent
     vault_agent_kube_control_plane_auth_path: auth/exoscale
