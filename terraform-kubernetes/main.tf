@@ -226,8 +226,10 @@ module "deployment_ingresses" {
     "ingress:node_taint_name"       = split("=", each.value.ingress_pool.label)[0]
     "ingress:node_taint_value"      = split("=", each.value.ingress_pool.label)[1]
     "ingress:domain"                = try(each.value.ingress_pool.domain, "")
+    "ingress:default_cert"          = "${try(each.value.ingress_pool.domain, "") != "" ? "${replace(each.value.ingress_pool.domain, ".", "-")}-wildcard-cert" : "default"}"
     "cert-manager:namespace"        = try(local.platform_components.kubernetes.deployments.core.cert-manager.namespace, "")
     "cert-manager:cloudflare_token" = try(local.platform_credentials.cloudflare.token, "")
+    "cert-manager:wildcard_name"    = "${replace(try(each.value.ingress_pool.domain, ""), ".", "-")}"
     "external-dns:namespace"        = "ingress-nginx-${each.value.ingress_pool_name}"
     "external-dns:cloudflare_token" = try(local.platform_credentials.cloudflare.token, "")
   })

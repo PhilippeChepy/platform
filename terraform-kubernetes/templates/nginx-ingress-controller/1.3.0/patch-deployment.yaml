@@ -17,6 +17,7 @@ spec:
           - --election-id=ingress-controller-leader
           - --controller-class=k8s.io/ingress-nginx-$ingress:class_suffix$
           - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+          - --default-ssl-certificate=$(POD_NAMESPACE)/$ingress:default_cert$
           - --ingress-class-by-name=true
           - --validating-webhook=:8443
           - --validating-webhook-certificate=/usr/local/certificates/cert
@@ -38,10 +39,6 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
-      # securityContext:
-      #   sysctls:
-      #     - name: net.ipv4.ip_unprivileged_port_start
-      #       value: "80"
       nodeSelector:
         $ingress:node_label_name$: $ingress:node_label_value$
       tolerations:
