@@ -18,7 +18,7 @@ variable "template_id" {
 variable "instance_type" {
   description = "Service offering of member instances."
   type        = string
-  default     = "standard.tiny"
+  default     = "standard.small"
 }
 
 variable "disk_size" {
