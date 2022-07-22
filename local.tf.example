@@ -68,93 +68,36 @@ locals {
       dns_service_ipv6       = "fc00::1:2"
 
       deployments = {
+        bootstrap = {
+          cert-manager       = { version = "1.8.2", namespace = "cert-manager" }
+          cilium-base        = { version = "1.11.6", namespace = "kube-system" }
+          core-dns           = { version = "1.9.3", namespace = "kube-system" }
+          konnectivity-agent = { version = "0.0.32", namespace = "kube-system" }
+        }
+
         core = {
-          cilium-base = {
-            version   = "1.11.6",
-            namespace = "kube-system",
-            ready_on = [
-              { kind = "daemonset", name = "cilium" },
-              { kind = "deployment", name = "cilium-operator" },
-              { kind = "pod", name = "cni", mode = "wait", labels = ["k8s-app=cilium"] }
-            ]
-          }
-          konnectivity-agent = {
-            version   = "0.0.32",
-            namespace = "kube-system"
-            ready_on = [
-              { kind = "deployment", name = "konnectivity-agent" },
-              { kind = "pod", name = "kas-proxy", mode = "wait", labels = ["k8s-app=konnectivity-agent"] }
-            ]
-          }
-          core-dns = {
-            version   = "1.9.3",
-            namespace = "kube-system"
-            ready_on = [
-              { kind = "deployment", name = "coredns" }
-            ]
-          }
-          cert-manager = {
-            version   = "1.8.2",
-            namespace = "cert-manager",
-            templated = false
-            ready_on = [
-              { kind = "deployment", name = "cert-manager" },
-              { kind = "deployment", name = "cert-manager-cainjector" },
-              { kind = "deployment", name = "cert-manager-webhook" },
-              { kind = "pod", name = "webhook", mode = "wait", labels = ["app.kubernetes.io/name=webhook", "app.kubernetes.io/instance=cert-manager", "app.kubernetes.io/component=webhook"] },
-            ]
-          }
-          vault-agent-injector = {
-            version   = "0.16.1",
-            namespace = "vault-agent-injector"
-            service_account_tokens = {
-              vault-server = { service_account = "vault" }
-            }
-            ready_on = [
-              { kind = "deployment", name = "vault-agent-injector" },
-              { kind = "pod", name = "webhook", mode = "wait", labels = ["app.kubernetes.io/instance=vault", "app.kubernetes.io/name=vault-agent-injector", "component=webhook"] }
-            ]
-          }
-          reloader = {
-            version   = "0.0.118"
-            namespace = "reloader"
-            ready_on = [
-              { kind = "deployment", name = "reloader" }
-            ]
-          }
+          certificate-metrics-server = { version = "0.0.1", namespace = "kube-system" } # requires "core.cert-manager"
+          metrics-server             = { version = "0.6.1", namespace = "kube-system" } # requires "certificate-metrics-server" or another aggregation certificate provisioning mean 
+          reloader             = { version = "0.0.118", namespace = "reloader" }
+          vault-agent-injector = { version = "0.16.1", namespace = "vault-agent-injector" }
         }
-        core-addons = {
-          metrics-server = { # depends on cert-manager
-            version   = "0.6.1",
-            namespace = "kube-system"
-            service_account_tokens = {
-              metrics-server-vault-issuer = { service_account = "metrics-server" }
-            }
-            # Readiness of metrics-server depends on Pods to be deployed, but Pods requires 
-            # vault to be configured to validate the service account token (mandatory to issue
-            # valid aggregation layer server certificates mounted from a Secret managed by 
-            # cert-manager).
-            #
-            # If deployment readiness check is enabled, Vault will depends on metrics-server to
-            # be fully deployed before being correctly configured (chicken'n egg problem).
-            #
-            # We disable readiness check for metrics-server to allow configuring Vault.
-            # Anyway, metrics-server is not required to deploy additional workloads, and can come slightly
-            # later in the bootstrap process.
-            #
-            # ready_on = [
-            #   { kind = "deployment", name = "metrics-server" }
-            # ]
-          }
-        }
-        # Ingress instance-pool related deployments
+
+        # Unless explicitely specified (e.g. cert-manager), these deployments are put in
+        # an ingress-specific namespace
         ingress = {
           nginx-ingress-controller          = { version = "1.3.0" }
-          cert-manager-http01               = { version = "0.0.1" }
-          cert-manager-dns01-cloudflare     = { version = "0.0.1", namespace = "cert-manager" }
-          cert-manager-wildcard-letsencrypt = { version = "0.0.1" } # This deployment requires a DNS01 issuer; Currently "Cloudflare" is the only supported provider
-          external-dns-cloudflare           = { version = "0.12.0" }
+          cert-manager-clusterissuer-http01 = { version = "0.0.1" }
         }
+
+        ingress-cloudflare = {
+          cert-manager-dns01-cloudflare = { version = "0.0.1", namespace = "cert-manager" }
+          external-dns-cloudflare       = { version = "0.12.0" }
+          # This certificate requires:
+          # - A DNS01 issuer (e.g. "cert-manager-dns01-cloudflare") deployed and configured for this ingress
+          # - A specific domain set in ingress.*.domain (see next section)
+          certificate-wildcard-letsencrypt = { version = "0.0.1" }
+        }
+
       }
 
       # Define your ingress pools here
@@ -162,38 +105,26 @@ locals {
         default = {
           label     = "platform.example.tld/ingress=default",
           pool_size = 2
+          deployments = [
+            "cert-manager-clusterissuer-http01",
+            "nginx-ingress-controller"
+          ]
         }
         internal = {
           label     = "platform.example.tld/ingress=internal",
           pool_size = 2,
           domain    = "internal.example.tld"
           deployments = [
-            "cert-manager-http01",
-            "cert-manager-dns01-cloudflare", 
-            "cert-manager-wildcard-letsencrypt", 
-            "external-dns-cloudflare", 
+            "cert-manager-clusterissuer-http01",
             "nginx-ingress-controller"
+          ]
+          deployments-cloudflare = [
+            "cert-manager-dns01-cloudflare",
+            "external-dns-cloudflare",
+            "certificate-wildcard-letsencrypt",
           ]
         }
       }
-    }
-  }
-
-  platform_credentials = {
-    ## If using cloudflare, you can deploy cert-manager-dns101-cloudflare on ingress controllers
-    #
-    # REF: https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/#api-tokens
-    #
-    # Tokens can be created at User Profile > API Tokens > API Tokens. The following settings are recommended:
-    #
-    # Permissions:
-    #   Zone - DNS - Edit
-    #   Zone - Zone - Read
-    # Zone Resources:
-    #   Include - All Zones
-    #
-    cloudflare = {
-      token = "<API Token>"
     }
   }
 

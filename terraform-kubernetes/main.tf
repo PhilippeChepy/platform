@@ -146,153 +146,6 @@ module "kubernetes_control_plane" {
   }
 }
 
-module "namespaces" {
-  source = "./modules/kubernetes-namespace"
-  for_each = toset([
-    for _, spec in merge(
-      local.platform_components.kubernetes.deployments.core,
-      local.platform_components.kubernetes.deployments.core-addons
-    ) : spec.namespace
-    if spec.namespace != "kube-system"
-  ])
-  depends_on = [local_file.kubeconfig, module.kubernetes_control_plane]
-
-  kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
-
-  namespace = each.value
-}
-
-module "deployment_core" {
-  source     = "./modules/kubernetes-deployment"
-  for_each   = local.platform_components.kubernetes.deployments.core
-  depends_on = [module.namespaces, local_file.kubeconfig]
-
-  kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
-
-  deployment_namespace     = each.value.namespace
-  deployment_manifest_file = "${path.module}/templates/${each.key}/${each.value.version}/manifests.yaml"
-  deployment_variables     = local.deployment_variables
-
-  service_account_tokens = try(each.value.service_account_tokens, {})
-
-  readiness_checks = try(each.value.ready_on, [])
-  templated        = try(each.value.templated, true)
-}
-
-module "deployment_core_addons" {
-  source     = "./modules/kubernetes-deployment"
-  for_each   = local.platform_components.kubernetes.deployments.core-addons
-  depends_on = [module.deployment_core, local_file.kubeconfig]
-
-  kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
-
-  deployment_namespace     = each.value.namespace
-  deployment_manifest_file = "${path.module}/templates/${each.key}/${each.value.version}/manifests.yaml"
-  deployment_variables     = local.deployment_variables
-
-  service_account_tokens = try(each.value.service_account_tokens, {})
-
-  readiness_checks = toset(try(each.value.ready_on, []))
-  templated        = try(each.value.templated, true)
-}
-
-module "deployment_ingresses" {
-  source = "./modules/kubernetes-deployment"
-  for_each = merge(flatten([
-    for ingress_pool_name in keys(local.platform_components.kubernetes.ingresses) : [
-      for deployment_name in try(local.platform_components.kubernetes.ingresses[ingress_pool_name].deployments, ["nginx-ingress-controller"]) : {
-        "${ingress_pool_name}|${deployment_name}" = {
-          ingress_pool_name = ingress_pool_name
-          ingress_pool      = local.platform_components.kubernetes.ingresses[ingress_pool_name]
-          deployment_name   = deployment_name
-          deployment        = local.platform_components.kubernetes.deployments.ingress[deployment_name]
-        }
-      }
-    ]
-  ])...)
-
-  depends_on = [module.deployment_core, local_file.kubeconfig]
-
-  kubeconfig_path = "${path.module}/../artifacts/admin.kubeconfig"
-
-  deployment_namespace     = try(each.value.deployment.namespace, "ingress-nginx-${each.value.ingress_pool_name}")
-  deployment_manifest_file = "${path.module}/templates/${each.value.deployment_name}/${each.value.deployment.version}/manifests.yaml"
-
-  deployment_variables = merge(local.deployment_variables, {
-    "ingress:namespace"             = "ingress-nginx-${each.value.ingress_pool_name}"
-    "ingress:class_suffix"          = each.value.ingress_pool_name
-    "ingress:node_label_name"       = split("=", each.value.ingress_pool.label)[0]
-    "ingress:node_label_value"      = split("=", each.value.ingress_pool.label)[1]
-    "ingress:node_taint_name"       = split("=", each.value.ingress_pool.label)[0]
-    "ingress:node_taint_value"      = split("=", each.value.ingress_pool.label)[1]
-    "ingress:domain"                = try(each.value.ingress_pool.domain, "")
-    "ingress:default_cert"          = "${try(each.value.ingress_pool.domain, "") != "" ? "${replace(each.value.ingress_pool.domain, ".", "-")}-wildcard-cert" : "default"}"
-    "cert-manager:namespace"        = try(local.platform_components.kubernetes.deployments.core.cert-manager.namespace, "")
-    "cert-manager:cloudflare_token" = try(local.platform_credentials.cloudflare.token, "")
-    "cert-manager:wildcard_name"    = "${replace(try(each.value.ingress_pool.domain, ""), ".", "-")}"
-    "external-dns:namespace"        = "ingress-nginx-${each.value.ingress_pool_name}"
-    "external-dns:cloudflare_token" = try(local.platform_credentials.cloudflare.token, "")
-  })
-
-  templated = true
-}
-
-resource "vault_auth_backend" "kubernetes" {
-  for_each = toset(concat(
-    can(local.platform_components.kubernetes.deployments.core["cert-manager"]) ? [
-      "cert-manager"
-    ] : [],
-    can(local.platform_components.kubernetes.deployments.core["vault-agent-injector"]) ? [
-      "vault-agent-injector"
-    ] : []
-  ))
-
-  type = "kubernetes"
-  path = "kubernetes/${each.key}"
-}
-
-resource "vault_kubernetes_auth_backend_config" "kubernetes" {
-  for_each = merge(
-    can(local.platform_components.kubernetes.deployments.core["cert-manager"]) &&
-    can(local.platform_components.kubernetes.deployments.core-addons["metrics-server"]) ? {
-      "metrics-server" = {
-        backend = "cert-manager"
-        token   = module.deployment_core_addons["metrics-server"].serviceaccount_tokens["metrics-server-vault-issuer"]
-      }
-    } : {},
-    can(local.platform_components.kubernetes.deployments.core["vault-agent-injector"]) ? {
-      "vault-agent-injector" = {
-        backend = "vault-agent-injector"
-        token   = module.deployment_core["vault-agent-injector"].serviceaccount_tokens["vault-server"]
-      }
-    } : {}
-  )
-
-  backend                = vault_auth_backend.kubernetes[each.value["backend"]].path
-  kubernetes_host        = "https://${module.kubernetes_control_plane.cluster_ip_address}:6443"
-  kubernetes_ca_cert     = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
-  token_reviewer_jwt     = each.value["token"] //kubernetes_secret.vault_token[each.key].data["token"]
-  issuer                 = "kubernetes.default.svc.${local.platform_components.kubernetes.cluster_domain}"
-  disable_iss_validation = true
-}
-
-resource "vault_kubernetes_auth_backend_role" "roles" {
-  for_each = merge(
-    can(local.platform_components.kubernetes.deployments.core-addons["metrics-server"]) ? { "metrics-server" = {
-      backend         = "cert-manager"
-      namespace       = try(local.platform_components.kubernetes.deployments.core-addons["metrics-server"].namespace, null)
-      service_account = "metrics-server"
-    } } : {},
-  )
-
-  backend                          = vault_auth_backend.kubernetes[each.value["backend"]].path
-  role_name                        = each.key
-  bound_service_account_namespaces = [each.value["namespace"]]
-  bound_service_account_names      = [try(each.value["service_account"], each.key)]                            # fallback = each.key
-  token_policies                   = ["default", try(each.value["policy"], "platform-kubernetes-${each.key}")] # fallback = "platform-kubernetes-${each.key}"
-  token_ttl                        = 3600
-}
-
 resource "exoscale_nlb" "ingress" {
   for_each = local.platform_components.kubernetes.ingresses
 
@@ -444,6 +297,8 @@ all:
     ansible_ssh_user: ubuntu
     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
     ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
+
+    kubernetes_control_plane_ip_address: ${module.kubernetes_control_plane.cluster_ip_address}
   children:
     etcd:
       hosts:
@@ -452,5 +307,5 @@ all:
           ansible_host: ${instance.public_ip_address~}
 %{endfor}
 EOT
-  filename = "${path.module}/../artifacts/etcd-inventory.yml"
+  filename = "${path.module}/../artifacts/kubernetes-inventory.yml"
 }

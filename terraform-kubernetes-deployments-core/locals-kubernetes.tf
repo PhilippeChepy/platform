@@ -1,0 +1,1 @@
+../artifacts/locals-kubernetes.tf

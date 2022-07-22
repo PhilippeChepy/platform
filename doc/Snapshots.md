@@ -32,7 +32,7 @@ ls -lah artifacts/latest-vault.snapshot
 # Etcd Snapshots
 
 ```bash
-ansible-playbook -i artifacts/etcd-inventory.yml ansible-playbooks/etcd-dump-snapshot.yaml
+ansible-playbook -i artifacts/kubernetes-inventory.yml ansible-playbooks/etcd-dump-snapshot.yaml
 # 【output】
 #
 # ... truncated ...

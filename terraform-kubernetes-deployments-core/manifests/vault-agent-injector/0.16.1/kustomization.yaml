@@ -1,0 +1,51 @@
+patches:
+  - target:
+      kind: ClusterRole
+      name: ingress-nginx
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: ingress-nginx
+  - target:
+      kind: MutatingWebhookConfiguration
+      name: vault-agent-injector-cfg
+    patch: |-
+      - op: remove
+        path: /webhooks/0/clientConfig/caBundle
+  - target:
+      kind: Deployment
+      name: vault-agent-injector
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/hostNetwork
+
+helmGlobals:
+  chartHome: .helm
+  configHome: .helm
+
+helmCharts:
+- name: vault
+  repo: https://helm.releases.hashicorp.com
+  releaseName: vault
+  namespace: vault-agent-injector
+  version: 0.20.1
+  valuesInline:
+    global:
+      tlsDisable: false
+    injector:
+      enabled: true
+      externalVaultAddr: $vault:cluster_addr$
+      authPath: $vault:auth_path$
+      replicas: 2
+      agentImage:
+        repository: hashicorp/vault
+        tag: 1.11.0
+      image:
+        repository: "hashicorp/vault-k8s"
+        tag: "0.16.1"
+    csi:
+      enabled: false
+    server:
+      enabled: false
+
+namespace: vault-agent-injector

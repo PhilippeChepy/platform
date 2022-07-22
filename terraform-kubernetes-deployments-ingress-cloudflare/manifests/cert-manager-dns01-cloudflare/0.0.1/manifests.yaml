@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-api-token-$ingress:class_suffix$-secret
+  namespace: $cert-manager:namespace$
+type: Opaque
+data:
+  api-token: $cert-manager:cloudflare_token$
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: dns01-issuer-$ingress:class_suffix$
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: dns01-issuer-$ingress:class_suffix$-account-key
+    solvers:
+    - dns01:
+        cloudflare:
+          apiTokenSecretRef:
+            name: cloudflare-api-token-$ingress:class_suffix$-secret
+            key: api-token

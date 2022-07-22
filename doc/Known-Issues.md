@@ -29,28 +29,3 @@ You can force Terraform to build a new kubeconfig file that contains a renewed T
 terraform state rm vault_pki_secret_backend_cert.operator
 terraform apply -target vault_pki_secret_backend_cert.operator -target local_file.kubeconfig
 ```
-
-## Missing service-account tokens
-
-This is happening when upgrading `vault-agent-injector` or `metrics-server`.
-When the deployment is destroyed, the service account is also destroyed.
-
-### Solution
-
-You can force Terraform to build a new service account for the related deployment:
-
-For `vault-agent-injector`:
-
-```bash
-# From the terraform-kubernetes directory
-terraform state rm 'module.deployment_core["vault-agent-injector"].module.service_account_token["vault-server"].null_resource.token_secret'
-terraform apply -target 'module.deployment_core["vault-agent-injector"].module.service_account_token["vault-server"].null_resource.token_secret'
-```
-
-For `metrics-server`:
-
-```bash
-# From the terraform-kubernetes directory
-terraform state rm 'module.deployment_core_addons["metrics-server"].module.service_account_token["metrics-server-vault-issuer"].null_resource.token_secret'
-terraform apply -target 'module.deployment_core_addons["metrics-server"].module.service_account_token["metrics-server-vault-issuer"].null_resource.token_secret'
-```
