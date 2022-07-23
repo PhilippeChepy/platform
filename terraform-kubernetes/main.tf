@@ -1,27 +1,4 @@
 locals {
-  # Control plane CAs & deployment properties
-  deployment_variables = {
-    "provider:zone"                         = local.platform_zone
-    "kubernetes:apiserver_ca_cert"          = base64encode(data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"])
-    "kubernetes:aggregationlayer_ca_cert"   = base64encode(data.vault_generic_secret.kubernetes["aggregation-layer-ca"].data["ca_chain"])
-    "kubernetes:kubelet_ca_cert"            = base64encode(data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"])
-    "kubernetes:apiserver_service_ipv4"     = local.platform_components.kubernetes.apiserver_service_ipv4
-    "kubernetes:apiserver_service_ipv6"     = local.platform_components.kubernetes.apiserver_service_ipv6
-    "kubernetes:apiserver_ipv4"             = module.kubernetes_control_plane.cluster_ip_address
-    "kubernetes:cluster_domain"             = local.platform_components.kubernetes.cluster_domain
-    "kubernetes:pod_cidr_ipv4"              = local.platform_components.kubernetes.pod_cidr_ipv4
-    "kubernetes:pod_cidr_ipv6"              = local.platform_components.kubernetes.pod_cidr_ipv6
-    "kubernetes:dns_service_ipv4"           = local.platform_components.kubernetes.dns_service_ipv4
-    "kubernetes:dns_service_ipv6"           = local.platform_components.kubernetes.dns_service_ipv6 // XXX: implement it in addition to ipv4
-    "kubernetes:service_cidr_ipv4"          = local.platform_components.kubernetes.service_cidr_ipv4
-    "kubernetes:service_cidr_ipv6"          = local.platform_components.kubernetes.service_cidr_ipv6
-    "kubernetes:proxy_server_ipv4"          = module.kubernetes_control_plane.cluster_ip_address
-    "vault:cluster_addr"                    = local.vault.url
-    "vault:cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
-    "vault:auth_path"                       = "auth/kubernetes/vault-agent-injector"
-    "vault:path_pki_sign:aggregation_layer" = local.pki.pki_sign_aggregation_layer
-  }
-
   # Settings for Vault clients
 
   vault_settings = {
