@@ -1,6 +1,6 @@
 - name: Unseal key
   ansible.builtin.set_fact:
-    vault_unseal_key: "{{ vault_unseal_key + [ lookup('file', '%s/vault-unseal-key-%d' | format(vault_unseal_data_dir, item)) ] }}"
+    vault_unseal_key: "{{ vault_unseal_key + [ lookup('file', '%s/vault-unseal-key-%d.txt' | format(vault_unseal_data_dir, item)) ] }}"
   loop: "{{ range(0, vault_key_threshold, 1)|list }}"
   register: vault_init_data
   delegate_to: localhost

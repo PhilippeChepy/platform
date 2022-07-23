@@ -16,7 +16,7 @@
 
 - name: Write unseal keys
   ansible.builtin.copy:
-    dest: "{{ vault_unseal_data_dir }}/vault-unseal-key-{{ item.0 }}"
+    dest: "{{ vault_unseal_data_dir }}/vault-unseal-key-{{ item.0 }}.txt"
     content: "{{ item.1 }}"
   with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
   delegate_to: localhost

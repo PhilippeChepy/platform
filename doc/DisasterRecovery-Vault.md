@@ -6,7 +6,7 @@ This procedure is based on the official [Vault disaster recovery procedure](http
 
 - you need a snapshot (from backup for ex.) available on one of the cluster peer
 - you need to perform a copy of your root-token.txt: keep it on a secure storage!
-- you need to perform a copy of your unseal keys (artifacts/vault-unseal-key-*): keept them on a secure storage!
+- you need to perform a copy of your unseal keys (artifacts/vault-unseal-key-*.txt): keept them on a secure storage!
 
 ## Procedure
 
