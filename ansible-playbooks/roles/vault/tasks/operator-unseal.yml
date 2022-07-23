@@ -9,15 +9,25 @@
   ansible.builtin.debug:
     msg: "{{ vault_unseal_key }}"
 
-- name: Start agent
+- name: Vault status
+  become: true
+  become_user: "{{ vault_user }}"
+  ansible.builtin.shell: |
+    vault status -format json
+  environment: "{{ vault_environment }}"
+  register: vault_unseal_status
+  failed_when: vault_unseal_status.rc == 127 # command not found
+  changed_when: false
+
+- name: Restart uninitialized members
   become: true
   ansible.builtin.systemd:
-    name: "vault-agent"
+    name: "vault-server"
     state: restarted
     enabled: true
+  when: not (vault_unseal_status.stdout | from_json | json_query('initialized') | bool)
 
-
-- name: Unseal server
+- name: Unseal sealed members
   become: true
   become_user: "{{ vault_user }}"
   ansible.builtin.shell: |
@@ -28,6 +38,7 @@
   retries: 5
   delay: 5
   until: unseal is succeeded
+  when: vault_unseal_status.stdout | from_json | json_query('sealed') | bool
 
 - name: Unseal status
   ansible.builtin.debug:

@@ -7,17 +7,13 @@
         name: vault
         tasks_from: tls-bootstrap
 
-- name: Operator init
+- name: Operator init and unseal
   hosts: vault
   tasks:
     - run_once: true
       include_role:
         name: vault
         tasks_from: operator-init
-
-- name: Operator Unseal
-  hosts: vault
-  tasks:
     - include_role:
         name: vault
         tasks_from: operator-unseal
