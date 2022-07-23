@@ -39,7 +39,7 @@ helmCharts:
       replicas: 2
       agentImage:
         repository: hashicorp/vault
-        tag: 1.11.0
+        tag: 1.11.1
       image:
         repository: "hashicorp/vault-k8s"
         tag: "0.16.1"

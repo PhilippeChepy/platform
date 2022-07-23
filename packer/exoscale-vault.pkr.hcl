@@ -13,8 +13,8 @@ source "exoscale" "base" {
   instance_template    = "Linux Ubuntu 22.04 LTS 64-bit"
   instance_disk_size   = 10
   template_zone        = var.zone
-  template_name        = "Vault 1.11.0"
-  template_description = "Hashicorp Vault 1.11.0 on top of Ubuntu 22.04"
+  template_name        = "Vault 1.11.1"
+  template_description = "Hashicorp Vault 1.11.1 on top of Ubuntu 22.04"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
