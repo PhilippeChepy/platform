@@ -297,7 +297,7 @@ resource "tls_self_signed_cert" "kubelet_ca" {
     organizational_unit = try(local.platform_default_tls_subject.organizational_unit, null)
     postal_code         = try(local.platform_default_tls_subject.postal_code, null)
     province            = try(local.platform_default_tls_subject.province, null)
-    serial_number = ""
+    serial_number       = ""
     street_address      = try(local.platform_default_tls_subject.street_address, null)
   }
 
