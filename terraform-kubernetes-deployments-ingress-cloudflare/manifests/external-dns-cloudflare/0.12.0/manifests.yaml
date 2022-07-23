@@ -57,12 +57,12 @@ subjects:
   namespace: $external-dns:namespace$
 ---
 apiVersion: v1
+data:
+  api-token: $external-dns:cloudflare_token$
 kind: Secret
 metadata:
   name: cloudflare-api-token-$ingress:class_suffix$-secret
   namespace: $external-dns:namespace$
-data:
-  api-token: $external-dns:cloudflare_token$
 type: Opaque
 ---
 apiVersion: apps/v1

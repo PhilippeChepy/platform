@@ -6,7 +6,7 @@ resources:
   - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-serviceaccount.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-clusterrole.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-clusterrolebinding.yaml
-  - ./base/secret.yaml
+  - secret.yaml
 
 namespace: $external-dns:namespace$
 
