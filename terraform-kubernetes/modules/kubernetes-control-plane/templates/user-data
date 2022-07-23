@@ -93,5 +93,5 @@ runcmd:
 - [systemctl, start, kube-vault-agent.service]
 - [/usr/local/bin/wait-apiserver]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/kubelet-bootstrap-rbac.yaml]
-- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cloud-controller-manager.yaml]
+- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cloud-controller-manager-rbac.yaml]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cluster-autoscaler-rbac.yaml]
