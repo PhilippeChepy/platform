@@ -5,14 +5,28 @@ locals {
     }
     etcd_instance_pool = {
       operations = [
+        "list-instance-pools",
+        "get-anti-affinity-group",
+        "get-security-group",
         "get-instance-pool",
+        "get-elastic-ip",
         "get-instance",
+        "get-instance-type",
+        "get-template",
+        "list-instances",
       ]
     }
     vault_instance_pool = {
       operations = [
+        "list-instance-pools",
+        "get-anti-affinity-group",
+        "get-security-group",
         "get-instance-pool",
+        "get-elastic-ip",
         "get-instance",
+        "get-instance-type",
+        "get-template",
+        "list-instances",
       ]
     }
     cloud_controller_manager = {
