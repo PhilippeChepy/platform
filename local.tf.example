@@ -151,9 +151,9 @@ locals {
   }
 
   platform_default_tls_ttl = {
-    ca   = 87600 # 10y
-    ica  = 43800 # 5y
-    cert = 96    # 4d
+    ca   = 262800 # 30y
+    ica  = 87600  # 10y
+    cert = 96     # 4d
   }
 
   # Set your organization details here

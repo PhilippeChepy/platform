@@ -280,18 +280,32 @@ resource "random_string" "token_secret" {
   upper   = false
 }
 
-module "kubelet_ca_certificate" {
-  source = "git@github.com:PhilippeChepy/terraform-tls-root-ca.git"
+resource "tls_private_key" "kubelet_ca" {
+  algorithm   = local.platform_default_tls_algorithm.algorithm
+  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+}
 
-  key_algorithm = local.platform_default_tls_algorithm.algorithm
-  ecdsa_curve   = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
-  rsa_bits      = try(local.platform_default_tls_algorithm.rsa_bits, null)
+resource "tls_self_signed_cert" "kubelet_ca" {
+  private_key_pem = tls_private_key.kubelet_ca.private_key_pem
 
-  subject = merge(
-    { common_name = "Kubernetes Kubelets CA" },
-    local.platform_default_tls_subject
-  )
+  subject {
+    common_name         = "Kubernetes Kubelets CA"
+    country             = try(local.platform_default_tls_subject.country, null)
+    locality            = try(local.platform_default_tls_subject.locality, null)
+    organization        = try(local.platform_default_tls_subject.organization, null)
+    organizational_unit = try(local.platform_default_tls_subject.organizational_unit, null)
+    postal_code         = try(local.platform_default_tls_subject.postal_code, null)
+    province            = try(local.platform_default_tls_subject.province, null)
+    serial_number = ""
+    street_address      = try(local.platform_default_tls_subject.street_address, null)
+  }
+
+  is_ca_certificate     = true
   validity_period_hours = local.platform_default_tls_ttl.ca
+  allowed_uses = [
+    "cert_signing",
+  ]
 }
 
 resource "vault_mount" "pki_kubernetes" {
@@ -335,7 +349,7 @@ resource "vault_pki_secret_backend_config_ca" "pki_kubernetes_kubelet" {
   depends_on = [vault_mount.pki_kubernetes]
   backend    = vault_mount.pki_kubernetes["kubelet"].path
 
-  pem_bundle = "${module.kubelet_ca_certificate.private_key_pem}${module.kubelet_ca_certificate.certificate_pem}"
+  pem_bundle = "${tls_private_key.kubelet_ca.private_key_pem}${tls_self_signed_cert.kubelet_ca.cert_pem}"
 }
 
 resource "vault_pki_secret_backend_config_urls" "pki_kubernetes" {
@@ -392,8 +406,8 @@ resource "vault_generic_secret" "kubelet_pki" {
   path       = "${vault_mount.secret_kubernetes.path}/kubelet-pki"
 
   data_json = jsonencode({
-    private_key = module.kubelet_ca_certificate.private_key_pem
-    certificate = module.kubelet_ca_certificate.certificate_pem
+    private_key = tls_private_key.kubelet_ca.private_key_pem
+    certificate = tls_self_signed_cert.kubelet_ca.cert_pem
   })
 }
 

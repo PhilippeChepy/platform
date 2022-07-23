@@ -1,17 +1,31 @@
 // PKI
 
-module "ca_certificate" {
-  source = "git@github.com:PhilippeChepy/terraform-tls-root-ca.git"
+resource "tls_private_key" "root_ca" {
+  algorithm   = local.platform_default_tls_algorithm.algorithm
+  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+}
 
-  key_algorithm = local.platform_default_tls_algorithm.algorithm
-  ecdsa_curve   = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
-  rsa_bits      = try(local.platform_default_tls_algorithm.rsa_bits, null)
+resource "tls_self_signed_cert" "root_ca" {
+  private_key_pem = tls_private_key.root_ca.private_key_pem
 
-  subject = merge(
-    { common_name = "Platform Root CA 1" },
-    local.platform_default_tls_subject
-  )
-  validity_period_hours = var.root_ca_validity_period_hours
+  subject {
+    common_name         = "Platform Root CA 1"
+    country             = try(local.platform_default_tls_subject.country, null)
+    locality            = try(local.platform_default_tls_subject.locality, null)
+    organization        = try(local.platform_default_tls_subject.organization, null)
+    organizational_unit = try(local.platform_default_tls_subject.organizational_unit, null)
+    postal_code         = try(local.platform_default_tls_subject.postal_code, null)
+    province            = try(local.platform_default_tls_subject.province, null)
+    serial_number = ""
+    street_address      = try(local.platform_default_tls_subject.street_address, null)
+  }
+
+  is_ca_certificate     = true
+  validity_period_hours = local.platform_default_tls_ttl.ca
+  allowed_uses = [
+    "cert_signing",
+  ]
 }
 
 // SSH automation
@@ -92,12 +106,12 @@ module "vault_cluster" {
 # Local artifacts
 
 resource "local_file" "root_ca_certificate_pem" {
-  content  = module.ca_certificate.certificate_pem
+  content  = tls_self_signed_cert.root_ca.cert_pem
   filename = "${path.module}/../artifacts/ca-certificate.pem"
 }
 
 resource "local_sensitive_file" "root_ca_private_key_pem" {
-  content         = module.ca_certificate.private_key_pem
+  content         = tls_private_key.root_ca.private_key_pem
   filename        = "${path.module}/../artifacts/ca-certificate.key"
   file_permission = 0600
 }
