@@ -190,9 +190,10 @@ module "kubernetes_nodepool" {
 
   for_each = merge({
     "general" = {
-      size          = 3
-      instance_type = "standard.small"
-      disk_size     = 20
+      size                 = 3
+      instance_type        = "standard.small"
+      security_group_rules = {}
+      disk_size            = 20
     }
     }, {
     for name, ingress in local.platform_components.kubernetes.ingresses :
@@ -218,7 +219,7 @@ module "kubernetes_nodepool" {
     vault   = local.vault.client_security_group, # for vault-agent-injector
     kubelet = module.kubernetes_control_plane.kubelet_security_group_id
   }
-  security_group_rules = try(each.value.security_group_rules, {})
+  security_group_rules = each.value.security_group_rules
   ssh_key              = "${local.platform_name}-management"
 
   labels = {
