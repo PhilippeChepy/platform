@@ -22,15 +22,14 @@ This platform is based on:
 - *Coming soon:* Disaster Recovery: Etcd
 - [Destroying the whole infrastructure](./doc/Destroy-Everything.md)
 
-## Known issues (and workarounds)
-
-- [Expired Kubernetes admin client configuration](./doc/Known-Issues.md#expired-kubernetes-admin-client-configuration)
-- [Missing service-account token for `metrics-server` or `vault-agent-injector`](./doc/Known-Issues.md#missing-service-account-tokens)
-
 ### Additional documentation
 
 - Official [Vault disaster recovery procedure](https://learn.hashicorp.com/tutorials/vault/sop-restore#single-vault-cluster) from Hashicorp Learn
 - Official [Etcd disaster recovery procedure](https://etcd.io/docs/v3.3/op-guide/recovery/) from etcd.io documentation
+
+### Known issues (and workarounds)
+
+- [Expired Kubernetes admin client configuration](./doc/Known-Issues.md#expired-kubernetes-admin-client-configuration)
 
 # Packer
 
