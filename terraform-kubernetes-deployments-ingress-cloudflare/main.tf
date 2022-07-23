@@ -14,7 +14,7 @@ data "cloudflare_zone" "zone" {
 }
 
 resource "cloudflare_api_token" "api_key" {
-  name = "platform-test"
+  name = local.platform_name
 
   policy {
     permission_groups = [
