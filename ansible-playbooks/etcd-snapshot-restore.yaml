@@ -8,7 +8,7 @@
     etcd_user: etcd
     etcd_group: etcd
   tasks:
-    - name: Upload snapshot on cluster member
+    - name: Upload snapshot on cluster members
       ansible.builtin.copy:
         src: "../artifacts/latest-etcd.snapshot"
         dest: "/home/{{ etcd_user }}/latest-etcd.snapshot"
@@ -29,18 +29,18 @@
         path: "{{ etcd_data_path }}.backup"
         state: absent
 
-    - name: Copy data dir
+    - name: Perform a backup of the data dir
       ansible.builtin.copy:
         remote_src: true
         src: "{{ etcd_data_path }}"
         dest: "{{ etcd_data_path }}.backup"
 
-    - name: Remove old data dir
+    - name: Remove current data dir
       ansible.builtin.file:
         path: "{{ etcd_data_path }}"
         state: absent
 
-    - name: Create new data dir
+    - name: Create new empty data dir
       ansible.builtin.file:
         dest: "{{ etcd_data_path }}"
         state: directory
@@ -72,3 +72,8 @@
       loop:
         - etcd
         - etcd-vault-agent
+
+    - name: Remove backup dir
+      ansible.builtin.file:
+        path: "{{ etcd_data_path }}.backup"
+        state: absent
