@@ -6,13 +6,13 @@
 .helm
 /artifacts/*.snapshot
 /artifacts/*.json
+/artifacts/*.csr
 /artifacts/*.key
 /artifacts/*.pem
 /artifacts/*.kubeconfig
 /artifacts/id_*
 /artifacts/*inventory.yml
-/artifacts/root-token.txt
-/artifacts/vault-*
+/artifacts/*.txt
 /locals.tf
 terraform.tfstate*
 terraform.tfvars

@@ -1,14 +1,33 @@
 # Vault Disaster recovery
 
-This procedure is based on the official [Vault disaster recovery procedure](https://learn.hashicorp.com/tutorials/vault/sop-restore#single-vault-cluster)
+Both the "automated" and "manual" procedures are based on the official [Vault disaster recovery procedure](https://learn.hashicorp.com/tutorials/vault/sop-restore#single-vault-cluster)
 
-## Prerequisites
+## The "automated" method
+
+This method is based on an Ansible playbook.
+
+1. Place the snapshot to restore in the `artifact` subdirectory, under the name `latest-vault.snapshot`.
+2. Run the restoration playbook:
+    ```bash
+    ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-snapshot-restore.yaml
+    # 【output】
+    # ... truncated ...
+    # paas-staging-vault-1324e-gojrj : ok=36   changed=20   unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+    # paas-staging-vault-1324e-ntxuj : ok=49   changed=24   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+    # paas-staging-vault-1324e-ribtp : ok=36   changed=20   unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+    #
+    ```
+3. Check your Vault cluster status
+
+## The "manual" method
+
+### Prerequisites
 
 - you need a snapshot (from backup for ex.) available on one of the cluster peer
 - you need to perform a copy of your root-token.txt: keep it on a secure storage!
 - you need to perform a copy of your unseal keys (artifacts/vault-unseal-key-*.txt): keept them on a secure storage!
 
-## Procedure
+### Procedure
 
 1. Reset each member Vault storage. On each hosts:
     ```bash
@@ -20,7 +39,6 @@ This procedure is based on the official [Vault disaster recovery procedure](http
 2. Now you can rebuild a new cluster. From this repository, run the following playbooks:
     ```bash
     ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-bootstrap.yaml
-    ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-unseal.yaml
     ```
 
 From now, you have a brand new fully fonctionnal Vault cluster, but it doesn't contain your data anymore.

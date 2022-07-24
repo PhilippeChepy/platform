@@ -6,53 +6,67 @@
   vars:
     vault_key_threshold: 1
     vault_user: vault
-    vault_environment:
-      VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
-      VAULT_CACERT: /etc/vault/tls/ca.pem
-      VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
-      VAULT_CLIENT_KEY: /etc/vault/tls/server.key
-    vault_unseal_data_dir: "{{ playbook_dir }}/../artifacts"
-    vault_unseal_key: []
+    vault_artifacts_path: "{{ playbook_dir }}/../artifacts"
+    vault_artifacts_prefix: ""
   tasks:
   - name: Unseal key
     ansible.builtin.set_fact:
-      vault_unseal_key: "{{ vault_unseal_key + [ lookup('file', '%s/vault-unseal-key-%d.txt' | format(vault_unseal_data_dir, item)) ] }}"
-    loop: "{{ range(0, vault_key_threshold, 1)|list }}"
-    register: vault_init_data
+      vault_unseal_key: []
     delegate_to: localhost
 
   - name: Unseal key
-    ansible.builtin.debug:
-      msg: "{{ vault_unseal_key }}"
+    ansible.builtin.set_fact:
+      vault_unseal_key: "{{ (vault_unseal_key | default([])) + [ lookup('file', '%s/{{ vault_artifacts_prefix }}vault-unseal-key-%d.txt' | format(vault_artifacts_path, item)) ] }}"
+    loop: "{{ range(0, vault_key_threshold, 1)|list }}"
+    delegate_to: localhost
+
+  - name: Read token
+    ansible.builtin.set_fact:
+      vault_token: "{{ lookup('file', '%s/{{ vault_artifacts_prefix }}root-token.txt' | format(vault_artifacts_path)) }}"
+    become: false
+    run_once: true
+    delegate_to: localhost
 
   - name: Vault status
     become_user: "{{ vault_user }}"
     ansible.builtin.shell: |
       vault status -format json
-    environment: "{{ vault_environment }}"
+    environment:
+      VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
+      VAULT_CACERT: /etc/vault/tls/ca.pem
+      VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
+      VAULT_CLIENT_KEY: /etc/vault/tls/server.key
+      VAULT_TOKEN: "{{ vault_token }}"
     register: vault_unseal_status
     failed_when: vault_unseal_status.rc == 127 # command not found
+    retries: 30
+    delay: 2
+    until: vault_unseal_status.rc != 1
     changed_when: false
+
+  - debug:
+      msg: "{{ vault_unseal_status }}"
 
   - name: Restart uninitialized members
     ansible.builtin.systemd:
       name: "vault-server"
       state: restarted
       enabled: true
-    when: not (vault_unseal_status.stdout | from_json | json_query('initialized') | bool)
+    when: (vault_unseal_status.rc == 1) or (not (vault_unseal_status.stdout | from_json | json_query('initialized') | bool))
 
   - name: Unseal sealed members
     become_user: "{{ vault_user }}"
     ansible.builtin.shell: |
       vault operator unseal {{ item }}
-    environment: "{{ vault_environment }}"
+    environment:
+      VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
+      VAULT_CACERT: /etc/vault/tls/ca.pem
+      VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
+      VAULT_CLIENT_KEY: /etc/vault/tls/server.key
+      VAULT_TOKEN: "{{ vault_token }}"
     loop: "{{ vault_unseal_key }}"
     register: unseal
-    retries: 5
+    retries: 10
     delay: 5
     until: unseal is succeeded
     when: vault_unseal_status.stdout | from_json | json_query('sealed') | bool
-
-  - name: Unseal status
-    ansible.builtin.debug:
-      msg: "{{ unseal }}"

@@ -4,8 +4,9 @@
   hosts: vault[0]
   become: true
   vars:
+    vault_artifacts_prefix: ""
     vault_unseal_data_dir: "{{ playbook_dir }}/../artifacts"
-    vault_root_token_file: "{{ playbook_dir }}/../artifacts/root-token.txt"
+    vault_root_token_file: "{{ playbook_dir }}/../artifacts/{{ vault_artifacts_prefix }}root-token.txt"
     vault_key_shares: 1
     vault_key_threshold: 1
     vault_user: vault
@@ -31,13 +32,15 @@
 
   - name: Write unseal keys
     ansible.builtin.copy:
-      dest: "{{ vault_unseal_data_dir }}/vault-unseal-key-{{ item.0 }}.txt"
+      dest: "{{ vault_unseal_data_dir }}/{{ vault_artifacts_prefix }}vault-unseal-key-{{ item.0 }}.txt"
       content: "{{ item.1 }}"
     with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
+    become: false
     delegate_to: localhost
 
   - name: Write Root Token
     ansible.builtin.copy:
       content: "{{ vault_init_parsed.root_token }}"
       dest: "{{ vault_root_token_file }}"
+    become: false
     delegate_to: localhost

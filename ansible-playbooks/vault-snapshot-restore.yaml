@@ -1,0 +1,119 @@
+- name: Rebuild a clean cluster
+  hosts: vault
+  become: true
+  vars:
+    vault_key_shares: 1
+    vault_data_path: /var/lib/vault
+    vault_user: vault
+    vault_group: vault
+    vault_artifacts_path: "{{ playbook_dir }}/../artifacts"
+  tasks:
+    - name: Upload snapshot on cluster members
+      ansible.builtin.copy:
+        src: "../artifacts/latest-vault.snapshot"
+        dest: "/home/{{ vault_user }}/latest-vault.snapshot"
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        mode: 0644
+
+    - name: Stop the vault cluster
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - vault-agent
+        - vault-server
+
+    - name: Remove existing backup dir
+      ansible.builtin.file:
+        path: "{{ vault_data_path }}.backup"
+        state: absent
+
+    - name: Perform a backup of the data dir
+      ansible.builtin.copy:
+        remote_src: true
+        src: "{{ vault_data_path }}"
+        dest: "{{ vault_data_path }}.backup"
+
+    - name: Remove current data dir
+      ansible.builtin.file:
+        path: "{{ vault_data_path }}"
+        state: absent
+
+    - name: Create new empty data dir
+      ansible.builtin.file:
+        dest: "{{ vault_data_path }}"
+        state: directory
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        mode: 0750
+
+- vars:
+    vault_artifacts_prefix: restore-
+  import_playbook: vault-cluster-bootstrap.yaml
+
+- name: Restore snapshot
+  hosts: vault[0]
+  become: true
+  vars:
+    vault_key_shares: 1
+    vault_data_path: /var/lib/vault
+    vault_user: vault
+    vault_artifacts_path: "{{ playbook_dir }}/../artifacts"
+    vault_artifacts_prefix: restore-
+  tasks:
+    - name: Read token
+      ansible.builtin.set_fact:
+        vault_token: "{{ lookup('file', '%s/{{ vault_artifacts_prefix }}root-token.txt' | format(vault_artifacts_path)) }}"
+      become: false
+      run_once: true
+      delegate_to: localhost
+
+    - name: Vault status
+      become_user: "{{ vault_user }}"
+      ansible.builtin.shell: |
+        vault status -format json
+      environment:
+        VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
+        VAULT_CACERT: /etc/vault/tls/ca.pem
+        VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
+        VAULT_CLIENT_KEY: /etc/vault/tls/server.key
+        VAULT_TOKEN: "{{ vault_token }}"
+      register: vault_status
+      changed_when: false
+
+    - name: Restore snapshot
+      become_user: "{{ vault_user }}"
+      ansible.builtin.shell: |
+        vault operator raft snapshot restore -force /home/{{ vault_user }}/latest-vault.snapshot
+      environment:
+        VAULT_ADDR: "{{ vault_status.stdout | from_json | json_query('leader_address') }}"
+        VAULT_CACERT: /etc/vault/tls/ca.pem
+        VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
+        VAULT_CLIENT_KEY: /etc/vault/tls/server.key
+        VAULT_TOKEN: "{{ vault_token }}"
+
+    - name: Remove backup dir
+      ansible.builtin.file:
+        path: "{{ vault_data_path }}.backup"
+        state: absent
+
+    - name: Delete restore root token
+      ansible.builtin.file:
+        path: "{{ vault_artifacts_path }}/{{ vault_artifacts_prefix }}root-token.txt"
+        state: absent
+      become: false
+      run_once: true
+      delegate_to: localhost
+
+    - name: Delete restore unseal keys
+      ansible.builtin.file:
+        path: "{{ '%s/{{ vault_artifacts_prefix }}vault-unseal-key-%d.txt' | format(vault_artifacts_path, item) }}"
+        state: absent
+      loop: "{{ range(0, vault_key_shares, 1)|list }}"
+      become: false
+      run_once: true
+      delegate_to: localhost
+
+- import_playbook: vault-cluster-unseal.yaml
+- import_playbook: vault-cluster-tls-agent.yaml
