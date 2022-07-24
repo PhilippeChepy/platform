@@ -1,4 +1,4 @@
-# Destroy everithing
+# Destroy everything
 
 WARNING: Following this guide will completely remove your infrastructure from
 your Exoscale account. There is no way to rollback (even if you have backups,
