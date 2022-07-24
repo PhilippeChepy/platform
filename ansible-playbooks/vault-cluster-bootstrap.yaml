@@ -1,19 +1,5 @@
 ---
 
-- name: Cluster TLS bootstrap
-  hosts: vault
-  tasks:
-    - include_role:
-        name: vault
-        tasks_from: tls-bootstrap
-
-- name: Operator init and unseal
-  hosts: vault
-  tasks:
-    - run_once: true
-      include_role:
-        name: vault
-        tasks_from: operator-init
-    - include_role:
-        name: vault
-        tasks_from: operator-unseal
+- import_playbook: vault-cluster-tls-bootstrap.yaml
+- import_playbook: vault-cluster-initialize.yaml
+- import_playbook: vault-cluster-unseal.yaml

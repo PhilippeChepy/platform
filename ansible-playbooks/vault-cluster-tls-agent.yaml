@@ -2,7 +2,26 @@
 
 - name: Enable TLS from Vault agent
   hosts: vault
+  become: true
   tasks:
-  - include_role:
-      name: vault
-      tasks_from: tls-enable-agent
+  - name: Remove cert
+    ansible.builtin.file:
+      path: /etc/vault/tls/server.pem
+      state: absent
+
+  - name: Remove key
+    ansible.builtin.file:
+      path: /etc/vault/tls/server.key
+      state: absent
+
+  - name: Start agent
+    ansible.builtin.systemd:
+      name: "vault-agent"
+      state: restarted
+      enabled: true
+
+  - name: Start rclone-backup timer
+    ansible.builtin.systemd:
+      name: "rclone-backup.timer"
+      state: started
+      enabled: true

@@ -1,8 +1,78 @@
 ---
 
-- name: Cluster TLS bootstrap
-  hosts: vault
+- hosts: vault
+  become: true
+  vars:
+    vault_user: "vault"
+    vault_group: "vault"
   tasks:
-  - include_role:
-      name: vault
-      tasks_from: tls-bootstrap
+  - name: Generate private key
+    openssl_privatekey:
+      path: "/etc/vault/tls/server.key"
+      owner: "{{ vault_user }}"
+      group: "{{ vault_group }}"
+      mode: 0600
+
+  - name: Generate CSR
+    openssl_csr:
+      path: "/etc/vault/tls/server.csr"
+      privatekey_path: "/etc/vault/tls/server.key"
+      common_name: "{{ ansible_host }}"
+      subject_alt_name: "DNS:{{ vault_cluster_name }},DNS:{{ ansible_host }},IP:{{ vault_ip_address }},IP:{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+
+  - name: Pull CSR
+    ansible.builtin.fetch:
+      src: "/etc/vault/tls/server.csr"
+      dest: "../artifacts/{{ ansible_host }}.csr"
+      flat: true
+
+  - name: Sign CSR with CA key
+    openssl_certificate:
+      path: "../artifacts/{{ ansible_host }}.pem"
+      csr_path: "../artifacts/{{ ansible_host }}.csr"
+      ownca_path: "../artifacts/ca-certificate.pem"
+      ownca_privatekey_path: "../artifacts/ca-certificate.key"
+      provider: ownca
+    become: false
+    delegate_to: localhost
+
+  - name: Push certificate
+    ansible.builtin.copy:
+      src: "../artifacts/{{ ansible_host }}.pem"
+      dest: "/etc/vault/tls/server.pem"
+      owner: "{{ vault_user }}"
+      group: "{{ vault_group }}"
+      mode: 0644
+
+  - name: Push certificate
+    ansible.builtin.copy:
+      src: "../artifacts/ca-certificate.pem"
+      dest: "/etc/vault/tls/ca.pem"
+      owner: "{{ vault_user }}"
+      group: "{{ vault_group }}"
+      mode: 0644
+
+  - name: Delete local copy of certificate
+    ansible.builtin.file:
+      path: "../artifacts/{{ ansible_host }}.pem"
+      state: absent
+    become: false
+    delegate_to: localhost
+
+  - name: Delete local copy of CSR
+    ansible.builtin.file:
+      path: "../artifacts/{{ ansible_host }}.csr"
+      state: absent
+    become: false
+    delegate_to: localhost
+
+  - name: Start server
+    ansible.builtin.systemd:
+      name: "vault-server"
+      state: started
+      enabled: true
+
+  - name: Reload server
+    ansible.builtin.systemd:
+      name: "vault-server"
+      state: reloaded

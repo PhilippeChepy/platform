@@ -1,9 +1,21 @@
 ---
 
 - name: Retrieve a fresh snapshot
-  hosts: vault
+  hosts: vault[0]
+  become: true
+  vars:
+    vault_user: vault
+    vault_agent_socket_path: /run/vault/vault-agent.sock
   tasks:
-  - run_once: true
-    include_role:
-        name: vault
-        tasks_from: dump-snapshot
+  - name: Create a fresh Vault snapshot
+    become_user: "{{ vault_user }}"
+    ansible.builtin.shell: |
+      vault operator raft snapshot save /home/{{ vault_user }}/vault.snapshot
+    environment:
+      VAULT_AGENT_ADDR: unix://{{ vault_agent_socket_path }}
+
+  - name: Retrieve the snapshot locally
+    ansible.builtin.fetch:
+      src: "/home/{{ vault_user }}/vault.snapshot"
+      dest: "../artifacts/latest-vault.snapshot"
+      flat: true

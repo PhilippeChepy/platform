@@ -1,9 +1,43 @@
 ---
 
 - name: Operator init
-  hosts: vault
+  hosts: vault[0]
+  become: true
+  vars:
+    vault_unseal_data_dir: "{{ playbook_dir }}/../artifacts"
+    vault_root_token_file: "{{ playbook_dir }}/../artifacts/root-token.txt"
+    vault_key_shares: 1
+    vault_key_threshold: 1
+    vault_user: vault
+    vault_environment:
+      VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
+      VAULT_CACERT: /etc/vault/tls/ca.pem
+      VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
+      VAULT_CLIENT_KEY: /etc/vault/tls/server.key
   tasks:
-  - run_once: true
-    include_role:
-      name: vault
-      tasks_from: operator-init
+  - name: Initialise Vault
+    become_user: "{{ vault_user }}"
+    ansible.builtin.shell: |
+      vault operator init \
+        -key-shares={{ vault_key_shares }} \
+        -key-threshold={{ vault_key_threshold }} \
+        -format json
+    environment: "{{ vault_environment }}"
+    register: vault_init_data
+
+  - name: Parse output
+    ansible.builtin.set_fact:
+      vault_init_parsed: "{{ vault_init_data.stdout | from_json }}"
+
+  - name: Write unseal keys
+    ansible.builtin.copy:
+      dest: "{{ vault_unseal_data_dir }}/vault-unseal-key-{{ item.0 }}.txt"
+      content: "{{ item.1 }}"
+    with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
+    delegate_to: localhost
+
+  - name: Write Root Token
+    ansible.builtin.copy:
+      content: "{{ vault_init_parsed.root_token }}"
+      dest: "{{ vault_root_token_file }}"
+    delegate_to: localhost
