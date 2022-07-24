@@ -19,13 +19,13 @@ This platform is based on:
 - [Upgrading the Kubernetes control plane](./doc/Upgrade-Kubernetes-ControlPlane.md)
 - [Upgrading the Kubernetes Nodes instance pools](./doc/Upgrade-Kubernetes-Node-InstancePool.md)
 - [Disaster Recovery: Vault](./doc/DisasterRecovery-Vault.md)
-- *Coming soon:* Disaster Recovery: Etcd
+- [Disaster Recovery: Etcd](./doc/DisasterRecovery-Etcd.md)
 - [Destroying the whole infrastructure](./doc/Destroy-Everything.md)
 
 ### Additional documentation
 
 - Official [Vault disaster recovery procedure](https://learn.hashicorp.com/tutorials/vault/sop-restore#single-vault-cluster) from Hashicorp Learn
-- Official [Etcd disaster recovery procedure](https://etcd.io/docs/v3.3/op-guide/recovery/) from etcd.io documentation
+- Official [Etcd disaster recovery procedure](https://etcd.io/docs/v3.5/op-guide/recovery/) from etcd.io documentation
 
 ### Known issues (and workarounds)
 

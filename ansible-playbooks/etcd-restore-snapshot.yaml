@@ -1,0 +1,74 @@
+---
+
+- name: Restore snapshot
+  hosts: etcd
+  become: true
+  vars:
+    etcd_data_path: /var/lib/etcd
+    etcd_user: etcd
+    etcd_group: etcd
+  tasks:
+    - name: Upload snapshot on cluster member
+      ansible.builtin.copy:
+        src: "../artifacts/latest-etcd.snapshot"
+        dest: "/home/{{ etcd_user }}/latest-etcd.snapshot"
+        owner: "{{ etcd_user }}"
+        group: "{{ etcd_group }}"
+        mode: 0644
+
+    - name: Stop the etcd cluster
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - etcd
+        - etcd-vault-agent
+
+    - name: Remove existing backup dir
+      ansible.builtin.file:
+        path: "{{ etcd_data_path }}.backup"
+        state: absent
+
+    - name: Copy data dir
+      ansible.builtin.copy:
+        remote_src: true
+        src: "{{ etcd_data_path }}"
+        dest: "{{ etcd_data_path }}.backup"
+
+    - name: Remove old data dir
+      ansible.builtin.file:
+        path: "{{ etcd_data_path }}"
+        state: absent
+
+    - name: Create new data dir
+      ansible.builtin.file:
+        dest: "{{ etcd_data_path }}"
+        state: directory
+        owner: "{{ etcd_user }}"
+        group: "{{ etcd_group }}"
+        mode: 0700
+
+    - name: "Define cluster address"
+      set_fact:
+        etcd_cluster: >-
+          {%- for host in groups['etcd'] -%}
+          {{ "" if loop.first else "," }}{{ host }}=https://{{ hostvars[host].ansible_host }}:2380
+          {%- endfor -%}
+
+    - name: Restore snapshot
+      become_user: "{{ etcd_user }}"
+      ansible.builtin.shell: |
+          etcdutl snapshot restore /home/{{ etcd_user }}/latest-etcd.snapshot \
+            --name {{ ansible_hostname }} \
+            --initial-cluster {{ etcd_cluster }} \
+            --initial-cluster-token etcd-cluster \
+            --initial-advertise-peer-urls https://{{ ansible_host }}:2380 \
+            --data-dir "{{ etcd_data_path }}"
+
+    - name: Start the etcd cluster
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+      loop:
+        - etcd
+        - etcd-vault-agent
