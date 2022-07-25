@@ -277,10 +277,20 @@ all:
     ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
 
     kubernetes_control_plane_ip_address: ${module.kubernetes_control_plane.cluster_ip_address}
+    kubernetes_control_plane_instance_ip_address:
+%{~for instance in module.kubernetes_control_plane.instances}
+    - ${instance.public_ip_address~}
+%{endfor}    
   children:
     etcd:
       hosts:
 %{~for instance in module.etcd_cluster.instances}
+        ${instance.name}:
+          ansible_host: ${instance.public_ip_address~}
+%{endfor}
+    kube-control-plane:
+      hosts:
+%{~for instance in module.kubernetes_control_plane.instances}
         ${instance.name}:
           ansible_host: ${instance.public_ip_address~}
 %{endfor}

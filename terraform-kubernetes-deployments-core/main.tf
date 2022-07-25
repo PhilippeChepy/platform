@@ -17,7 +17,8 @@ locals {
     "kubernetes:dns_service_ipv6"           = local.platform_components.kubernetes.dns_service_ipv6 // XXX: implement it in addition to ipv4
     "kubernetes:service_cidr_ipv4"          = local.platform_components.kubernetes.service_cidr_ipv4
     "kubernetes:service_cidr_ipv6"          = local.platform_components.kubernetes.service_cidr_ipv6
-    "kubernetes:proxy_server_ipv4"          = local.kubernetes.control_plane_ip_address
+    "kubernetes:proxy_server_0_ipv4"        = local.kubernetes.control_plane_instance_ip_address[0]
+    "kubernetes:proxy_server_1_ipv4"        = local.kubernetes.control_plane_instance_ip_address[1]
     "vault:cluster_addr"                    = local.vault.url
     "vault:cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
     "vault:auth_path"                       = "auth/kubernetes/vault-agent-injector"

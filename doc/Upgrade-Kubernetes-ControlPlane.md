@@ -52,3 +52,10 @@
     # [+] Are you sure you want to delete template f229708b-ce5f-4cd4-a9fa-bd96c89c1a49 ("Kubernetes 1.24.1 control plane")? [yN]: y
     # ✔ Deleting template f229708b-ce5f-4cd4-a9fa-bd96c89c1a49... 3s
     ```
+
+## Additional step: Update the Konnectivity agent deployment
+
+At least one instance of Konnectivity agent needs to connect directly to a Konnectivity server which is hosted on each control-plane node.
+This means once you remove a control plane node, Konnectivity agent cannot connect anymore to it.
+To solve this issue, you have to go to the `terraform-kubernetes-deployments-bootstrap` directory and run `terraform apply` again, in order
+to refresh the konnectivity agent deployment.

@@ -52,10 +52,10 @@ spec:
       - args:
         - --logtostderr=true
         - --ca-cert=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        - --proxy-server-host=$kubernetes:proxy_server_ipv4$
         - --admin-server-port=8095
         - --health-server-port=8134
         - --service-account-token-path=/var/run/secrets/tokens/konnectivity-agent-token
+        - --proxy-server-host=$kubernetes:proxy_server_0_ipv4$
         command:
         - /proxy-agent
         image: eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent:v0.0.32
@@ -65,7 +65,47 @@ spec:
             port: 8134
           initialDelaySeconds: 15
           timeoutSeconds: 15
-        name: konnectivity-agent
+        name: konnectivity-agent-to-server-0
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8134
+          initialDelaySeconds: 5
+          timeoutSeconds: 15
+        resources:
+          limits:
+            cpu: 50m
+            memory: 10Mi
+          requests:
+            cpu: 50m
+            memory: 10Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /var/run/secrets/tokens
+          name: konnectivity-agent-token
+      - args:
+        - --logtostderr=true
+        - --ca-cert=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        - --admin-server-port=8095
+        - --health-server-port=8134
+        - --service-account-token-path=/var/run/secrets/tokens/konnectivity-agent-token
+        - --proxy-server-host=$kubernetes:proxy_server_1_ipv4$
+        command:
+        - /proxy-agent
+        image: eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent:v0.0.32
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8134
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+        name: konnectivity-agent-to-server-1
         readinessProbe:
           httpGet:
             path: /healthz

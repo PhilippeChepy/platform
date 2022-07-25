@@ -15,3 +15,8 @@ output "kubelet_security_group_id" {
 output "cluster_ip_address" {
   value = exoscale_elastic_ip.endpoint.ip_address
 }
+
+output "instances" {
+  description = "Cluster's instances"
+  value       = exoscale_instance_pool.cluster.instances
+}
