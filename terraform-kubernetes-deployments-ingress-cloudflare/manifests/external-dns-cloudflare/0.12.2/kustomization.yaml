@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-deployment.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-serviceaccount.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-clusterrole.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-clusterrolebinding.yaml
+  - secret.yaml
+
+namespace: $external-dns:namespace$
+
+images:
+  - name: k8s.gcr.io/external-dns/external-dns
+    newTag: v0.12.2
+
+patches:
+- target:
+    kind: ClusterRoleBinding
+    name: external-dns-viewer
+  patch: |-
+    - op: replace
+      path: /metadata/name
+      value: external-dns-$ingress:class_suffix$-viewer
+- target:
+    kind: ClusterRole
+    name: external-dns
+  patch: |-
+    - op: replace
+      path: /metadata/name
+      value: external-dns-$ingress:class_suffix$
+
+- target:
+    kind: Deployment
+    name: external-dns
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/args
+      value:
+      - --source=ingress
+      - --domain-filter=$ingress:domain$
+      - --provider=cloudflare
+    - op: add
+      path: /spec/template/spec/containers/0/env
+      value:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token-$ingress:class_suffix$-secret
+            key: api-token
