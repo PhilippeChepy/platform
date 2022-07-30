@@ -19,6 +19,12 @@ provider "exoscale" {
   timeout = 120
 }
 
+provider "http" {
+}
+
+provider "local" {
+}
+
 provider "random" {
 }
 

@@ -1,6 +1,9 @@
 provider "exoscale" {
 }
 
+provider "local" {
+}
+
 provider "random" {
 }
 

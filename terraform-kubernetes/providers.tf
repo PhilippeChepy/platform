@@ -2,6 +2,12 @@ provider "exoscale" {
   timeout = 240
 }
 
+provider "local" {
+}
+
+provider "null" {
+}
+
 provider "vault" {
   address      = local.vault_settings.url
   token        = data.local_file.root_token.content
