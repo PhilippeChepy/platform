@@ -79,7 +79,7 @@ locals {
           certificate-metrics-server = { version = "0.0.1", namespace = "kube-system" } # requires "core.cert-manager"
           metrics-server             = { version = "0.6.1", namespace = "kube-system" } # requires "certificate-metrics-server" or another aggregation certificate provisioning mean 
           reloader             = { version = "0.0.118", namespace = "reloader" }
-          vault-agent-injector = { version = "0.16.1", namespace = "vault-agent-injector" }
+          vault-agent-injector = { version = "0.17.0", namespace = "vault-agent-injector" }
         }
 
         # Unless explicitely specified (e.g. cert-manager), these deployments are put in
