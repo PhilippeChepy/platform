@@ -197,11 +197,23 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
         volumeMounts:
         - mountPath: /etc/coredns
           name: config-volume
       dnsPolicy: Default
       priorityClassName: system-cluster-critical
+      securityContext:
+        sysctls:
+        - name: net.ipv4.ip_unprivileged_port_start
+          value: "53"
       serviceAccountName: default
       terminationGracePeriodSeconds: 30
       volumes:

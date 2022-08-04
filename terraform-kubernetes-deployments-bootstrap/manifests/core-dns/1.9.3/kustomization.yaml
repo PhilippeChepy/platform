@@ -42,6 +42,22 @@ patches:
       - op: replace
         path: /metadata/name
         value: coredns
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          sysctls:
+            - name: net.ipv4.ip_unprivileged_port_start
+              value: "53"
   - target:
       kind: Service
       name: coredns-coredns
