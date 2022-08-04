@@ -56,5 +56,19 @@ patches:
               labelSelector:
                 matchLabels:
                   k8s-app: metrics-server
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext/capabilities
+        value:
+          drop:
+          - ALL
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
 
 namespace: kube-system
