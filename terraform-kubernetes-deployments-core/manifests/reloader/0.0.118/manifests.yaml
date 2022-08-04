@@ -67,7 +67,7 @@ metadata:
   name: reloader
   namespace: reloader
 spec:
-  replicas: 1
+  replicas: 2
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -100,7 +100,35 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
       serviceAccountName: reloader
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: reloader
+  name: reloader
+  namespace: reloader
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: reloader

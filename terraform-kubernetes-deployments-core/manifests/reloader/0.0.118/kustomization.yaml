@@ -2,7 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://raw.githubusercontent.com/stakater/Reloader/v0.0.118/deployments/kubernetes/reloader.yaml
+- https://raw.githubusercontent.com/stakater/Reloader/v0.0.118/deployments/kubernetes/reloader.yaml
+- ./pod-disruption-budget.yaml
 
 namespace: reloader
 
@@ -35,3 +36,25 @@ patches:
     - op: replace
       path: /spec/template/spec/containers/0/name
       value: reloader
+    - op: add
+      path: /spec/template/spec/containers/0/securityContext
+      value:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 65534
+        capabilities:
+          drop:
+          - ALL
+    - op: add
+      path: /spec/replicas
+      value: 2
+    - op: add
+      path: /spec/template/spec/containers/0/resources
+      value: 
+        limits:
+          cpu: 100m
+          memory: 128Mi
+        requests:
+          cpu: 10m
+          memory: 32Mi
