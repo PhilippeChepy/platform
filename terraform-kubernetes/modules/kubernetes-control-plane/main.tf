@@ -120,6 +120,6 @@ resource "exoscale_instance_pool" "cluster" {
 resource "null_resource" "wait" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "while ! nc -z -w5 ${exoscale_elastic_ip.endpoint.ip_address} 6443; do echo \"Waiting for control-plane availability\"; done"
+    command     = "while ! nc -z -w5 ${data.exoscale_nlb.endpoint.ip_address} 6443; do echo \"Waiting for control-plane availability\"; sleep 5; done"
   }
 }
