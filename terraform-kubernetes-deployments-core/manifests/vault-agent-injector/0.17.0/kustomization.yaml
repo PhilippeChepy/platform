@@ -18,6 +18,26 @@ patches:
     patch: |-
       - op: remove
         path: /spec/template/spec/hostNetwork
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 10m
+            memory: 16Mi
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 100
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
 
 helmGlobals:
   chartHome: .helm

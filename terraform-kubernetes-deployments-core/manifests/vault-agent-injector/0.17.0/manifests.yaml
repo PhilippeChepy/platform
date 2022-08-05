@@ -251,8 +251,22 @@ spec:
           periodSeconds: 2
           successThreshold: 1
           timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 10m
+            memory: 16Mi
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 100
       securityContext:
         runAsGroup: 1000
         runAsNonRoot: true
