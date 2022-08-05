@@ -7,6 +7,7 @@ resources:
   - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-clusterrole.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/kustomize/external-dns-clusterrolebinding.yaml
   - secret.yaml
+  - ./pod-disruption-budget.yaml
 
 namespace: $external-dns:namespace$
 
@@ -51,6 +52,15 @@ patches:
     - op: add
       path:  /spec/replicas
       value: 2
+    - op: add
+      path: /spec/template/spec/affinity
+      value:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app: external-dns
     - op: add
       path: /spec/template/spec/containers/0/resources
       value:

@@ -9564,6 +9564,45 @@ spec:
         runAsNonRoot: true
       serviceAccountName: cert-manager-webhook
 ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: cert-manager
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cert-manager
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: cainjector
+  name: cert-manager-cainjector
+  namespace: cert-manager
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cainjector
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: webhook
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: webhook
+---
 apiVersion: batch/v1
 kind: Job
 metadata:

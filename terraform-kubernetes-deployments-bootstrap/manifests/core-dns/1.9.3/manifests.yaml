@@ -223,3 +223,16 @@ spec:
             path: Corefile
           name: coredns
         name: config-volume
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    k8s-app: kube-dns
+  name: coredns
+  namespace: kube-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      k8s-app: kube-dns

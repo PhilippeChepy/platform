@@ -82,6 +82,13 @@ spec:
       labels:
         app: external-dns
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: external-dns
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - --source=ingress
@@ -112,3 +119,16 @@ spec:
           runAsNonRoot: true
           runAsUser: 1000
       serviceAccountName: external-dns
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: external-dns
+  name: external-dns
+  namespace: $external-dns:namespace$
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: external-dns

@@ -1,0 +1,17 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/instance: vault
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: vault-agent-injector
+    component: webhook
+  name: vault-agent-injector
+  namespace: vault-agent-injector
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: vault
+      app.kubernetes.io/name: vault-agent-injector
+      component: webhook

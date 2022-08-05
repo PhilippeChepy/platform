@@ -77,6 +77,13 @@ spec:
       labels:
         app: reloader
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: reloader
+            topologyKey: kubernetes.io/hostname
       containers:
       - image: stakater/reloader:v0.0.118
         imagePullPolicy: IfNotPresent

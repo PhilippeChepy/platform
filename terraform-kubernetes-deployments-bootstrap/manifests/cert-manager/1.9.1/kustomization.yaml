@@ -1,3 +1,8 @@
+resources:
+- pod-disruption-budget.yaml
+- pod-disruption-budget-webhook.yaml
+- pod-disruption-budget-cainjector.yaml
+
 helmGlobals:
   chartHome: .helm
   configHome: .helm

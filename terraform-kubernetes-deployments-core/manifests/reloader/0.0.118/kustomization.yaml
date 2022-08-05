@@ -37,6 +37,15 @@ patches:
       path: /spec/template/spec/containers/0/name
       value: reloader
     - op: add
+      path: /spec/template/spec/affinity
+      value:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app: reloader
+    - op: add
       path: /spec/template/spec/containers/0/securityContext
       value:
         allowPrivilegeEscalation: false
