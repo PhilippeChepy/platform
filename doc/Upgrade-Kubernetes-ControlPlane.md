@@ -19,13 +19,12 @@
 4. Stop the API-server service on an instance:
     - Move to the `artifacts` directory
     - Connect to the instance (`ssh -i id_ed25519 ubuntu@89.145.161.16`)
-    - Stop the kube-vault-agent service (`sudo systemctl stop kube-vault-agent`)
-    - Stop the kube-apiserver service (`sudo systemctl stop kube-apiserver`)
+    - Stop the nginx service (`sudo systemctl stop nginx`)
     - Disconnect (`exit` or `logout`)
 5. Ensure the apiserver traffic is now handled by another node:
     - Move to the `artifacts` directory
     - Run `export KUBECONFIG=./admin.kubeconfig`
-    - Run `kubectl get nodes` until there is no errors (should be less than 10s after starting to stop the kube-apiserver service)
+    - Run `kubectl get nodes` to ensure the api server is still available from the failover node
 6. With `exo` CLI, or by other means, delete the instance.
     ```bash
     exo compute instance delete paas-staging-kubernetes-4976a-iznkw
@@ -57,5 +56,7 @@
 
 At least one instance of Konnectivity agent needs to connect directly to a Konnectivity server which is hosted on each control-plane node.
 This means once you remove a control plane node, Konnectivity agent cannot connect anymore to it.
-To solve this issue, you have to go to the `terraform-kubernetes-deployments-bootstrap` directory and run `terraform apply` again, in order
+To solve this issue, you have to:
+- from the `terraform-kubernete` directory and run `terraform apply` again in order to rebuild the kubernetes inventory.
+- from the `terraform-kubernetes-deployments-bootstrap` directory and run `terraform apply` again, in order
 to refresh the konnectivity agent deployment.
