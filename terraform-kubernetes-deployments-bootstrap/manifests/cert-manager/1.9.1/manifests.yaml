@@ -9340,7 +9340,7 @@ metadata:
   name: cert-manager
   namespace: cert-manager
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/component: controller
@@ -9361,6 +9361,13 @@ spec:
         app.kubernetes.io/version: v1.9.1
         helm.sh/chart: cert-manager-v1.9.1
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: cert-manager
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - --v=2
@@ -9378,8 +9385,22 @@ spec:
         - containerPort: 9402
           name: http-metrics
           protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 100
       nodeSelector:
         kubernetes.io/os: linux
       securityContext:
@@ -9400,7 +9421,7 @@ metadata:
   name: cert-manager-cainjector
   namespace: cert-manager
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/component: cainjector
@@ -9429,8 +9450,22 @@ spec:
         image: quay.io/jetstack/cert-manager-cainjector:v1.9.1
         imagePullPolicy: IfNotPresent
         name: cert-manager
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 100
       nodeSelector:
         kubernetes.io/os: linux
       securityContext:
@@ -9451,7 +9486,7 @@ metadata:
   name: cert-manager-webhook
   namespace: cert-manager
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/component: webhook
@@ -9507,8 +9542,22 @@ spec:
           periodSeconds: 5
           successThreshold: 1
           timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 100
       nodeSelector:
         kubernetes.io/os: linux
       securityContext:
@@ -9553,8 +9602,22 @@ spec:
         image: quay.io/jetstack/cert-manager-ctl:v1.9.1
         imagePullPolicy: IfNotPresent
         name: cert-manager
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 100
       nodeSelector:
         kubernetes.io/os: linux
       restartPolicy: OnFailure

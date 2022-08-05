@@ -50,5 +50,95 @@ patches:
   patch: |-
     - op: remove
       path: /data
+- target:
+    kind: Deployment
+  patch: |-
+    - op: add
+      path: /spec/replicas
+      value: 2
+    - op: add
+      path: /spec/template/spec/containers/0/resources
+      value:
+        limits:
+          cpu: 100m
+          memory: 32Mi
+        requests:
+          cpu: 100m
+          memory: 32Mi
+    - op: add
+      path: /spec/template/spec/containers/0/securityContext
+      value:
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 100
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+- target:
+    kind: Deployment
+    name: cert-manager
+  patch: |-
+    - op: add
+      path: /spec/template/spec/affinity
+      value:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app: cert-manager
+- target:
+    kind: Deployment
+    name: cainjector
+  patch: |-
+    - op: add
+      path: /spec/template/spec/affinity
+      value:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app: cainjector
+- target:
+    kind: Deployment
+    name: webhook
+  patch: |-
+    - op: add
+      path: /spec/template/spec/affinity
+      value:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app: webhook
+
+- target:
+    kind: Job
+    name: cert-manager-startupapicheck
+  patch: |-
+    - op: add
+      path: /spec/template/spec/containers/0/resources
+      value:
+        limits:
+          cpu: 100m
+          memory: 32Mi
+        requests:
+          cpu: 100m
+          memory: 32Mi
+    - op: add
+      path: /spec/template/spec/containers/0/securityContext
+      value:
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 100
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
 
 namespace: cert-manager
