@@ -71,6 +71,7 @@ metadata:
   name: external-dns
   namespace: $external-dns:namespace$
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: external-dns
@@ -94,4 +95,20 @@ spec:
               name: cloudflare-api-token-$ingress:class_suffix$-secret
         image: k8s.gcr.io/external-dns/external-dns:v0.12.2
         name: external-dns
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
       serviceAccountName: external-dns

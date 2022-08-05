@@ -48,3 +48,26 @@ patches:
           secretKeyRef:
             name: cloudflare-api-token-$ingress:class_suffix$-secret
             key: api-token
+    - op: add
+      path:  /spec/replicas
+      value: 2
+    - op: add
+      path: /spec/template/spec/containers/0/resources
+      value:
+        limits:
+          cpu: 100m
+          memory: 32Mi
+        requests:
+          cpu: 10m
+          memory: 16Mi
+    - op: add
+      path: /spec/template/spec/containers/0/securityContext
+      value:
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
