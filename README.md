@@ -161,11 +161,6 @@ This configuration creates an etcd cluster, a kubernetes control plane (2 nodes 
 
 ![Terraform Kubernetes](doc/assets/terraform-kubernetes%402x.png)
 
-This configuration also:
-- deploys base deployments: `cilium`, `konnectivity`, `core-dns`, etc
-- configure the Kubernetes authentication method in the Vault cluster for cert-manager (issues metrics-server server certificate), and for vault-agent-injector
-to issue IAM keys for integration with Exoscale (`cloud-controller-manager` and `cluster-autoscaler`)
-
 ### Additional authentication setup
 
 | Auth engine                           | Role                     | Authentication based on                                                          |
