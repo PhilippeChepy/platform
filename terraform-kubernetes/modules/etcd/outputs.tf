@@ -5,12 +5,12 @@ output "client_security_group_id" {
 
 output "url" {
   description = "Cluster url, for use by clients."
-  value       = "https://${exoscale_elastic_ip.endpoint.ip_address}:2379"
+  value       = "https://${data.exoscale_nlb.endpoint.ip_address}:2379"
 }
 
-output "cluster_ip_address" {
-  description = "Cluster IP address."
-  value       = exoscale_elastic_ip.endpoint.ip_address
+output "healthcheck_url" {
+  description = "Cluster healthcheck url, for use along the NLB."
+  value       = "http://${data.exoscale_nlb.endpoint.ip_address}:2378/healthz"
 }
 
 output "instances" {

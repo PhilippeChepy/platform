@@ -1,3 +1,8 @@
+data "exoscale_nlb" "endpoint" {
+  zone = var.zone
+  id   = var.endpoint_loadbalancer_id
+}
+
 # Base resources from Exoscale
 
 resource "exoscale_anti_affinity_group" "cluster" {
@@ -34,21 +39,26 @@ resource "exoscale_security_group_rule" "cluster_rule" {
   user_security_group_id = try(each.value.security_group, null)
 }
 
-resource "exoscale_elastic_ip" "endpoint" {
+resource "exoscale_nlb_service" "endpoint" {
+  nlb_id      = var.endpoint_loadbalancer_id
   zone        = var.zone
-  description = "Hashicorp Vault API endpoint ${var.name}"
+  name        = "vault"
+  description = "Hashicorp Vault API service"
+
+  instance_pool_id = exoscale_instance_pool.cluster.id
+  protocol         = "tcp"
+  port             = 8200
+  target_port      = 8200
+  strategy         = "round-robin"
 
   healthcheck {
-    mode            = "https"
-    port            = "8200"
-    uri             = "/v1/sys/health"
-    tls_sni         = var.name
-    tls_skip_verify = true
-
-    interval     = 5
-    timeout      = 2
-    strikes_ok   = 2
-    strikes_fail = 2
+    mode     = "https"
+    port     = 8200
+    uri      = "/v1/sys/health"
+    tls_sni  = var.name
+    interval = 5
+    timeout  = 2
+    retries  = 2
   }
 }
 
@@ -64,11 +74,10 @@ resource "exoscale_instance_pool" "cluster" {
   ipv6               = var.ipv6
   affinity_group_ids = [exoscale_anti_affinity_group.cluster.id]
   security_group_ids = [exoscale_security_group.cluster.id]
-  elastic_ip_ids     = [exoscale_elastic_ip.endpoint.id]
   user_data = templatefile("${path.module}/templates/user-data", {
     domain             = var.domain
     cluster_name       = var.name
-    cluster_ip_address = exoscale_elastic_ip.endpoint.ip_address
+    cluster_ip_address = data.exoscale_nlb.endpoint.ip_address
     backup_bucket      = var.backup.bucket
     backup_zone        = var.backup.zone
   })

@@ -1,6 +1,6 @@
 output "url" {
   description = "The URL of the cluster, for use by clients."
-  value       = "https://${exoscale_elastic_ip.endpoint.ip_address}:8200"
+  value       = "https://${data.exoscale_nlb.endpoint.ip_address}:8200"
 }
 
 output "client_security_group_id" {
@@ -11,11 +11,6 @@ output "client_security_group_id" {
 output "server_security_group_id" {
   description = "The cluster peer's security group id (if using Kubernetes authentication, allow this SG to connect to API server)."
   value       = exoscale_security_group.cluster.id
-}
-
-output "ip_address" {
-  description = "Cluster's IP address."
-  value       = exoscale_elastic_ip.endpoint.ip_address
 }
 
 output "instances" {

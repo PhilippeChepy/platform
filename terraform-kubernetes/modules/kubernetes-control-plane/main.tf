@@ -1,3 +1,8 @@
+data "exoscale_nlb" "endpoint" {
+  zone = var.zone
+  id   = var.endpoint_loadbalancer_id
+}
+
 # Base resources from Exoscale
 
 resource "exoscale_anti_affinity_group" "cluster" {
@@ -33,6 +38,9 @@ resource "exoscale_security_group_rule" "cluster_rule" {
     for name, id in var.client_security_groups :
     "tcp-6444-6444--${name}" => { type = "INGRESS", protocol = "TCP", port = "6444", source = id, target = exoscale_security_group.cluster.id }
     }, {
+    for name, id in var.healthcheck_security_groups :
+    "tcp-6444-6444--${name}" => { type = "INGRESS", protocol = "TCP", port = "6444", source = id, target = exoscale_security_group.cluster.id }
+    }, {
     # node <-> node
     "icmp-8-0--kube-cilium-healthcheck"        = { type = "INGRESS", protocol = "ICMP", icmp_type = "8", icmp_code = "0", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     "tcp-4240-4240--kube-cilium-healthcheck"   = { type = "INGRESS", protocol = "TCP", port = "4240", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
@@ -58,17 +66,29 @@ resource "exoscale_security_group_rule" "cluster_rule" {
   user_security_group_id = try(each.value.source, null)
 }
 
-resource "exoscale_elastic_ip" "endpoint" {
+resource "exoscale_nlb_service" "endpoint" {
+  for_each = {
+    kube-api             = { port = 6443 }
+    kube-api-healthcheck = { port = 6444 }
+  }
+  nlb_id      = var.endpoint_loadbalancer_id
   zone        = var.zone
-  description = "API server endpoint ${var.name}"
+  name        = each.key
+  description = "Kubernetes API server service (${each.key})"
+
+  instance_pool_id = exoscale_instance_pool.cluster.id
+  protocol         = "tcp"
+  port             = each.value.port
+  target_port      = each.value.port
+  strategy         = "round-robin"
 
   healthcheck {
-    mode         = "http"
-    port         = 6444
-    uri          = "/healthz"
-    interval     = 5
-    strikes_ok   = 2
-    strikes_fail = 2
+    mode     = "http"
+    port     = 6444
+    uri      = "/healthz"
+    interval = 5
+    timeout  = 2
+    retries  = 2
   }
 }
 
@@ -84,13 +104,12 @@ resource "exoscale_instance_pool" "cluster" {
   ipv6               = var.ipv6
   affinity_group_ids = [exoscale_anti_affinity_group.cluster.id]
   security_group_ids = concat([exoscale_security_group.cluster.id], values(var.additional_security_groups))
-  elastic_ip_ids     = [exoscale_elastic_ip.endpoint.id]
   user_data = templatefile("${path.module}/templates/user-data", {
     domain                         = var.domain
     etcd_address                   = var.etcd.address
     etcd_healthcheck_url           = var.etcd.healthcheck_url
     kubernetes_cluster_domain      = var.kubernetes.cluster_domain
-    kubernetes_cluster_ip_address  = exoscale_elastic_ip.endpoint.ip_address
+    kubernetes_cluster_ip_address  = data.exoscale_nlb.endpoint.ip_address
     kubernetes_cluster_internal_ip = var.kubernetes.apiserver_service_ipv4
     kubernetes_cluster_name        = var.name
     kubernetes_service_cidr_ipv4   = var.kubernetes.service_cidr_ipv4

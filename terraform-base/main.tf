@@ -1,3 +1,14 @@
+data "http" "operator_ip_address" {
+  count = try(local.platform_admin_networks == "auto", false) ? 1 : 0
+  url   = "http://ipconfig.me"
+}
+
+
+data "http" "exoscale_ip_addresses" {
+  # TODO: To be replaced by Exoscale HC more fine grained ip addresses list (to be provided by Exoscale)
+  url = "https://exoscale-prefixes.sos-ch-dk-2.exo.io/exoscale_prefixes.json"
+}
+
 // PKI
 
 resource "tls_private_key" "root_ca" {
@@ -41,17 +52,29 @@ resource "exoscale_ssh_key" "management_key" {
   public_key = tls_private_key.management_key.public_key_openssh
 }
 
-# Admin access
+# Control plane entrypoint
 
-data "http" "operator_ip_address" {
-  count = try(local.platform_admin_networks == "auto", false) ? 1 : 0
-  url   = "http://ipconfig.me"
+resource "exoscale_nlb" "load_balancer" {
+  zone        = local.platform_zone
+  name        = local.platform_name
+  description = "Entrypoint for vault, etcd, and kubernetes control plane instances"
 }
+
+# Admin & provider access
 
 resource "exoscale_security_group" "operator" {
   name = "${local.platform_name}-operator"
 
   external_sources = try(local.platform_admin_networks == "auto", false) ? ["${chomp(data.http.operator_ip_address[0].body)}/32"] : tolist(local.platform_admin_networks)
+}
+
+resource "exoscale_security_group" "exoscale" {
+  name = "${local.platform_name}-exoscale"
+
+  external_sources = [
+    for prefix in jsondecode(data.http.exoscale_ip_addresses.body)["prefixes"] : prefix["IPv4Prefix"]
+    if can(prefix["IPv4Prefix"]) && prefix["zone"] == local.platform_zone
+  ]
 }
 
 # Backup buckets
@@ -86,7 +109,7 @@ module "vault_cluster" {
 
   template_id            = local.platform_components.vault.template
   admin_security_groups  = { terraform = exoscale_security_group.operator.id }
-  client_security_groups = { terraform = exoscale_security_group.operator.id }
+  client_security_groups = { terraform = exoscale_security_group.operator.id, exoscale = exoscale_security_group.exoscale.id }
   ssh_key                = "${local.platform_name}-management"
 
   labels = {
@@ -101,6 +124,8 @@ module "vault_cluster" {
     bucket = aws_s3_bucket.backup["vault"].bucket
     zone   = local.platform_backup_zone
   }
+
+  endpoint_loadbalancer_id = exoscale_nlb.load_balancer.id
 }
 
 # Local artifacts
@@ -129,15 +154,18 @@ all:
     ansible_ssh_user: ubuntu
     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
     ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
-    
+
     base_operator_security_group: "${exoscale_security_group.operator.id}"
+    base_exoscale_security_group: "${exoscale_security_group.exoscale.id}"
+    base_endpoint_loadbalencer_id: "${exoscale_nlb.load_balancer.id}"
+
     rclone_backup_vault_bucket: "${aws_s3_bucket.backup["vault"].bucket}"
     rclone_backup_vault_zone: "${local.platform_backup_zone}"
     rclone_backup_etcd_bucket: "${aws_s3_bucket.backup["etcd"].bucket}"
     rclone_backup_etcd_zone: "${local.platform_backup_zone}"
     vault_cluster_name: "${local.platform_name}-vault"
-    vault_ip_address: "${module.vault_cluster.ip_address}"
     vault_url: "${module.vault_cluster.url}"
+    vault_ip_address: "${exoscale_nlb.load_balancer.ip_address}"
     vault_client_security_group_id: "${module.vault_cluster.client_security_group_id}"
     vault_server_security_group_id: "${module.vault_cluster.server_security_group_id}"
   children:

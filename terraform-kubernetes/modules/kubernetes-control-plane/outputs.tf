@@ -12,8 +12,14 @@ output "kubelet_security_group_id" {
   value = exoscale_security_group.kubelet.id
 }
 
-output "cluster_ip_address" {
-  value = exoscale_elastic_ip.endpoint.ip_address
+output "url" {
+  description = "Cluster url, for use by clients."
+  value       = "https://${data.exoscale_nlb.endpoint.ip_address}:6443"
+}
+
+output "healthcheck_url" {
+  description = "Cluster healthcheck url, for use along the NLB."
+  value       = "http://${data.exoscale_nlb.endpoint.ip_address}:6444/healthz"
 }
 
 output "instances" {

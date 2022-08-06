@@ -10,7 +10,7 @@
     vault_mode: agent
     vault_user: kube
     vault_group: kube
-    # kubernetes apiserver healthcheck reverse-proxy for EIP
+    # kubernetes apiserver healthcheck reverse-proxy for the Network Load Balancer
     healthcheck_port: 6444
     healthcheck_user: "{{ kube_apiserver_user }}"
     healthcheck_script_path: "{{ kube_apiserver_bin_path }}/kube-healthcheck"

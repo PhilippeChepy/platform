@@ -17,7 +17,7 @@
     vault_mode: agent
     vault_user: etcd
     vault_group: etcd
-    # etcd healthcheck reverse-proxy for EIP
+    # etcd healthcheck reverse-proxy for the Network Load Balancer
     healthcheck_port: 2378
     healthcheck_user: etcd
     healthcheck_script_path: "{{ etcd_bin_path }}/etcd-healthcheck"

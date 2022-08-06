@@ -5,17 +5,18 @@ locals {
     url                = local.vault.url
     cluster_name       = "${local.platform_name}-vault"
     ca_certificate_pem = data.local_file.root_ca_certificate_pem.content
-    healthcheck_url    = "https://${local.vault.ip_address}:8200/v1/sys/health"
+    healthcheck_url    = "${local.vault.url}/v1/sys/health"
   }
 
   # Settings for Kubernetes clients
 
   kubernetes_settings = {
-    apiserver_cluster_ip_address = module.kubernetes_control_plane.cluster_ip_address
-    cluster_domain               = local.platform_components.kubernetes.cluster_domain
-    controlplane_ca_pem          = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
-    dns_service_ipv4             = local.platform_components.kubernetes.dns_service_ipv4
-    dns_service_ipv6             = local.platform_components.kubernetes.dns_service_ipv6
+    apiserver_url             = module.kubernetes_control_plane.url
+    apiserver_healthcheck_url = module.kubernetes_control_plane.healthcheck_url
+    cluster_domain            = local.platform_components.kubernetes.cluster_domain
+    controlplane_ca_pem       = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
+    dns_service_ipv4          = local.platform_components.kubernetes.dns_service_ipv4
+    dns_service_ipv6          = local.platform_components.kubernetes.dns_service_ipv6
     kubelet_authentication_token = join("", [
       data.vault_generic_secret.kubernetes["bootstrap-token"].data["id"],
       ".",
@@ -44,23 +45,22 @@ data "vault_generic_secret" "kubernetes" {
   path = each.value
 }
 
+data "exoscale_nlb" "endpoint" {
+  zone = local.platform_zone
+  id   = local.base.endpoint_loadbalencer_id
+}
+
 module "etcd_cluster" {
   source = "./modules/etcd"
   zone   = local.platform_zone
   name   = "${local.platform_name}-etcd"
 
-  template_id = local.platform_components.kubernetes.templates.etcd
-  admin_security_groups = {
-    operator = local.base.operator_security_group
-  }
-  client_security_groups = {
-    operator = local.base.operator_security_group,
-    # module.kubernetes_control_plane.controlplane_security_group_id
-  }
-  additional_security_groups = {
-    vault = local.vault.client_security_group
-  }
-  ssh_key = "${local.platform_name}-management"
+  template_id                 = local.platform_components.kubernetes.templates.etcd
+  admin_security_groups       = { operator = local.base.operator_security_group }
+  client_security_groups      = { operator = local.base.operator_security_group }
+  healthcheck_security_groups = { exoscale = local.base.exoscale_security_group }
+  additional_security_groups  = { vault = local.vault.client_security_group }
+  ssh_key                     = "${local.platform_name}-management"
 
   labels = {
     name = local.platform_name
@@ -76,6 +76,8 @@ module "etcd_cluster" {
     bucket = local.rclone.etcd.bucket
     zone   = local.rclone.etcd.zone
   }
+
+  endpoint_loadbalancer_id = local.base.endpoint_loadbalencer_id
 }
 
 module "kubernetes_control_plane" {
@@ -83,19 +85,12 @@ module "kubernetes_control_plane" {
   zone   = local.platform_zone
   name   = "${local.platform_name}-kubernetes"
 
-  template_id = local.platform_components.kubernetes.templates.control_plane
-  admin_security_groups = {
-    operator = local.base.operator_security_group
-  }
-  client_security_groups = {
-    operator = local.base.operator_security_group,
-    vault    = local.vault.server_security_group,
-  }
-  additional_security_groups = {
-    vault = local.vault.client_security_group,
-    etcd  = module.etcd_cluster.client_security_group_id
-  }
-  ssh_key = "${local.platform_name}-management"
+  template_id                 = local.platform_components.kubernetes.templates.control_plane
+  admin_security_groups       = { operator = local.base.operator_security_group }
+  client_security_groups      = { operator = local.base.operator_security_group, vault = local.vault.server_security_group }
+  healthcheck_security_groups = { exoscale = local.base.exoscale_security_group }
+  additional_security_groups  = { vault = local.vault.client_security_group, etcd = module.etcd_cluster.client_security_group_id }
+  ssh_key                     = "${local.platform_name}-management"
 
   labels = {
     name = local.platform_name
@@ -110,7 +105,7 @@ module "kubernetes_control_plane" {
 
   etcd = {
     address         = module.etcd_cluster.url
-    healthcheck_url = "http://${module.etcd_cluster.cluster_ip_address}:2378/healthz"
+    healthcheck_url = module.etcd_cluster.healthcheck_url
   }
 
   kubernetes = {
@@ -121,6 +116,8 @@ module "kubernetes_control_plane" {
     service_cidr_ipv4      = local.platform_components.kubernetes.service_cidr_ipv4
     service_cidr_ipv6      = local.platform_components.kubernetes.service_cidr_ipv6
   }
+
+  endpoint_loadbalancer_id = local.base.endpoint_loadbalencer_id
 }
 
 resource "exoscale_nlb" "ingress" {
@@ -249,7 +246,7 @@ apiVersion: v1
 clusters:
   - cluster:
       certificate-authority-data: ${base64encode(data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"])}
-      server: https://${module.kubernetes_control_plane.cluster_ip_address}:6443
+      server: ${module.kubernetes_control_plane.url}
     name: ${local.platform_name}
 contexts:
   - context:
@@ -276,7 +273,8 @@ all:
     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
     ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
 
-    kubernetes_control_plane_ip_address: ${module.kubernetes_control_plane.cluster_ip_address}
+    kubernetes_apiserver_url: ${module.kubernetes_control_plane.url}
+    kubernetes_control_plane_ip_address: ${data.exoscale_nlb.endpoint.ip_address}
     kubernetes_control_plane_instance_ip_address:
 %{~for instance in module.kubernetes_control_plane.instances}
     - ${instance.public_ip_address~}

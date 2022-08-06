@@ -188,7 +188,7 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
   )
 
   backend                = vault_auth_backend.kubernetes[each.value["backend"]].path
-  kubernetes_host        = "https://${local.kubernetes.control_plane_ip_address}:6443"
+  kubernetes_host        = local.kubernetes.apiserver_url
   kubernetes_ca_cert     = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
   token_reviewer_jwt     = each.value["token"] //kubernetes_secret.vault_token[each.key].data["token"]
   issuer                 = "kubernetes.default.svc.${local.platform_components.kubernetes.cluster_domain}"

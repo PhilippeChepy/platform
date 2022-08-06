@@ -42,7 +42,7 @@ bootcmd:
 - [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/default/vault"]
 # Vault server
 - [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/vault/server-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_EIP_ADDRESS|${cluster_ip_address}|g", "/etc/vault/server-conf.d/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${cluster_ip_address}|g", "/etc/vault/server-conf.d/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/server-conf.d/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/server-conf.d/vault.hcl"]
 # Vault agent for TLS certs self-renewal
@@ -50,5 +50,5 @@ bootcmd:
 - [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/vault/agent-conf.d/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/agent-conf.d/vault.hcl"]
 - [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/vault/agent-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_EIP_ADDRESS|${cluster_ip_address}|g", "/etc/vault/agent-conf.d/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${cluster_ip_address}|g", "/etc/vault/agent-conf.d/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/agent-conf.d/vault.hcl"]

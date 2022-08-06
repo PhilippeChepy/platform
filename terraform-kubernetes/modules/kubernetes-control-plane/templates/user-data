@@ -77,7 +77,7 @@ runcmd:
 # Vault CLI
 - [sed, -i, "s|CLUSTER_NAME|${vault_cluster_name}|g", "/etc/default/vault"]
 # Vault agent: common settings
-- [sed, -i, "s|CLUSTER_EIP_ADDRESS|${kubernetes_cluster_ip_address}|g", "/etc/kubernetes/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${kubernetes_cluster_ip_address}|g", "/etc/kubernetes/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/kubernetes/vault.hcl"]
 - [sed, -i, "s|CLUSTER_INTERNAL_ADDRESS|${kubernetes_cluster_internal_ip}|g", "/etc/kubernetes/vault.hcl"]
 - [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/kubernetes/vault.hcl"]

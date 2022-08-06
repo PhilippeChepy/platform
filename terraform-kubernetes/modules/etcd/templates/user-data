@@ -54,7 +54,7 @@ runcmd:
 - [sed, -i, "s|CLUSTER_NAME|${vault_cluster_name}|g", "/etc/default/vault"]
 # Vault agent: etcd TLS certs self-renewal
 - [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|CLUSTER_EIP_ADDRESS|${etcd_cluster_ip_address}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${etcd_cluster_ip_address}|g", "/etc/etcd/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/etcd/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/etcd/vault.hcl"]
 - [sed, -i, "s|CLUSTER_NAME|${etcd_cluster_name}|g", "/etc/etcd/vault.hcl"]

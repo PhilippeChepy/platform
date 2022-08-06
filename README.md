@@ -90,7 +90,7 @@ This configuration creates all required elements for other parts of the platform
 The Vault module allows the provisioning of a Vault cluster:
 - An anti-affinity group to ensure each cluster member goes to distinct hypervisors on the Exoscale side
 - Two security groups: one for cluster members, another one for clients to be allowed to access the cluster
-- A managed EIP as a final endpoint to reach the cluster
+- A Network Load Balancer (NLB) as a final endpoint to reach the Vault cluster, and other critical infrastructure components
 - An instance pool to ease template updates (doing a rolling update of each instance after having updated the instance pools template). By default, this instance pool size is 3, allowing to have a failing member.
 
 ### Post-provisioning tasks

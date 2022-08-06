@@ -1,3 +1,8 @@
+data "exoscale_nlb" "endpoint" {
+  zone = var.zone
+  id   = var.endpoint_loadbalancer_id
+}
+
 # Base resources from Exoscale
 
 resource "exoscale_anti_affinity_group" "cluster" {
@@ -22,7 +27,10 @@ resource "exoscale_security_group_rule" "cluster_rule" {
     "tcp-22-22--${name}" => { type = "INGRESS", protocol = "TCP", port = "22", source = id, target = exoscale_security_group.cluster.id }
     }, {
     for name, id in merge(var.client_security_groups) :
-    "tcp-2379-2379--${name}" => { type = "INGRESS", protocol = "TCP", port = "2379", source = id, target = exoscale_security_group.cluster.id }
+    "tcp-2378-2379--${name}" => { type = "INGRESS", protocol = "TCP", port = "2378-2379", source = id, target = exoscale_security_group.cluster.id }
+    }, {
+    for name, id in merge(var.healthcheck_security_groups) :
+    "tcp-2378-2378--${name}" => { type = "INGRESS", protocol = "TCP", port = "2378", source = id, target = exoscale_security_group.cluster.id }
   })
 
   security_group_id      = try(each.value.target, null)
@@ -33,18 +41,29 @@ resource "exoscale_security_group_rule" "cluster_rule" {
   user_security_group_id = try(each.value.source, null)
 }
 
-resource "exoscale_elastic_ip" "endpoint" {
+resource "exoscale_nlb_service" "endpoint" {
+  for_each = {
+    etcd             = { port = 2379 }
+    etcd-healthcheck = { port = 2378 }
+  }
+  nlb_id      = var.endpoint_loadbalancer_id
   zone        = var.zone
-  description = "etcd endpoint ${var.name}"
+  name        = each.key
+  description = "Etcd service (${each.key})"
+
+  instance_pool_id = exoscale_instance_pool.cluster.id
+  protocol         = "tcp"
+  port             = each.value.port
+  target_port      = each.value.port
+  strategy         = "round-robin"
 
   healthcheck {
-    mode         = "http"
-    port         = 2378
-    uri          = "/healthz"
-    interval     = 5
-    timeout      = 2
-    strikes_ok   = 2
-    strikes_fail = 2
+    mode     = "http"
+    port     = 2378
+    uri      = "/healthz"
+    interval = 5
+    timeout  = 2
+    retries  = 2
   }
 }
 
@@ -60,10 +79,9 @@ resource "exoscale_instance_pool" "cluster" {
   ipv6               = var.ipv6
   affinity_group_ids = [exoscale_anti_affinity_group.cluster.id]
   security_group_ids = concat([exoscale_security_group.cluster.id], values(var.additional_security_groups))
-  elastic_ip_ids     = [exoscale_elastic_ip.endpoint.id]
   user_data = templatefile("${path.module}/templates/user-data", {
     domain                          = var.domain
-    etcd_cluster_ip_address         = exoscale_elastic_ip.endpoint.ip_address
+    etcd_cluster_ip_address         = data.exoscale_nlb.endpoint.ip_address
     etcd_cluster_instance_pool_name = var.name
     etcd_cluster_name               = var.name
     etcd_cluster_zone               = var.zone

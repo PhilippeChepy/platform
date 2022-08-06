@@ -19,7 +19,7 @@ auto_auth {
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_etcd_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_etcd_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.issuing_ca }}
 {{- end }}
 {% endraw %}
@@ -31,7 +31,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_etcd_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_etcd_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.certificate }}
 {{- end }}
 {% endraw %}
@@ -43,7 +43,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_etcd_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_etcd_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.private_key }}
 {{- end }}
 {% endraw %}
@@ -73,7 +73,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
 {{ .Data.certificate }}
 {{- end }}
 {% endraw %}
@@ -85,7 +85,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
 {{ .Data.private_key }}
 {{- end }}
 {% endraw %}
@@ -97,7 +97,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_aggregationlayer_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_aggregationlayer_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.issuing_ca }}
 {{- end }}
 {% endraw %}
@@ -109,7 +109,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_aggregationlayer_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_aggregationlayer_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.certificate }}
 {{- end }}
 {% endraw %}
@@ -121,7 +121,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_aggregationlayer_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_aggregationlayer_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.private_key }}
 {{- end }}
 {% endraw %}
@@ -133,7 +133,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_kubelet_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_kubelet_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.issuing_ca }}
 {{- end }}
 {% endraw %}
@@ -145,7 +145,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_kubelet_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_kubelet_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.certificate }}
 {{- end }}
 {% endraw %}
@@ -157,7 +157,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_kubelet_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_kubelet_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
 {{ .Data.private_key }}
 {{- end }}
 {% endraw %}
@@ -405,7 +405,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_konnectivity_cert_cluster'] }}{% raw %}" "common_name=konnectivity" "alt_names=konnectivity" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS,127.0.0.1" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_konnectivity_cert_cluster'] }}{% raw %}" "common_name=konnectivity" "alt_names=konnectivity" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,127.0.0.1" "ttl=24h" -}}
 {{ .Data.private_key }}
 {{- end }}
 {% endraw %}
@@ -417,7 +417,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_konnectivity_cert_cluster'] }}{% raw %}" "common_name=konnectivity" "alt_names=konnectivity" "ip_sans=CLUSTER_EIP_ADDRESS,CLUSTER_MEMBER_ADDRESS,127.0.0.1" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_konnectivity_cert_cluster'] }}{% raw %}" "common_name=konnectivity" "alt_names=konnectivity" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,127.0.0.1" "ttl=24h" -}}
 {{ .Data.certificate }}
 {{- end }}
 {% endraw %}

@@ -82,3 +82,8 @@ variable "backup" {
     zone   = string
   })
 }
+
+variable "endpoint_loadbalancer_id" {
+  description = "The ID of the infrastructure load balancer"
+  type        = string
+}

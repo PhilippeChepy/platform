@@ -52,7 +52,13 @@ variable "admin_security_groups" {
 }
 
 variable "client_security_groups" {
-  description = "A map (key => ID) of security groups authorized to access Vault. Clients of the cluster can be authorized using this variable."
+  description = "A map (key => ID) of security groups authorized to access Etcd. Clients of the cluster can be authorized using this variable."
+  type        = map(string)
+  default     = {}
+}
+
+variable "healthcheck_security_groups" {
+  description = "A map (key => ID) of security groups authorized to access Etcd healthcheck port."
   type        = map(string)
   default     = {}
 }
@@ -96,4 +102,9 @@ variable "backup" {
     bucket = string
     zone   = string
   })
+}
+
+variable "endpoint_loadbalancer_id" {
+  description = "The ID of the infrastructure load balancer"
+  type        = string
 }

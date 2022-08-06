@@ -52,7 +52,13 @@ variable "admin_security_groups" {
 }
 
 variable "client_security_groups" {
-  description = "A map (key => ID) of security groups authorized to access Vault. Clients of the cluster can be authorized using this variable."
+  description = "A map (key => ID) of security groups authorized to access API server. Clients of the cluster can be authorized using this variable."
+  type        = map(string)
+  default     = {}
+}
+
+variable "healthcheck_security_groups" {
+  description = "A map (key => ID) of security groups authorized to access API server healthcheck port."
   type        = map(string)
   default     = {}
 }
@@ -108,4 +114,9 @@ variable "kubernetes" {
     service_cidr_ipv4      = string
     service_cidr_ipv6      = string
   })
+}
+
+variable "endpoint_loadbalancer_id" {
+  description = "The ID of the infrastructure load balancer"
+  type        = string
 }
