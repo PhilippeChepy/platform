@@ -68,7 +68,7 @@ locals {
       "ingress:node_taint_value"              = split("=", ingress.label)[1]
       "ingress:domain"                        = try(ingress.domain, "")
       "cert-manager:namespace"                = try(local.platform_components.kubernetes.deployments.bootstrap.cert-manager.namespace, "")
-      "cert-manager:cloudflare_token"         = base64encode(cloudflare_api_token.api_key.value)
+      "cert-manager:cloudflare_token"         = cloudflare_api_token.api_key.value
       "cert-manager:wildcard_name"            = "${replace(try(ingress.domain, ""), ".", "-")}"
       "external-dns:namespace"                = "ingress-nginx-${name}"
       "external-dns:cloudflare_token"         = base64encode(cloudflare_api_token.api_key.value)
@@ -105,6 +105,7 @@ data "vault_generic_secret" "kubernetes" {
 
 resource "kubernetes_manifest" "ingress" {
   for_each = local.ingress_manifests
+  depends_on = [ cloudflare_api_token.api_key ]
 
   manifest = yamldecode(join("\n", [
     for line in split("\n", each.value.manifest) :
@@ -116,5 +117,6 @@ resource "kubernetes_manifest" "ingress" {
   computed_fields = concat(
     ["metadata.annotations", "metadata.labels"],
     yamldecode(each.value.manifest)["kind"] == "Job" ? ["spec.template.metadata.labels"] : [],
+    yamldecode(each.value.manifest)["kind"] == "Secret" ? ["data", "stringData"] : [],
   )
 }

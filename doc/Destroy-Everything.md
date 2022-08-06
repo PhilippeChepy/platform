@@ -45,16 +45,16 @@ resource "exoscale_nlb" "ingress" {
 
 ## Manual tasks
 
-1. Delete terraform states for other configuraiton directories, as related Vault & Kubernetes cluster are destroyed, they are no longer valid:
+1. If applicable, fom the `terraform-cloudflare` sub-directory, run `terraform destroy`.
+2. Delete terraform states for other configuraiton directories, as related Vault & Kubernetes cluster are destroyed, they are no longer valid:
     - `terraform-base-configuration`
     - `terraform-kubernetes-deployments-bootstrap`
     - `terraform-kubernetes-deployments-core`
-    - `terraform-kubernetes-deployments-ingress-cloudflare` (if applicable)
-2. Delete templates from your Exoscale account:
+3. Delete templates from your Exoscale account:
     - `Etcd x.y.z`
     - `Kubernetes x.y control plane`
     - `Kubernetes x.y node`
     - `Vault x.y.z`
-3. Cleanup artifacts (files in the `artifacts` sub-directory):
+4. Cleanup artifacts (files in the `artifacts` sub-directory):
     - `*.json`
     - `*.txt`

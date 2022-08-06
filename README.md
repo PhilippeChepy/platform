@@ -71,7 +71,7 @@ The whole infrastructure is provisioned by applying 5 configurations, one after 
 - `terraform-kubernetes-deployments-core`: for core Kubernetes and ingress-controller deployments
 
 Additionally, integration with Cloudflare is set by applying an additional configuration:
-- `terraform-kubernetes-deployments-ingress-cloudflare`: deploys external-DNS and lets-encrypt integration using DNS01 issuer
+- `terraform-cloudflare`: deploys external-DNS and lets-encrypt integration using DNS01 issuer
 
 ## Base components and secret management with Vault (terraform-base)
 

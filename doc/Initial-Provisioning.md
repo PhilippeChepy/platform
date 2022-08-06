@@ -145,4 +145,4 @@
     - Terraform: from the `terraform-kubernetes-deployments-core` sub-directory, run `terraform init` and `terraform apply`.
 
 Optionnally, if you want to integrate the infrastructure with Cloudflare, you can also apply the
-`terraform-kubernetes-deployments-ingress-cloudflare` configuration.
+`terraform-cloudflare` configuration.
