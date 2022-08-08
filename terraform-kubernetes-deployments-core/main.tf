@@ -59,7 +59,7 @@ locals {
       merge([
         for _, deployment in ingress.deployments : {
           for manifest in split("\n---\n", file("manifests/${deployment}/${local.platform_components.kubernetes.deployments.ingress[deployment].version}/manifests.yaml")) :
-          "ingress-${name}|${yamldecode(manifest)["apiVersion"]}.${yamldecode(manifest)["kind"]}|${yamldecode(manifest)["metadata"]["name"]}" => {
+          "ingress-${name}(${deployment})|${yamldecode(manifest)["apiVersion"]}.${yamldecode(manifest)["kind"]}|${yamldecode(manifest)["metadata"]["name"]}" => {
             ingress  = name,
             manifest = manifest
           }

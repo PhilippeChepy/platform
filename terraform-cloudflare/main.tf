@@ -68,7 +68,7 @@ locals {
       "ingress:node_taint_value"              = split("=", ingress.label)[1]
       "ingress:domain"                        = try(ingress.domain, "")
       "cert-manager:namespace"                = try(local.platform_components.kubernetes.deployments.bootstrap.cert-manager.namespace, "")
-      "cert-manager:cloudflare_token"         = cloudflare_api_token.api_key.value
+      "cert-manager:cloudflare_token"         = base64encode(cloudflare_api_token.api_key.value)
       "cert-manager:wildcard_name"            = "${replace(try(ingress.domain, ""), ".", "-")}"
       "external-dns:namespace"                = "ingress-nginx-${name}"
       "external-dns:cloudflare_token"         = base64encode(cloudflare_api_token.api_key.value)
@@ -80,7 +80,7 @@ locals {
       merge([
         for _, deployment in try(ingress.deployments-cloudflare, []) : {
           for manifest in split("\n---\n", file("manifests/${deployment}/${local.platform_components.kubernetes.deployments.ingress-cloudflare[deployment].version}/manifests.yaml")) :
-          "ingress-${name}|${yamldecode(manifest)["apiVersion"]}.${yamldecode(manifest)["kind"]}|${yamldecode(manifest)["metadata"]["name"]}" => {
+          "ingress-${name}(${deployment})|${yamldecode(manifest)["apiVersion"]}.${yamldecode(manifest)["kind"]}|${yamldecode(manifest)["metadata"]["name"]}" => {
             ingress  = name,
             manifest = manifest
           }
