@@ -1,0 +1,20 @@
+patches:
+- target:
+    kind: CustomResourceDefinition
+  patch: |-
+    - op: remove
+      path: /metadata/creationTimestamp
+
+helmGlobals:
+  chartHome: .helm
+  configHome: .helm
+
+helmCharts:
+- name: kyverno
+  repo: https://kyverno.github.io/kyverno/
+  releaseName: kyverno
+  namespace: kyverno
+  valuesInline:
+    replicaCount: 3
+
+namespace: kyverno
