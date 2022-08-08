@@ -79,7 +79,7 @@ locals {
     for name, ingress in local.platform_components.kubernetes.ingresses : [
       merge([
         for _, deployment in try(ingress.deployments-cloudflare, []) : {
-          for manifest in split("---", file("manifests/${deployment}/${local.platform_components.kubernetes.deployments.ingress-cloudflare[deployment].version}/manifests.yaml")) :
+          for manifest in split("\n---\n", file("manifests/${deployment}/${local.platform_components.kubernetes.deployments.ingress-cloudflare[deployment].version}/manifests.yaml")) :
           "ingress-${name}|${yamldecode(manifest)["apiVersion"]}.${yamldecode(manifest)["kind"]}|${yamldecode(manifest)["metadata"]["name"]}" => {
             ingress  = name,
             manifest = manifest
