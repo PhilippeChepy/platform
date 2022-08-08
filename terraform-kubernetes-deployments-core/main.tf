@@ -86,7 +86,7 @@ resource "kubernetes_manifest" "manifest" {
 
   manifest = yamldecode(join("\n", [
     for line in split("\n", each.value) :
-    format(replace(line, "/${local.deployment_variables_regex}/", "%s"), [
+    format(replace(replace(line, "%", "%%"), "/${local.deployment_variables_regex}/", "%s"), [
       for value in flatten(regexall(local.deployment_variables_regex, line)) : lookup(local.deployment_variables, value)
     ]...)
   ]))
@@ -104,7 +104,7 @@ resource "kubernetes_manifest" "ingress" {
 
   manifest = yamldecode(join("\n", [
     for line in split("\n", each.value.manifest) :
-    format(replace(line, "/${local.ingress_variables_regex[each.value.ingress]}/", "%s"), [
+    format(replace(replace(line, "%", "%%"), "/${local.ingress_variables_regex[each.value.ingress]}/", "%s"), [
       for value in flatten(regexall(local.ingress_variables_regex[each.value.ingress], line)) : lookup(local.ingress_variables[each.value.ingress], value)
     ]...)
   ]))

@@ -69,7 +69,7 @@ resource "kubernetes_manifest" "manifest" {
 
   manifest = yamldecode(join("\n", [
     for line in split("\n", each.value) :
-    format(replace(line, "/${local.variables_regex}/", "%s"), [
+    format(replace(replace(line, "%", "%%"), "/${local.variables_regex}/", "%s"), [
       for value in flatten(regexall(local.variables_regex, line)) : lookup(local.deployment_variables, value)
     ]...)
   ]))
