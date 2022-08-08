@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-rclone_version: "1.59.0"
+rclone_version: "1.59.1"
 rclone_architecture_map:
   amd64: amd64
   x86_64: amd64
