@@ -39,6 +39,7 @@ locals {
     for name, deployment in local.platform_components.kubernetes.deployments.bootstrap : {
       for manifest in split("\n---\n", file("manifests/${name}/${deployment.version}/manifests.yaml")) :
       "${yamldecode(manifest)["apiVersion"]}.${yamldecode(manifest)["kind"]}|${yamldecode(manifest)["metadata"]["name"]}" => manifest
+      if manifest != ""
     }
   ]...)
 }
