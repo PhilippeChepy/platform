@@ -74,28 +74,25 @@ locals {
           core-dns           = { version = "1.9.3", namespace = "kube-system" }
           konnectivity-agent = { version = "0.0.32", namespace = "kube-system" }
           kyverno            = { version = "1.7.2", namespace = "kyverno" }
+          external-secrets   = { version = "0.5.9", namespace = "external-secrets" }
         }
 
         core = {
-          certificate-metrics-server = { version = "0.0.1", namespace = "kube-system" } # requires "core.cert-manager"
-          metrics-server             = { version = "0.6.1", namespace = "kube-system" } # requires "certificate-metrics-server" or another aggregation certificate provisioning mean 
-          reloader             = { version = "0.0.118", namespace = "reloader" }
+          certificate-metrics-server = { version = "0.0.1", namespace = "kube-system", vault-service-account = "cert-manager-metrics-server" } # requires "core.cert-manager"
+          metrics-server             = { version = "0.6.1", namespace = "kube-system" } # requires "certificate-metrics-server" or another aggregation certificate provisioning mean
+          reloader                   = { version = "0.0.118", namespace = "reloader" }
         }
 
         # Unless explicitely specified (e.g. cert-manager), these deployments are put in
         # an ingress-specific namespace
+        #
+        # Vault service accounts are prefixed with "ingress-${ingress_name}-"
         ingress = {
           nginx-ingress-controller          = { version = "1.3.0" }
           cert-manager-clusterissuer-http01 = { version = "0.0.1" }
-        }
-
-        ingress-cloudflare = {
-          cert-manager-dns01-cloudflare = { version = "0.0.1", namespace = "cert-manager" }
-          external-dns-cloudflare       = { version = "0.12.2" }
-          # This certificate requires:
-          # - A DNS01 issuer (e.g. "cert-manager-dns01-cloudflare") deployed and configured for this ingress
-          # - A specific domain set in ingress.*.domain (see next section)
-          certificate-wildcard-letsencrypt = { version = "0.0.1" }
+          cert-manager-dns01-cloudflare     = { provider = "cloudflare", version = "0.0.1", namespace = "cert-manager", credentials = true, vault-service-account = "cert-manager-dns01-cloudflare" }
+          external-dns-cloudflare           = { provider = "cloudflare", version = "0.12.2", credentials = true, vault-service-account = "external-dns-cloudflare" }
+          certificate-wildcard-letsencrypt  = { provider = "any", version = "0.0.1" } # requires a "cert-manager-dns01-*" deployment
         }
 
       }
@@ -111,14 +108,13 @@ locals {
           ]
         }
         internal = {
-          label     = "platform.example.tld/ingress=internal",
-          pool_size = 2,
-          domain    = "internal.example.tld"
+          label       = "platform.example.tld/ingress=internal",
+          pool_size   = 2,
+          domain      = "internal.example.tld"
+          integration = "cloudflare"
           deployments = [
             "cert-manager-clusterissuer-http01",
             "nginx-ingress-controller"
-          ]
-          deployments-cloudflare = [
             "cert-manager-dns01-cloudflare",
             "external-dns-cloudflare",
             "certificate-wildcard-letsencrypt",

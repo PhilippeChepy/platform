@@ -700,7 +700,7 @@ EOT
 }
 
 resource "vault_policy" "metrics-server" {
-  name = "platform-kubernetes-metrics-server"
+  name = "platform-deployment-certificate-metrics-server"
 
   policy = <<EOT
 path "${vault_mount.pki_kubernetes["control-plane"].path}/cert/ca_chain" {

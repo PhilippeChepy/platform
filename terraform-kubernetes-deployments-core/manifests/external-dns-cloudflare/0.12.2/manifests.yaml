@@ -4,6 +4,12 @@ metadata:
   name: external-dns
   namespace: $external-dns:namespace$
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ingress-$ingress:class_suffix$-external-dns-cloudflare
+  namespace: $external-dns:namespace$
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -56,14 +62,35 @@ subjects:
   name: external-dns
   namespace: $external-dns:namespace$
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ingress-$ingress:class_suffix$-external-dns-cloudflare-tokenreview-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: ingress-$ingress:class_suffix$-external-dns-cloudflare
+  namespace: $external-dns:namespace$
+---
 apiVersion: v1
-data:
-  api-token: $external-dns:cloudflare_token$
 kind: Secret
 metadata:
-  name: cloudflare-api-token-$ingress:class_suffix$-secret
+  annotations:
+    kubernetes.io/service-account.name: ingress-$ingress:class_suffix$-external-dns-cloudflare
+  name: ingress-$ingress:class_suffix$-external-dns-cloudflare
   namespace: $external-dns:namespace$
-type: Opaque
+type: kubernetes.io/service-account-token
+---
+apiVersion: v1
+data:
+  vault-ca-cert: $vault:cluster_ca_cert$
+kind: Secret
+metadata:
+  name: ingress-$ingress:class_suffix$-vault-cloudflare
+  namespace: $external-dns:namespace$
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -99,7 +126,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: api-token
-              name: cloudflare-api-token-$ingress:class_suffix$-secret
+              name: ingress-$ingress:class_suffix$-cloudflare-api-token
         image: k8s.gcr.io/external-dns/external-dns:v0.12.2
         name: external-dns
         resources:
@@ -132,3 +159,44 @@ spec:
   selector:
     matchLabels:
       app: external-dns
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: ingress-$ingress:class_suffix$-vault-cloudflare
+  namespace: $external-dns:namespace$
+spec:
+  data:
+  - remoteRef:
+      key: $ingress:class_suffix$-external-dns-cloudflare
+      property: api-key
+    secretKey: api-token
+  refreshInterval: 60s
+  secretStoreRef:
+    kind: SecretStore
+    name: ingress-$ingress:class_suffix$-vault-cloudflare
+  target:
+    name: ingress-$ingress:class_suffix$-cloudflare-api-token
+---
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: ingress-$ingress:class_suffix$-vault-cloudflare
+  namespace: $external-dns:namespace$
+spec:
+  provider:
+    vault:
+      auth:
+        kubernetes:
+          mountPath: kubernetes
+          role: ingress-$ingress:class_suffix$-external-dns-cloudflare
+          secretRef:
+            key: token
+            name: ingress-$ingress:class_suffix$-external-dns-cloudflare
+      caProvider:
+        key: vault-ca-cert
+        name: ingress-$ingress:class_suffix$-vault-cloudflare
+        type: Secret
+      path: kv/platform/cloudflare
+      server: $vault:cluster_addr$
+      version: v1

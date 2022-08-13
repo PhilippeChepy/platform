@@ -163,11 +163,11 @@ This configuration creates an etcd cluster, a kubernetes control plane (2 nodes 
 
 ### Additional authentication setup
 
-| Auth engine                           | Role                     | Authentication based on                                                          |
-|---------------------------------------|--------------------------|----------------------------------------------------------------------------------|
-| /auth/kubernetes/cert-manager         | metrics-server           | Service account: metrics-server (token: kube-system/metrics-server-vault-issuer) |
-| /auth/kubernetes/vault-agent-injector | cloud-controller-manager | Service account: cloud-controller-manager (token: vault-server)                  |
-| /auth/kubernetes/vault-agent-injector | cluster-autoscaler       | Service account: cluster-autoscaler (token: vault-server)                        |
+| Auth engine                           | Role                          | Authentication based on                                                      |
+|---------------------------------------|-------------------------------|------------------------------------------------------------------------------|
+| /auth/kubernetes/cert-manager         | certificate-metrics-server    | Service account/token: kube-system/cert-manager-metrics-server (-token)      |
+| /auth/kubernetes/external-secrets     | cert-manager-dns01-cloudflare | Service account/token: cert-manager/<ingress>-cert-manager-dns01-cloudflare  |
+| /auth/kubernetes/external-secrets     | external-dns-cloudflare       | Service account/token: <ingress-namespace>/<ingress>-external-dns-cloudflare |
 
 ## Provisioning instructions
 

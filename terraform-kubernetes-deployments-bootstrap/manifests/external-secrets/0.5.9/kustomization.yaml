@@ -1,0 +1,26 @@
+patches:
+- target:
+    kind: CustomResourceDefinition
+  patch: |-
+    - op: remove
+      path: /metadata/creationTimestamp
+- target:
+    kind: Deployment
+    name: external-secrets-webhook
+  patch: |-
+    - op: remove
+      path: /spec/template/spec/hostNetwork
+
+helmGlobals:
+  chartHome: .helm
+  configHome: .helm
+
+helmCharts:
+- name: external-secrets
+  repo: https://charts.external-secrets.io
+  releaseName: external-secrets
+  namespace: external-secrets
+  valuesInline:
+    installCRDs: true
+
+namespace: external-secrets
