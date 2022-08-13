@@ -27,7 +27,6 @@
     # 【output】
     # node/paas-staging-general-012d4-kdlvx already cordoned
     # WARNING: ignoring DaemonSet-managed Pods: kube-system/cilium-fngs9
-    # evicting pod vault-agent-injector/vault-agent-injector-f94b96967-m5nwx
     # evicting pod kube-system/konnectivity-agent-5649884967-6gjpq
     # evicting pod ingress-nginx-default/ingress-nginx-admission-patch-pqm2r
     # evicting pod cert-manager/cert-manager-cainjector-5f6fd79648-qmpk5
@@ -43,7 +42,6 @@
     # pod/metrics-server-648f457f4f-z8qs9 evicted
     # pod/reloader-f877dcc64-kskhp evicted
     # pod/konnectivity-agent-5649884967-6gjpq evicted
-    # pod/vault-agent-injector-f94b96967-m5nwx evicted
     # pod/coredns-678bbdfc47-hs6lj evicted
     # node/paas-staging-general-012d4-kdlvx evicted
     ```

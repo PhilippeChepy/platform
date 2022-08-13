@@ -5,9 +5,7 @@
 ```
  Error: External Program Execution Failed
 │ 
-│   with module.deployment_core["vault-agent-injector"].module.service_account_token["vault-server"].data.external.token,
-│   on modules/kubernetes-deployment/modules/kubernetes-serviceaccount-token/main.tf line 49, in data "external" "token":
-│   49:   program    = ["kubectl", "--kubeconfig=../artifacts/admin.kubeconfig", "--namespace=${var.namespace}", "get", "secret", var.name, "-o", "jsonpath={.data}"]
+...
 │ 
 │ The data source received an unexpected error while attempting to execute the program.
 │ 
