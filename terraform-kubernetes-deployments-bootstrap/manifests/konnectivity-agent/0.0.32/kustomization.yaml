@@ -72,9 +72,9 @@ patches:
         value: "konnectivity-agent-to-server-1"
       - op: add
         path: /spec/template/spec/containers/0/args/-
-        value: "--proxy-server-host=$kubernetes:proxy_server_0_ipv4$"
+        value: "--proxy-server-host=${ kubernetes_proxy_server_0_ipv4 }"
       - op: add
         path: /spec/template/spec/containers/1/args/-
-        value: "--proxy-server-host=$kubernetes:proxy_server_1_ipv4$"
+        value: "--proxy-server-host=${ kubernetes_proxy_server_1_ipv4 }"
 
 namespace: kube-system

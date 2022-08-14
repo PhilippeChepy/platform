@@ -313,9 +313,9 @@ data:
   cilium-endpoint-gc-interval: 5m0s
   cluster-id: "0"
   cluster-name: default
-  cluster-pool-ipv4-cidr: $kubernetes:pod_cidr_ipv4$
+  cluster-pool-ipv4-cidr: ${ kubernetes_pod_cidr_ipv4 }
   cluster-pool-ipv4-mask-size: "24"
-  cluster-pool-ipv6-cidr: $kubernetes:pod_cidr_ipv6$
+  cluster-pool-ipv6-cidr: ${ kubernetes_pod_cidr_ipv6 }
   cluster-pool-ipv6-mask-size: "120"
   cni-chaining-mode: portmap
   custom-cni-conf: "false"
@@ -436,7 +436,7 @@ spec:
               name: cilium-config
               optional: true
         - name: KUBERNETES_SERVICE_HOST
-          value: $kubernetes:apiserver_ipv4$
+          value: ${ kubernetes_apiserver_ipv4 }
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
         image: quay.io/cilium/operator-generic:v1.12.0@sha256:bb2a42eda766e5d4a87ee8a5433f089db81b72dd04acf6b59fcbb445a95f9410
@@ -545,7 +545,7 @@ spec:
               name: cilium-config
               optional: true
         - name: KUBERNETES_SERVICE_HOST
-          value: $kubernetes:apiserver_ipv4$
+          value: ${ kubernetes_apiserver_ipv4 }
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
         image: quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade
@@ -690,7 +690,7 @@ spec:
               name: cilium-config
               optional: true
         - name: KUBERNETES_SERVICE_HOST
-          value: $kubernetes:apiserver_ipv4$
+          value: ${ kubernetes_apiserver_ipv4 }
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
         image: quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade

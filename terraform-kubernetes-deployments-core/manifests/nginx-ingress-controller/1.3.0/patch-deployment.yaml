@@ -15,7 +15,7 @@ spec:
         args:
           - /nginx-ingress-controller
           - --election-id=ingress-controller-leader
-          - --controller-class=k8s.io/ingress-nginx-$ingress:class_suffix$
+          - --controller-class=k8s.io/ingress-nginx-${ ingress_class_suffix }
           - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
           - --default-ssl-certificate=$(POD_NAMESPACE)/$ingress:default_cert$
           - --ingress-class-by-name=true
@@ -40,9 +40,9 @@ spec:
             cpu: 500m
             memory: 512Mi
       nodeSelector:
-        $ingress:node_label_name$: $ingress:node_label_value$
+        ${ ingress_node_label_name }: ${ ingress_node_label_value }
       tolerations:
-      - key: $ingress:node_taint_name$
+      - key: ${ ingress_node_taint_name }
         operator: Equal
-        value: $ingress:node_taint_value$
+        value: ${ ingress_node_taint_value }
         effect: NoSchedule

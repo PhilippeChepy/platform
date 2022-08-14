@@ -9,7 +9,7 @@ resources:
   - secret.yaml
   - ./pod-disruption-budget.yaml
 
-namespace: $external-dns:namespace$
+namespace: ${ external_dns_namespace }
 
 images:
   - name: k8s.gcr.io/external-dns/external-dns
@@ -22,14 +22,14 @@ patches:
   patch: |-
     - op: replace
       path: /metadata/name
-      value: external-dns-$ingress:class_suffix$-viewer
+      value: external-dns-${ ingress_class_suffix }-viewer
 - target:
     kind: ClusterRole
     name: external-dns
   patch: |-
     - op: replace
       path: /metadata/name
-      value: external-dns-$ingress:class_suffix$
+      value: external-dns-${ ingress_class_suffix }
 
 - target:
     kind: Deployment
@@ -39,7 +39,7 @@ patches:
       path: /spec/template/spec/containers/0/args
       value:
       - --source=ingress
-      - --domain-filter=$ingress:domain$
+      - --domain-filter=${ ingress_domain }
       - --provider=cloudflare
     - op: add
       path: /spec/template/spec/containers/0/env
@@ -47,7 +47,7 @@ patches:
       - name: CF_API_TOKEN
         valueFrom:
           secretKeyRef:
-            name: ingress-$ingress:class_suffix$-cloudflare-api-token
+            name: ingress-${ ingress_class_suffix }-cloudflare-api-token
             key: api-token
     - op: add
       path:  /spec/replicas

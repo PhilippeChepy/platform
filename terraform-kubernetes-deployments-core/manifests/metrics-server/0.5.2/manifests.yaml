@@ -94,8 +94,8 @@ subjects:
 ---
 apiVersion: v1
 data:
-  aggregationlayer-server-ca.pem: $kubernetes:aggregationlayer_ca_cert$
-  kubelet-server-ca.pem: $kubernetes:kubelet_ca_cert$
+  aggregationlayer-server-ca.pem: ${ kubernetes_aggregationlayer_ca_cert }
+  kubelet-server-ca.pem: ${ kubernetes_kubelet_ca_cert }
 kind: Secret
 metadata:
   name: metrics-server-ca
@@ -221,7 +221,7 @@ metadata:
     k8s-app: metrics-server
   name: v1beta1.metrics.k8s.io
 spec:
-  caBundle: $kubernetes:aggregationlayer_ca_cert$
+  caBundle: ${ kubernetes_aggregationlayer_ca_cert }
   group: metrics.k8s.io
   groupPriorityMinimum: 100
   insecureSkipTLSVerify: false

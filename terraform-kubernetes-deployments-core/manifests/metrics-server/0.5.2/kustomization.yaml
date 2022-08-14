@@ -13,7 +13,7 @@ patches:
         value: false
       - op: add
         path: /spec/caBundle
-        value: $kubernetes:aggregationlayer_ca_cert$
+        value: ${ kubernetes_aggregationlayer_ca_cert }
   - target:
       kind: Deployment
       name: metrics-server

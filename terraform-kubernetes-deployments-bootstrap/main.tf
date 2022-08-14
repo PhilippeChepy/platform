@@ -1,46 +1,56 @@
 locals {
-  variables_regex = "\\$(${join("|", keys(local.deployment_variables))})\\$"
-
   # Control plane CAs & deployment properties
   deployment_variables = {
-    "provider:zone"                         = local.platform_zone
-    "kubernetes:apiserver_ca_cert"          = base64encode(data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"])
-    "kubernetes:aggregationlayer_ca_cert"   = base64encode(data.vault_generic_secret.kubernetes["aggregation-layer-ca"].data["ca_chain"])
-    "kubernetes:kubelet_ca_cert"            = base64encode(data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"])
-    "kubernetes:apiserver_service_ipv4"     = local.platform_components.kubernetes.apiserver_service_ipv4
-    "kubernetes:apiserver_service_ipv6"     = local.platform_components.kubernetes.apiserver_service_ipv6
-    "kubernetes:apiserver_ipv4"             = local.kubernetes.control_plane_ip_address
-    "kubernetes:cluster_domain"             = local.platform_components.kubernetes.cluster_domain
-    "kubernetes:pod_cidr_ipv4"              = local.platform_components.kubernetes.pod_cidr_ipv4
-    "kubernetes:pod_cidr_ipv6"              = local.platform_components.kubernetes.pod_cidr_ipv6
-    "kubernetes:dns_service_ipv4"           = local.platform_components.kubernetes.dns_service_ipv4
-    "kubernetes:dns_service_ipv6"           = local.platform_components.kubernetes.dns_service_ipv6 // XXX: implement it in addition to ipv4
-    "kubernetes:service_cidr_ipv4"          = local.platform_components.kubernetes.service_cidr_ipv4
-    "kubernetes:service_cidr_ipv6"          = local.platform_components.kubernetes.service_cidr_ipv6
-    "kubernetes:proxy_server_0_ipv4"        = local.kubernetes.control_plane_instance_ip_address[0]
-    "kubernetes:proxy_server_1_ipv4"        = local.kubernetes.control_plane_instance_ip_address[1]
-    "vault:cluster_addr"                    = local.vault.url
-    "vault:cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
-    "vault:path_pki_sign:aggregation_layer" = local.pki.pki_sign_aggregation_layer
+    "kubernetes_aggregationlayer_ca_cert"   = base64encode(data.vault_generic_secret.kubernetes["aggregation-layer-ca"].data["ca_chain"])
+    "kubernetes_kubelet_ca_cert"            = base64encode(data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"])
+    "kubernetes_apiserver_ipv4"             = local.kubernetes.control_plane_ip_address
+    "kubernetes_cluster_domain"             = local.platform_components.kubernetes.cluster_domain
+    "kubernetes_pod_cidr_ipv4"              = local.platform_components.kubernetes.pod_cidr_ipv4
+    "kubernetes_pod_cidr_ipv6"              = local.platform_components.kubernetes.pod_cidr_ipv6
+    "kubernetes_dns_service_ipv4"           = local.platform_components.kubernetes.dns_service_ipv4
+    "kubernetes_service_cidr_ipv4"          = local.platform_components.kubernetes.service_cidr_ipv4
+    "kubernetes_service_cidr_ipv6"          = local.platform_components.kubernetes.service_cidr_ipv6
+    "kubernetes_proxy_server_0_ipv4"        = local.kubernetes.control_plane_instance_ip_address[0]
+    "kubernetes_proxy_server_1_ipv4"        = local.kubernetes.control_plane_instance_ip_address[1]
+    "vault_cluster_addr"                    = local.vault.url
+    "vault_cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
+    "vault_path_pki_sign_aggregation_layer" = local.pki.pki_sign_aggregation_layer
+
+    # Colision between actual manifest content and the Terraform templating syntax
+    "BIN_PATH" = "$${BIN_PATH}" # Cilium manifests
   }
 
   namespaces = toset(concat([
-    for _, deployment in local.platform_components.kubernetes.deployments.bootstrap : deployment.namespace
-    if deployment.namespace != "kube-system"
-    ], [
-    for _, deployment in local.platform_components.kubernetes.deployments.core : deployment.namespace
+    for _, deployment in merge(
+      local.platform_components.kubernetes.deployments.bootstrap,
+      local.platform_components.kubernetes.deployments.core
+    ) : deployment.namespace
     if deployment.namespace != "kube-system"
     ], [
     for name, ingress in local.platform_components.kubernetes.ingresses : "ingress-nginx-${name}"
   ]))
 
-  bootstrap_manifests = merge([
-    for name, deployment in local.platform_components.kubernetes.deployments.bootstrap : {
-      for manifest in split("\n---\n", file("manifests/${name}/${deployment.version}/manifests.yaml")) :
-      "${yamldecode(manifest)["apiVersion"]}.${yamldecode(manifest)["kind"]}|${yamldecode(manifest)["metadata"]["name"]}" => manifest
+  # This local is an array of yaml decoded manifests
+  # - manifests.yaml of each deployment is split by resource (a single yaml document is split by "---" delimiter)
+  # - the result is transformed to a native HCL yaml structure using yamldecode()
+  # - this result is stored in the manifest array, unless manifest is empty
+  bootstrap_manifests = concat([
+    for name, deployment in local.platform_components.kubernetes.deployments.bootstrap : [
+      for manifest in split("\n---\n", templatefile("manifests/${name}/${deployment.version}/manifests.yaml", local.deployment_variables)) :
+      yamldecode(manifest)
       if manifest != ""
-    }
+    ]
   ]...)
+
+  # Here we transform the `bootstrap_manifests` local into a nonsensitive data set using `try(nonsensitive(X), X)` construction.
+  # Each manifest is placed into a map, indexed by a unique identifier.
+  #
+  # QUIRK: some manifests can be considered sensitive. That's why we use the `try(nonsensitive(X), X)` construction,
+  # in order to enforce non-sensitiveness of the variable.
+  bootstrap_resources = {
+    for resource in try(nonsensitive(local.bootstrap_manifests), local.bootstrap_manifests) :
+    "${try("${resource.metadata.namespace}", "(global)")}|${resource.kind}/${resource.metadata.name}" => resource
+  }
 }
 
 data "vault_generic_secret" "kubernetes" {
@@ -65,17 +75,11 @@ resource "kubernetes_namespace" "namespace" {
 
 resource "kubernetes_manifest" "manifest" {
   depends_on = [kubernetes_namespace.namespace]
-  for_each   = local.bootstrap_manifests
+  for_each   = local.bootstrap_resources
 
-  manifest = yamldecode(join("\n", [
-    for line in split("\n", each.value) :
-    format(replace(replace(line, "%", "%%"), "/${local.variables_regex}/", "%s"), [
-      for value in flatten(regexall(local.variables_regex, line)) : lookup(local.deployment_variables, value)
-    ]...)
-  ]))
-
+  manifest = each.value
   computed_fields = concat(
     ["metadata.annotations", "metadata.labels"],
-    yamldecode(each.value)["kind"] == "Job" ? ["spec.template.metadata.labels"] : [],
+    each.value.kind == "Job" ? ["spec.template.metadata.labels"] : [],
   )
 }

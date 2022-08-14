@@ -59,7 +59,7 @@ data:
           lameduck 5s
         }
         ready
-        kubernetes $kubernetes:cluster_domain$ in-addr.arpa ip6.arpa {
+        kubernetes ${ kubernetes_cluster_domain } in-addr.arpa ip6.arpa {
           fallthrough in-addr.arpa ip6.arpa
         }
         prometheus :9153
@@ -205,7 +205,7 @@ metadata:
 spec:
   selector:
     k8s-app: kube-dns
-  clusterIP: $kubernetes:dns_service_ipv4$
+  clusterIP: ${ kubernetes_dns_service_ipv4 }
   ports:
   - name: dns
     port: 53

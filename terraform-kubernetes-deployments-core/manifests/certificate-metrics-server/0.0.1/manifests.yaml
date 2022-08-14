@@ -34,9 +34,9 @@ metadata:
   namespace: kube-system
 spec:
   vault:
-    path: $vault:path_pki_sign:aggregation_layer$
-    server: $vault:cluster_addr$
-    caBundle: $vault:cluster_ca_cert$
+    path: ${ vault_path_pki_sign_aggregation_layer }
+    server: ${ vault_cluster_addr }
+    caBundle: ${ vault_cluster_ca_cert }
     auth:
       kubernetes:
         role: certificate-metrics-server

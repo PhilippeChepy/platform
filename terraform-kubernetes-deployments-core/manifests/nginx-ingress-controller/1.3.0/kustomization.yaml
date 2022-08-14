@@ -24,51 +24,51 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/args/1
-        value: --webhook-name=ingress-nginx-$ingress:class_suffix$-admission
+        value: --webhook-name=ingress-nginx-${ ingress_class_suffix }-admission
   - target:
       kind: ClusterRole
       name: ingress-nginx
     patch: |-
       - op: replace
         path: /metadata/name
-        value: ingress-nginx-$ingress:class_suffix$
+        value: ingress-nginx-${ ingress_class_suffix }
   - target:
       kind: ClusterRole
       name: ingress-nginx-admission
     patch: |-
       - op: replace
         path: /metadata/name
-        value: ingress-nginx-$ingress:class_suffix$-admission
+        value: ingress-nginx-${ ingress_class_suffix }-admission
   - target:
       kind: ClusterRoleBinding
       name: ingress-nginx
     patch: |-
       - op: replace
         path: /metadata/name
-        value: ingress-nginx-$ingress:class_suffix$
+        value: ingress-nginx-${ ingress_class_suffix }
   - target:
       kind: ClusterRoleBinding
       name: ingress-nginx-admission
     patch: |-
       - op: replace
         path: /metadata/name
-        value: ingress-nginx-$ingress:class_suffix$-admission
+        value: ingress-nginx-${ ingress_class_suffix }-admission
   - target:
       kind: IngressClass
       name: nginx
     patch: |-
       - op: replace
         path: /metadata/name
-        value: nginx-$ingress:class_suffix$
+        value: nginx-${ ingress_class_suffix }
       - op: replace
         path: /spec/controller
-        value: k8s.io/ingress-nginx-$ingress:class_suffix$
+        value: k8s.io/ingress-nginx-${ ingress_class_suffix }
   - target:
       kind: ValidatingWebhookConfiguration
       name: ingress-nginx-admission
     patch: |-
       - op: replace
         path: /metadata/name
-        value: ingress-nginx-$ingress:class_suffix$-admission
+        value: ingress-nginx-${ ingress_class_suffix }-admission
 
-namespace: $ingress:namespace$
+namespace: ${ ingress_namespace }

@@ -3,7 +3,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: external-dns
-  namespace: $external-dns:namespace$
+  namespace: ${ external_dns_namespace }
   labels:
     app: external-dns
 spec:

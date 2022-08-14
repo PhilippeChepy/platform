@@ -76,7 +76,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/clusterIP
-        value: $kubernetes:dns_service_ipv4$
+        value: ${ kubernetes_dns_service_ipv4 }
 
 helmGlobals:
   chartHome: .helm
@@ -105,7 +105,7 @@ helmCharts:
       - name: ready
       # Required to query kubernetes API for data
       - name: kubernetes
-        parameters: $kubernetes:cluster_domain$ in-addr.arpa ip6.arpa
+        parameters: ${ kubernetes_cluster_domain } in-addr.arpa ip6.arpa
         configBlock: |-
           pods verified
           fallthrough in-addr.arpa ip6.arpa

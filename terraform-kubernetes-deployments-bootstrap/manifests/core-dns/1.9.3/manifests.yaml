@@ -59,7 +59,7 @@ data:
             lameduck 5s
         }
         ready
-        kubernetes $kubernetes:cluster_domain$ in-addr.arpa ip6.arpa {
+        kubernetes ${ kubernetes_cluster_domain } in-addr.arpa ip6.arpa {
             pods verified
             fallthrough in-addr.arpa ip6.arpa
             ttl 30
@@ -98,7 +98,7 @@ metadata:
   name: coredns
   namespace: kube-system
 spec:
-  clusterIP: $kubernetes:dns_service_ipv4$
+  clusterIP: ${ kubernetes_dns_service_ipv4 }
   ports:
   - name: udp-53
     port: 53

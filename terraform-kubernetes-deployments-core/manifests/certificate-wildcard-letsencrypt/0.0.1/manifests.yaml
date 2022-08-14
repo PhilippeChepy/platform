@@ -2,15 +2,15 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: $cert-manager:wildcard_name$-wildcard
-  namespace: $ingress:namespace$
+  name: ${ cert_manager_wildcard_name }-wildcard
+  namespace: ${ ingress_namespace }
 spec:
-  secretName: $cert-manager:wildcard_name$-wildcard-cert
+  secretName: ${ cert_manager_wildcard_name }-wildcard-cert
   duration: "2160h0m0s"
   renewBefore: "1440h0m0s"
   issuerRef:
-    name: dns01-issuer-$ingress:class_suffix$
+    name: dns01-issuer-${ ingress_class_suffix }
     kind: ClusterIssuer
-  commonName: "*.$ingress:domain$"
+  commonName: "*.${ ingress_domain }"
   dnsNames:
-    - "*.$ingress:domain$"
+    - "*.${ ingress_domain }"
