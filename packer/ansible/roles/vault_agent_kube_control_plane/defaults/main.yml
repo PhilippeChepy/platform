@@ -28,8 +28,8 @@ vault_agent_kube_control_plane_paths:
   pki_controlplane_cert_cluster_autoscaler: 'pki/platform/kubernetes/control-plane/issue/cluster-autoscaler'
 
   ## Cloud controller manager: Exoscale
-  iam_exoscale_cloud_controller_manager: 'iam/exoscale/apikey/cloud-controller-manager'
-  iam_exoscale_cluster_autoscaler: 'iam/exoscale/apikey/cluster-autoscaler'
+  kv_exoscale_cloud_controller_manager_exoscale_api: 'kv/platform/exoscale/cloud-controller-manager'
+  kv_exoscale_cluster_autoscaler_exoscale_api: 'kv/platform/exoscale/cluster-autoscaler'
 
 # TODO: make provider-specific sections optional
 # vault_agent_kube_control_plane_provider: None | 'exoscale'

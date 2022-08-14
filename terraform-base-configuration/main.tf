@@ -1,84 +1,29 @@
-resource "exoscale_iam_access_key" "iam_api_key" {
-  name = "${local.platform_name}-vault-iam"
+# Exoscale Access keys
 
-  operations = concat([for name, role in local.iam_role : try(role.operations, [])]...)
+resource "exoscale_iam_access_key" "access_key" {
+  for_each = local.iam_roles
+  name     = "${local.platform_name}-${each.key}"
 
-  # TODO: enable this attribute once the provider's bug is fixed
-  # resources  = concat([for name, resource in local.iam_role : try(resource.resources, [])]...)
-  tags = concat([for tag, role in local.iam_role : try(role.tags, [])]...)
+  operations = try(each.value.operations, [])
+  resources  = try(each.value.resources, [])
+  tags = try(each.value.tags, [])
 }
 
-resource "exoscale_iam_access_key" "auth_api_key" {
-  name = "${local.platform_name}-vault-auth"
-  operations = [
-    "list-zones",
-    "list-instances",
-    "list-security-groups",
-    "get-instance",
-    "get-instance-pool",
-    "get-security-group"
-  ]
+resource "vault_mount" "secret_exoscale" {
+  path        = "kv/platform/exoscale"
+  description = "Exoscale Secrets"
+
+  type = "kv"
 }
 
-# Exoscale plugin: secret engine
+resource "vault_generic_secret" "exoscale_api_keys" {
+  depends_on = [vault_mount.secret_exoscale]
+  for_each   = local.iam_roles
+  path       = "${vault_mount.secret_exoscale.path}/${each.key}"
 
-resource "vault_generic_endpoint" "exoscale_secret_plugin_register" {
-  path         = "sys/plugins/catalog/secret/exoscale"
-  disable_read = true
   data_json = jsonencode({
-    name    = "exoscale"
-    command = "vault-plugin-secrets-exoscale"
-    args    = ["-ca-cert=/etc/vault/tls/server.pem"]
-    sha256  = var.exoscale_secret_plugin_hash
-  })
-}
-
-resource "vault_mount" "iam_exoscale" {
-  depends_on  = [vault_generic_endpoint.exoscale_secret_plugin_register]
-  path        = "iam/exoscale"
-  type        = "exoscale"
-  description = "Exoscale IAM"
-}
-
-resource "vault_generic_endpoint" "iam_exoscale_config_root" {
-  depends_on     = [vault_mount.iam_exoscale]
-  path           = "${vault_mount.iam_exoscale.path}/config/root"
-  disable_delete = true
-  data_json = jsonencode({
-    api_environment = "api"
-    root_api_key    = exoscale_iam_access_key.iam_api_key.key
-    root_api_secret = exoscale_iam_access_key.iam_api_key.secret
-    zone            = local.platform_zone
-  })
-}
-
-resource "vault_generic_endpoint" "iam_exoscale_config_lease" {
-  depends_on   = [vault_mount.iam_exoscale]
-  path         = "${vault_mount.iam_exoscale.path}/config/lease"
-  disable_read = true
-  data_json = jsonencode({
-    ttl     = "24h",
-    max_ttl = "48h"
-  })
-}
-
-resource "vault_generic_endpoint" "iam_exoscale_role_etcd_instance_pool" {
-  for_each = {
-    etcd-instance-pool       = local.iam_role.etcd_instance_pool,
-    vault-instance-pool      = local.iam_role.vault_instance_pool,
-    cloud-controller-manager = local.iam_role.cloud_controller_manager,
-    cluster-autoscaler       = local.iam_role.cluster_autoscaler,
-    vault-backup             = local.iam_role.vault_backup,
-    etcd-backup              = local.iam_role.etcd_backup,
-  }
-
-  depends_on   = [vault_mount.iam_exoscale]
-  path         = "${vault_mount.iam_exoscale.path}/role/${each.key}"
-  disable_read = true
-  data_json = jsonencode({
-    operations = try(each.value.operations, [])
-    resources  = try(each.value.resources, [])
-    tags       = try(each.value.tags, null)
+    api_key     = exoscale_iam_access_key.access_key[each.key].key
+    api_secret  = exoscale_iam_access_key.access_key[each.key].secret
   })
 }
 
@@ -246,7 +191,7 @@ path "${vault_mount.pki_vault.path}/issue/server" {
   capabilities = ["create", "update"]
 }
 
-path "${vault_mount.iam_exoscale.path}/apikey/vault-backup" {
+path "${vault_mount.secret_exoscale.path}/vault-backup" {
   capabilities = ["read"]
 }
 
@@ -564,11 +509,11 @@ path "${vault_mount.pki_kubernetes["etcd"].path}/issue/server" {
   capabilities = ["create", "update"]
 }
 
-path "${vault_mount.iam_exoscale.path}/apikey/etcd-instance-pool" {
+path "${vault_mount.secret_exoscale.path}/etcd-instance-pool" {
   capabilities = ["read"]
 }
 
-path "${vault_mount.iam_exoscale.path}/apikey/etcd-backup" {
+path "${vault_mount.secret_exoscale.path}/etcd-backup" {
   capabilities = ["read"]
 }
 
@@ -669,7 +614,7 @@ path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/cloud-controller
   capabilities = ["create", "update"]
 }
 
-path "${vault_mount.iam_exoscale.path}/apikey/cloud-controller-manager" {
+path "${vault_mount.secret_exoscale.path}/cloud-controller-manager" {
   capabilities = ["read"]
 }
 
@@ -681,7 +626,7 @@ path "${vault_mount.pki_kubernetes["control-plane"].path}/issue/cluster-autoscal
   capabilities = ["create", "update"]
 }
 
-path "${vault_mount.iam_exoscale.path}/apikey/cluster-autoscaler" {
+path "${vault_mount.secret_exoscale.path}/cluster-autoscaler" {
   capabilities = ["read"]
 }
 
@@ -886,8 +831,8 @@ resource "vault_generic_endpoint" "auth_exoscale_config" {
   disable_delete = true
   data_json = jsonencode({
     api_environment = "api"
-    api_key         = exoscale_iam_access_key.auth_api_key.key
-    api_secret      = exoscale_iam_access_key.auth_api_key.secret
+    api_key         = exoscale_iam_access_key.access_key["vault-exoscale-auth"].key
+    api_secret      = exoscale_iam_access_key.access_key["vault-exoscale-auth"].secret
     approle_mode    = true,
     zone            = local.platform_zone
   })

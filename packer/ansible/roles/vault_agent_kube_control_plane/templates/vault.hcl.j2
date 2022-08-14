@@ -73,7 +73,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,kube-api.CLUSTER_DOMAIN_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
 {{ .Data.certificate }}
 {{- end }}
 {% endraw %}
@@ -85,7 +85,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_controlplane_cert_apiserver'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,kube-api.CLUSTER_DOMAIN_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS,CLUSTER_INTERNAL_ADDRESS" "ttl=24h" -}}
 {{ .Data.private_key }}
 {{- end }}
 {% endraw %}
@@ -431,7 +431,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['iam_exoscale_cloud_controller_manager'] }}{% raw %}" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['kv_exoscale_cloud_controller_manager_exoscale_api'] }}{% raw %}" -}}
 EXOSCALE_API_KEY="{{ .Data.api_key }}"
 EXOSCALE_API_SECRET="{{ .Data.api_secret }}"
 EXOSCALE_ZONE="EXOSCALE_CLUSTER_ZONE"
@@ -476,7 +476,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['iam_exoscale_cluster_autoscaler'] }}{% raw %}" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['kv_exoscale_cluster_autoscaler_exoscale_api'] }}{% raw %}" -}}
 EXOSCALE_API_KEY="{{ .Data.api_key }}"
 EXOSCALE_API_SECRET="{{ .Data.api_secret }}"
 EXOSCALE_ZONE="EXOSCALE_CLUSTER_ZONE"

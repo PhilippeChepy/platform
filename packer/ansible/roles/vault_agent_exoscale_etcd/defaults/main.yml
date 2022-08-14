@@ -6,8 +6,8 @@ vault_agent_exoscale_etcd_group: "{{ vault_group }}"
 
 vault_agent_exoscale_etcd_auth_path: null
 vault_agent_exoscale_etcd_paths:
-  iam_instance_pool: "iam/exoscale/apikey/etcd-instance-pool"
-  iam_backup: "iam/exoscale/apikey/etcd-backup"
+  kv_instance_pool_exoscale_api: "kv/platform/exoscale/etcd-instance-pool"
+  kv_backup_exoscale_api: "kv/platform/exoscale/etcd-backup"
   kv_backup_encryption: "kv/platform/backup/etcd-public"
   pki_etcd_cert: 'pki/platform/kubernetes/etcd/issue/server'
 

@@ -1,9 +1,16 @@
 locals {
-  iam_role = {
-    vault_iam = {
-      tags = ["iam"]
+  iam_roles = {
+    vault-exoscale-auth = {
+      operations = [
+        "list-zones",
+        "list-instances",
+        "list-security-groups",
+        "get-instance",
+        "get-instance-pool",
+        "get-security-group"
+      ]
     }
-    etcd_instance_pool = {
+    etcd-instance-pool = {
       operations = [
         "list-instance-pools",
         "get-anti-affinity-group",
@@ -16,7 +23,7 @@ locals {
         "list-instances",
       ]
     }
-    vault_instance_pool = {
+    vault-instance-pool = {
       operations = [
         "list-instance-pools",
         "get-anti-affinity-group",
@@ -29,7 +36,7 @@ locals {
         "list-instances",
       ]
     }
-    cloud_controller_manager = {
+    cloud-controller-manager = {
       operations = [
         "add-service-to-load-balancer",
         "create-load-balancer",
@@ -49,7 +56,7 @@ locals {
         "update-load-balancer-service",
       ]
     }
-    cluster_autoscaler = {
+    cluster-autoscaler = {
       operations = [
         "evict-instance-pool-members",
         "get-instance-pool",
@@ -59,7 +66,7 @@ locals {
         "scale-instance-pool",
       ]
     },
-    vault_backup = {
+    vault-backup = {
       operations = [
         "list-sos-bucket",
         "create-sos-bucket",
@@ -69,7 +76,7 @@ locals {
       ]
       resources = ["sos/bucket:${local.rclone.vault.bucket}"]
     }
-    etcd_backup = {
+    etcd-backup = {
       operations = [
         "list-sos-bucket",
         "create-sos-bucket",

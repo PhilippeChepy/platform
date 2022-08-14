@@ -7,6 +7,6 @@ vault_agent_vault_group: "{{ vault_group }}"
 
 vault_agent_vault_auth_path: null
 vault_agent_vault_paths:
-  iam_backup: "iam/exoscale/apikey/vault-backup"
+  kv_backup_exoscale_api: "kv/platform/exoscale/vault-backup"
   kv_backup_encryption: "kv/platform/backup/vault-public"
   pki_vault_cert: 'pki/platform/vault/issue/server'
