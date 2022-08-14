@@ -7,7 +7,7 @@ locals {
   api_keys = toset(concat([
     for name, ingress in local.platform_components.kubernetes.ingresses : [
       for _, deployment in try(ingress.deployments, []) : "${name}-${deployment}"
-      if try(local.platform_components.kubernetes.deployments.ingress[deployment].credentials, false)
+      if try(local.platform_components.kubernetes.deployments.ingress[deployment].provider, "") == "cloudflare" && try(local.platform_components.kubernetes.deployments.ingress[deployment].credentials, false)
     ]
   ]...))
 }
@@ -18,6 +18,25 @@ data "cloudflare_api_token_permission_groups" "all" {
 data "cloudflare_zone" "zone" {
   for_each = toset(local.domains)
   name     = each.key
+}
+
+
+resource "cloudflare_record" "base_services" {
+  for_each = merge([
+    for domain in toset(local.domains): {
+      for service in toset(["vault", "etcd", "kube-api"]): "${ service }.${ local.platform_domain }" => {
+        domain = domain
+        name   = service
+      }
+    }
+    if trimsuffix(".${ local.platform_domain }", ".${ domain }") != ".${ local.platform_domain }"
+  ]...)
+
+  zone_id = data.cloudflare_zone.zone[each.value.domain].id
+  name = "${ each.value.name }.${ local.platform_domain }."
+  value = local.kubernetes.control_plane_ip_address
+  type    = "A"
+  ttl = 120
 }
 
 resource "cloudflare_api_token" "api_key" {
