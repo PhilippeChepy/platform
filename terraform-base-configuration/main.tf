@@ -6,7 +6,7 @@ resource "exoscale_iam_access_key" "access_key" {
 
   operations = try(each.value.operations, [])
   resources  = try(each.value.resources, [])
-  tags = try(each.value.tags, [])
+  tags       = try(each.value.tags, [])
 }
 
 resource "vault_mount" "secret_exoscale" {
@@ -22,8 +22,8 @@ resource "vault_generic_secret" "exoscale_api_keys" {
   path       = "${vault_mount.secret_exoscale.path}/${each.key}"
 
   data_json = jsonencode({
-    api_key     = exoscale_iam_access_key.access_key[each.key].key
-    api_secret  = exoscale_iam_access_key.access_key[each.key].secret
+    api_key    = exoscale_iam_access_key.access_key[each.key].key
+    api_secret = exoscale_iam_access_key.access_key[each.key].secret
   })
 }
 

@@ -23,20 +23,20 @@ data "cloudflare_zone" "zone" {
 
 resource "cloudflare_record" "base_services" {
   for_each = merge([
-    for domain in toset(local.domains): {
-      for service in toset(["vault", "etcd", "kube-api"]): "${ service }.${ local.platform_domain }" => {
+    for domain in toset(local.domains) : {
+      for service in toset(["vault", "etcd", "kube-api"]) : "${service}.${local.platform_domain}" => {
         domain = domain
         name   = service
       }
     }
-    if trimsuffix(".${ local.platform_domain }", ".${ domain }") != ".${ local.platform_domain }"
+    if trimsuffix(".${local.platform_domain}", ".${domain}") != ".${local.platform_domain}"
   ]...)
 
   zone_id = data.cloudflare_zone.zone[each.value.domain].id
-  name = "${ each.value.name }.${ local.platform_domain }."
-  value = local.kubernetes.control_plane_ip_address
+  name    = "${each.value.name}.${local.platform_domain}."
+  value   = local.kubernetes.control_plane_ip_address
   type    = "A"
-  ttl = 120
+  ttl     = 120
 }
 
 resource "cloudflare_api_token" "api_key" {
