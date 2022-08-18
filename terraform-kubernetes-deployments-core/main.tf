@@ -27,6 +27,7 @@ locals {
       "ingress_node_taint_value"   = split("=", ingress.label)[1]
       "ingress_domain"             = try(ingress.domain, "")
       "ingress_default_cert"       = "${replace(try(ingress.domain, ""), ".", "-")}-wildcard-cert" # TODO: implement default TLS cert if not provided by DNS01 integration
+      "ingress_loadbalancer_ip"    = local.kubernetes.ingress[name].ip_address
       "cert_manager_wildcard_name" = "${replace(try(ingress.domain, ""), ".", "-")}"
       "external_dns_namespace"     = "ingress-nginx-${name}"
     })

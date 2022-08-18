@@ -354,6 +354,8 @@ metadata:
   name: ingress-nginx-controller
   namespace: ${ ingress_namespace }
 spec:
+  externalIPs:
+  - ${ ingress_loadbalancer_ip }
   externalTrafficPolicy: Local
   ports:
   - appProtocol: http

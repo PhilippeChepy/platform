@@ -329,12 +329,17 @@ all:
     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
     ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
 
+    kubernetes_ingress:
+%{~for ingress, _ in local.platform_components.kubernetes.ingresses}
+      ${ingress}:
+        ip_address: "${exoscale_nlb.ingress[ingress].ip_address}"
+%{endfor}
     kubernetes_apiserver_url: ${module.kubernetes_control_plane.url}
     kubernetes_control_plane_ip_address: ${data.exoscale_nlb.endpoint.ip_address}
     kubernetes_control_plane_instance_ip_address:
 %{~for instance in module.kubernetes_control_plane.instances}
     - ${instance.public_ip_address~}
-%{endfor}    
+%{endfor}
   children:
     etcd:
       hosts:

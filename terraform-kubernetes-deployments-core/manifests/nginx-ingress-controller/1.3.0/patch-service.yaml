@@ -5,3 +5,5 @@ metadata:
   namespace: ingress-nginx
 spec:
   externalTrafficPolicy: Local
+  externalIPs:
+  - "${ ingress_loadbalancer_ip }"
