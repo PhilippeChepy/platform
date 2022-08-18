@@ -26,6 +26,7 @@ locals {
       "ingress_node_taint_name"    = split("=", ingress.label)[0]
       "ingress_node_taint_value"   = split("=", ingress.label)[1]
       "ingress_domain"             = try(ingress.domain, "")
+      "ingress_default_cert"       = "${replace(try(ingress.domain, ""), ".", "-")}-wildcard-cert" # TODO: implement default TLS cert if not provided by DNS01 integration
       "cert_manager_wildcard_name" = "${replace(try(ingress.domain, ""), ".", "-")}"
       "external_dns_namespace"     = "ingress-nginx-${name}"
     })
