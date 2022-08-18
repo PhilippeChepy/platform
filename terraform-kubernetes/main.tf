@@ -28,9 +28,9 @@ locals {
   # Ingress nodes
 
   ingress_security_group_rules = {
-    http                       = { protocol = "TCP", type = "INGRESS", port = 80, cidr = "0.0.0.0/0" },
-    https                      = { protocol = "TCP", type = "INGRESS", port = 443, cidr = "0.0.0.0/0" },
-    nginx_admission_controller = { protocol = "TCP", type = "INGRESS", port = 8443, security_group_id = module.kubernetes_control_plane.cluster_security_group_id },
+    http      = { protocol = "TCP", type = "INGRESS", port = 80, cidr = "0.0.0.0/0" },
+    https     = { protocol = "TCP", type = "INGRESS", port = 443, cidr = "0.0.0.0/0" },
+    admission = { protocol = "TCP", type = "INGRESS", port = 8443, security_group_id = module.kubernetes_control_plane.kubelet_security_group_id },
   }
 }
 
