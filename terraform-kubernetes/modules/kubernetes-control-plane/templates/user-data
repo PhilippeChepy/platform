@@ -26,6 +26,11 @@ write_files:
     KUBE_APISERVER_ETCD_SERVERS=${etcd_address}
     KUBE_APISERVER_SERVICE_ACCOUNT_ISSUER=https://kubernetes.default.svc.${kubernetes_cluster_domain}
     KUBE_APISERVER_SERVICE_CLUSTER_IP_RANGE=${kubernetes_service_cidr_ipv4},${kubernetes_service_cidr_ipv6}
+    KUBE_APISERVER_OIDC_ISSUER_URL=${ oidc_issuer_url }
+    KUBE_APISERVER_OIDC_CLIENT_ID=${ oidc_client_id }
+    KUBE_APISERVER_OIDC_USERNAME_CLAIM=${ oidc_username_claim }
+    KUBE_APISERVER_OIDC_GROUPS_CLAIM=${ oidc_groups }
+
 - path: /etc/default/kube-controller-manager
   owner: kube:kube
   permissions: "0644"

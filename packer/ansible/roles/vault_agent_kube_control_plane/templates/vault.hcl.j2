@@ -203,6 +203,18 @@ EOT
   perms       = 0600
 }
 
+template {
+  contents    = <<EOT
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_dex_ca_chain'] }}{% raw %}" -}}
+{{ .Data.ca_chain }}
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ kube_apiserver_config_path }}/oidc-ca.pem"
+  command     = "sudo systemctl restart kube-apiserver"
+  perms       = 0644
+}
+
 ## Controller Manager
 
 template {

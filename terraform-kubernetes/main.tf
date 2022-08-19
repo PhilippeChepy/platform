@@ -118,6 +118,15 @@ module "kubernetes_control_plane" {
     service_cidr_ipv6      = local.platform_components.kubernetes.service_cidr_ipv6
   }
 
+  oidc = {
+    claim = {
+      groups   = "groups"
+      username = "name"
+    }
+    client_id  = "kubectl"
+    issuer_url = "https://dex.${local.platform_domain}"
+  }
+
   endpoint_loadbalancer_id = local.base.endpoint_loadbalencer_id
 }
 

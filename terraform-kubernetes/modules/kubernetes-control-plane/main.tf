@@ -114,6 +114,10 @@ resource "exoscale_instance_pool" "cluster" {
     kubernetes_cluster_name        = var.name
     kubernetes_service_cidr_ipv4   = var.kubernetes.service_cidr_ipv4
     kubernetes_service_cidr_ipv6   = var.kubernetes.service_cidr_ipv6
+    oidc_issuer_url                = var.oidc.issuer_url
+    oidc_client_id                 = var.oidc.client_id
+    oidc_username_claim            = var.oidc.claim.username
+    oidc_groups                    = var.oidc.claim.groups
     vault_ca_pem                   = base64encode(var.vault.ca_certificate_pem)
     vault_cluster_address          = var.vault.url
     vault_cluster_healthcheck_url  = var.vault.healthcheck_url

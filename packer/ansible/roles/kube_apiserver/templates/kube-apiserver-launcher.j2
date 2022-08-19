@@ -14,6 +14,7 @@ if [ ! -f {{ kube_apiserver_config_path }}/kubelet-client.pem ]; then exit 0; fi
 if [ ! -f {{ kube_apiserver_config_path }}/server-ca.pem ]; then exit 0; fi
 if [ ! -f {{ kube_apiserver_config_path }}/server.key ]; then exit 0; fi
 if [ ! -f {{ kube_apiserver_config_path }}/server.pem ]; then exit 0; fi
+if [ ! -f {{ kube_apiserver_config_path }}/oidc-ca.pem ]; then exit 0; fi
 if [ ! -f {{ kube_apiserver_config_path }}/service-account-key.pem ]; then exit 0; fi
 
 # Build egress selector configuration for Konnectivity
@@ -66,4 +67,9 @@ EOF
   --requestheader-client-ca-file={{ kube_apiserver_config_path }}/aggregation-layer-ca.pem \
   --proxy-client-cert-file={{ kube_apiserver_config_path }}/aggregation-layer.pem \
   --proxy-client-key-file={{ kube_apiserver_config_path }}/aggregation-layer.key \
+  --oidc-issuer-url="$KUBE_APISERVER_OIDC_ISSUER_URL" \
+  --oidc-client-id="$KUBE_APISERVER_OIDC_CLIENT_ID" \
+  --oidc-username-claim="$KUBE_APISERVER_OIDC_USERNAME_CLAIM" \
+  --oidc-groups-claim="$KUBE_APISERVER_OIDC_GROUPS_CLAIM" \
+  --oidc-ca-file={{ kube_apiserver_config_path }}/oidc-ca.pem \
   --v=2

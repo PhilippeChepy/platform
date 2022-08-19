@@ -116,6 +116,18 @@ variable "kubernetes" {
   })
 }
 
+variable "oidc" {
+  description = "OIDC configuration"
+  type = object({
+    issuer_url = string
+    client_id  = string
+    claim = object({
+      username = string
+      groups   = string
+    })
+  })
+}
+
 variable "endpoint_loadbalancer_id" {
   description = "The ID of the infrastructure load balancer"
   type        = string
