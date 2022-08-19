@@ -114,44 +114,6 @@ resource "vault_pki_secret_backend_config_urls" "pki_vault" {
   issuing_certificates = ["https://${local.platform_components.vault.endpoint}/v1/${vault_mount.pki_vault.path}/ca"]
 }
 
-## Backups
-
-resource "vault_mount" "secret_rclone_backup" {
-  path        = "kv/platform/backup"
-  description = "Backup Secrets"
-
-  type                      = "kv"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.cert * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.cert * 3600
-}
-
-resource "tls_private_key" "backup" {
-  for_each    = toset(["etcd", "vault"])
-  algorithm   = local.platform_default_tls_algorithm.algorithm
-  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
-  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
-}
-
-resource "vault_generic_secret" "backup_public" {
-  for_each   = tls_private_key.backup
-  depends_on = [vault_mount.secret_rclone_backup]
-  path       = "${vault_mount.secret_rclone_backup.path}/${each.key}-public"
-
-  data_json = jsonencode({
-    key = tls_private_key.backup[each.key].public_key_pem
-  })
-}
-
-resource "vault_generic_secret" "backup_private" {
-  for_each   = tls_private_key.backup
-  depends_on = [vault_mount.secret_rclone_backup]
-  path       = "${vault_mount.secret_rclone_backup.path}/${each.key}-private"
-
-  data_json = jsonencode({
-    key = tls_private_key.backup[each.key].private_key_pem
-  })
-}
-
 ## Vault roles
 
 resource "vault_pki_secret_backend_role" "pki_vault" {
@@ -662,6 +624,44 @@ path "${vault_mount.pki_kubernetes["aggregation-layer"].path}/sign/metrics-serve
 EOT
 }
 
+## Backups (vault & etcd)
+
+resource "vault_mount" "secret_rclone_backup" {
+  path        = "kv/platform/backup"
+  description = "Backup Secrets"
+
+  type                      = "kv"
+  default_lease_ttl_seconds = local.platform_default_tls_ttl.cert * 3600
+  max_lease_ttl_seconds     = local.platform_default_tls_ttl.cert * 3600
+}
+
+resource "tls_private_key" "backup" {
+  for_each    = toset(["etcd", "vault"])
+  algorithm   = local.platform_default_tls_algorithm.algorithm
+  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+}
+
+resource "vault_generic_secret" "backup_public" {
+  for_each   = tls_private_key.backup
+  depends_on = [vault_mount.secret_rclone_backup]
+  path       = "${vault_mount.secret_rclone_backup.path}/${each.key}-public"
+
+  data_json = jsonencode({
+    key = tls_private_key.backup[each.key].public_key_pem
+  })
+}
+
+resource "vault_generic_secret" "backup_private" {
+  for_each   = tls_private_key.backup
+  depends_on = [vault_mount.secret_rclone_backup]
+  path       = "${vault_mount.secret_rclone_backup.path}/${each.key}-private"
+
+  data_json = jsonencode({
+    key = tls_private_key.backup[each.key].private_key_pem
+  })
+}
+
 # Authentication Methods
 
 ## User / pass
@@ -697,22 +697,41 @@ resource "vault_generic_endpoint" "user_base" {
   })
 }
 
+locals {
+  user_groups = toset(concat(tolist([for _, user in local.platform_authentication["users"] : toset(user.groups)]...)))
+}
 
-resource "vault_generic_endpoint" "user_policies" {
-  for_each   = local.platform_authentication["provider"] == "vault" ? local.platform_authentication["users"] : {}
-  depends_on = [vault_generic_endpoint.user_base]
-  path       = "auth/${vault_auth_backend.userpass.path}/users/${each.key}"
+resource "vault_identity_entity" "user_entity" {
+  for_each = local.platform_authentication["provider"] == "vault" ? local.platform_authentication["users"] : {}
 
-  disable_read   = true
-  disable_delete = true
+  name = each.key
+  policies = concat(
+    ["default"],
+    [for policy in vault_policy.vault_user : policy.name],
+    [for resource in try(each.value.groups, []) : "platform-vault-user-${resource}"]
+  )
+}
 
-  data_json = jsonencode({
-    "policies" = concat(
-      ["default"],
-      [for policy in vault_policy.vault_user : policy.name],
-      [for resource in try(each.value.groups, []) : "platform-vault-user-${resource}"]
-    )
-  })
+resource "vault_identity_group" "user_group" {
+  for_each = local.platform_authentication["provider"] == "vault" ? local.user_groups : []
+
+
+  name              = each.key
+  type              = "internal"
+  policies          = ["platform-vault-user-${each.key}"]
+  member_entity_ids = [for username, user in local.platform_authentication["users"] : vault_identity_entity.user_entity[username].id if contains(user.groups, "cluster-admin")]
+
+  metadata = {
+    version = "2"
+  }
+}
+
+resource "vault_identity_entity_alias" "user_entity_alias" {
+  for_each = local.platform_authentication["provider"] == "vault" ? local.platform_authentication["users"] : {}
+
+  name           = each.key
+  canonical_id   = vault_identity_entity.user_entity[each.key].id
+  mount_accessor = vault_auth_backend.userpass.accessor
 }
 
 resource "vault_policy" "vault_user_group" {
@@ -876,6 +895,98 @@ resource "vault_generic_endpoint" "auth_exoscale_role_kubernetes_control_plane" 
     validator = "client_ip == instance_public_ip && \"${local.platform_name}-kubernetes-controllers\" in instance_security_group_names"
   })
 }
+
+# OIDC provider configuration
+
+resource "vault_generic_endpoint" "oidc_configuration" {
+  count      = local.platform_authentication["provider"] == "vault" ? 1 : 0
+  depends_on = [vault_generic_endpoint.oidc_scopes]
+  path       = "identity/oidc/provider/default"
+
+  disable_read = true
+  data_json = jsonencode({
+    issuer           = "https://vault.${local.platform_domain}:8200"
+    scopes_supported = "groups,user"
+  })
+}
+
+resource "vault_generic_endpoint" "oidc_assignment" {
+  count      = local.platform_authentication["provider"] == "vault" ? 1 : 0
+  depends_on = [vault_generic_endpoint.oidc_scopes]
+  path       = "identity/oidc/assignment/platform"
+
+  disable_read = true
+  data_json = jsonencode({
+    entity_ids = [for username, _ in local.platform_authentication["users"] : vault_identity_entity.user_entity[username].id]
+    group_ids  = [for group in local.user_groups : vault_identity_group.user_group[group].id]
+  })
+}
+
+resource "vault_generic_endpoint" "oidc_key" {
+  count      = local.platform_authentication["provider"] == "vault" ? 1 : 0
+  depends_on = [vault_generic_endpoint.oidc_scopes]
+  path       = "identity/oidc/key/dex"
+
+  disable_read = true
+  data_json = jsonencode({
+    allowed_client_ids = "*"
+    verification_ttl   = "2h"
+    rotation_period    = "1h"
+    algorithm          = "RS256"
+  })
+}
+
+resource "vault_generic_endpoint" "oidc_client_configuration" {
+  count = local.platform_authentication["provider"] == "vault" ? 1 : 0
+  path  = "identity/oidc/client/dex"
+
+  depends_on = [
+    vault_generic_endpoint.oidc_assignment,
+    vault_generic_endpoint.oidc_key
+  ]
+
+  disable_read = true
+  data_json = jsonencode({
+    redirect_uris    = "https://dex.${local.platform_domain}/callback"
+    assignments      = "platform"
+    key              = "dex"
+    id_token_ttl     = "30m"
+    access_token_ttl = "1h"
+  })
+}
+
+locals {
+  scope_template_user = <<EOT
+{
+    "username": {{identity.entity.name}},
+    "contact": {
+        "email": {{identity.entity.metadata.email}},
+        "phone_number": {{identity.entity.metadata.phone_number}}
+    }
+}
+EOT
+
+  scope_template_groups = <<EOF
+{
+    "groups": {{identity.entity.groups.names}}
+}
+EOF
+}
+
+resource "vault_generic_endpoint" "oidc_scopes" {
+  for_each = local.platform_authentication["provider"] == "vault" ? {
+    user   = local.scope_template_user,
+    groups = local.scope_template_groups
+  } : {}
+  path = "identity/oidc/scope/${each.key}"
+
+  disable_read = true
+  data_json = jsonencode({
+    template = each.value
+  })
+}
+
+
 
 # TODO: admin token
 
