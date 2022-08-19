@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-manager-dex
+  namespace: dex
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-dex-tokenreview-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: cert-manager-dex
+    namespace: dex
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-manager-dex-token
+  namespace: dex
+  annotations:
+    kubernetes.io/service-account.name: cert-manager-dex
+type: "kubernetes.io/service-account-token"
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: platform-deployment-dex
+  namespace: dex
+spec:
+  vault:
+    path: ${ vault_path_pki_sign_dex }
+    server: ${ vault_cluster_addr }
+    caBundle: ${ vault_cluster_ca_cert }
+    auth:
+      kubernetes:
+        role: certificate-dex
+        mountPath: /v1/auth/kubernetes/
+        secretRef:
+          name: cert-manager-dex-token
+          key: token
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dex
+  namespace: dex
+spec:
+  secretName: dex-cert
+  duration: 24h0m0s
+  renewBefore: 18h0m0s
+  subject:
+    organizations:
+      - dex
+  commonName: dex.dex.svc
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    size: 4096
+  usages:
+    - server auth
+  dnsNames:
+    - dex.dex.svc
+    - ${ dex_issuer_domain }
+  issuerRef:
+    name: platform-deployment-dex
+    kind: Issuer
+    group: cert-manager.io

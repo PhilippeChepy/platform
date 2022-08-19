@@ -1,6 +1,12 @@
 locals {
+
+  platform_ingress_class = one([
+    for name, ingress in local.platform_components.kubernetes.ingresses : "nginx-${name}"
+    if try(ingress.domain, null) != null && trimsuffix(".${local.platform_domain}", ".${ingress.domain}") != ".${local.platform_domain}"
+  ])
+
   # Control plane CAs & deployment properties
-  deployment_variables = {
+  deployment_variables = merge({
     "kubernetes_aggregationlayer_ca_cert"   = base64encode(data.vault_generic_secret.kubernetes["aggregation-layer-ca"].data["ca_chain"])
     "kubernetes_kubelet_ca_cert"            = base64encode(data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"])
     "kubernetes_apiserver_ipv4"             = local.kubernetes.control_plane_ip_address
@@ -13,7 +19,17 @@ locals {
     "vault_cluster_addr"                    = local.vault.url
     "vault_cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
     "vault_path_pki_sign_aggregation_layer" = local.pki.pki_sign_aggregation_layer
-  }
+    "vault_path_pki_sign_dex"               = local.pki.pki_sign_dex
+    "dex_issuer_domain"                     = "dex.${local.platform_domain}"
+    "dex_ingress_class_name"                = local.platform_ingress_class
+    "oidc_issuer"                           = "https://vault.${local.platform_domain}:8200/v1/identity/oidc/provider/default"
+    "oidc_provider_url"                     = "https://dex.${local.platform_domain}"
+    },
+    local.platform_authentication["provider"] == "vault" ? {
+      "oidc_client_id"     = data.vault_generic_secret.vault_dex[0].data["client_id"]
+      "oidc_client_secret" = data.vault_generic_secret.vault_dex[0].data["client_secret"]
+      } : {
+  })
 
   # Ingress-related workloads
   ingress_variables = {
@@ -81,6 +97,11 @@ data "vault_generic_secret" "kubernetes" {
   }
 
   path = each.value
+}
+
+data "vault_generic_secret" "vault_dex" {
+  count = local.platform_authentication["provider"] == "vault" ? 1 : 0
+  path  = "identity/oidc/client/dex"
 }
 
 # Deployments: only ServiceAccount
