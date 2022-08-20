@@ -7300,7 +7300,7 @@ metadata:
   name: external-secrets
   namespace: external-secrets
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/instance: external-secrets
@@ -7311,6 +7311,14 @@ spec:
         app.kubernetes.io/instance: external-secrets
         app.kubernetes.io/name: external-secrets
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: external-secrets
+                app.kubernetes.io/name: external-secrets
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - --concurrent=1
@@ -7321,6 +7329,21 @@ spec:
         - containerPort: 8080
           name: metrics
           protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
       serviceAccountName: external-secrets
 ---
 apiVersion: apps/v1
@@ -7335,7 +7358,7 @@ metadata:
   name: external-secrets-cert-controller
   namespace: external-secrets
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/instance: external-secrets
@@ -7346,6 +7369,14 @@ spec:
         app.kubernetes.io/instance: external-secrets
         app.kubernetes.io/name: external-secrets-cert-controller
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: external-secrets
+                app.kubernetes.io/name: external-secrets-cert-controller
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - certcontroller
@@ -7356,6 +7387,16 @@ spec:
         - --secret-namespace=external-secrets
         image: ghcr.io/external-secrets/external-secrets:v0.5.9
         imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 2
         name: cert-controller
         ports:
         - containerPort: 8080
@@ -7367,6 +7408,21 @@ spec:
             port: 8081
           initialDelaySeconds: 20
           periodSeconds: 5
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
       serviceAccountName: external-secrets-cert-controller
 ---
 apiVersion: apps/v1
@@ -7381,7 +7437,7 @@ metadata:
   name: external-secrets-webhook
   namespace: external-secrets
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/instance: external-secrets
@@ -7392,6 +7448,14 @@ spec:
         app.kubernetes.io/instance: external-secrets
         app.kubernetes.io/name: external-secrets-webhook
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: external-secrets
+                app.kubernetes.io/name: external-secrets-webhook
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - webhook
@@ -7401,6 +7465,16 @@ spec:
         - --check-interval=5m
         image: ghcr.io/external-secrets/external-secrets:v0.5.9
         imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 2
         name: webhook
         ports:
         - containerPort: 8080
@@ -7415,6 +7489,21 @@ spec:
             port: 8081
           initialDelaySeconds: 20
           periodSeconds: 5
+        resources:
+          limits:
+            cpu: 100m
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
         volumeMounts:
         - mountPath: /tmp/certs
           name: certs
