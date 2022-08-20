@@ -26,6 +26,16 @@ write_files:
       - "${kube_dns_service_ipv6}"
     resolvConf: "/run/systemd/resolve/resolv.conf"
     providerID: exoscale://{{ ds.meta_data.instance_id }}
+    systemReserved:
+      cpu: 100m
+      memory: 128Mi
+      ephemeral-storage: 2Gi
+      pid: "1000"
+    kubeReserved:
+      cpu: 100m
+      memory: 128Mi
+      ephemeral-storage: 1Gi
+      pid: "1000"
     serverTLSBootstrap: true
     registerNode: true
     %{~ if length(taints) > 0 ~}
