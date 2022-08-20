@@ -1,9 +1,33 @@
+patchesStrategicMerge:
+  - patch-delete-pod.yaml
+
 patches:
 - target:
     kind: CustomResourceDefinition
   patch: |-
     - op: remove
       path: /metadata/creationTimestamp
+- target:
+    kind: Deployment
+  patch: |-
+    - op: add
+      path: /spec/replicas
+      value: 2
+    - op: add
+      path: /spec/template/spec/containers/0/resources/limits/cpu
+      value: 200m
+    - op: add
+      path: /spec/template/spec/containers/0/livenessProbe
+      value:
+        httpGet:
+          path: /health/liveness
+          port: 9443
+          scheme: HTTPS
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
+        timeoutSeconds: 2
 
 helmGlobals:
   chartHome: .helm

@@ -7785,7 +7785,7 @@ metadata:
   name: kyverno
   namespace: kyverno
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/instance: kyverno
@@ -7844,15 +7844,15 @@ spec:
         image: ghcr.io/kyverno/kyverno:v1.7.2
         imagePullPolicy: IfNotPresent
         livenessProbe:
-          failureThreshold: 2
+          failureThreshold: 3
           httpGet:
             path: /health/liveness
             port: 9443
             scheme: HTTPS
-          initialDelaySeconds: 15
-          periodSeconds: 30
+          initialDelaySeconds: 5
+          periodSeconds: 5
           successThreshold: 1
-          timeoutSeconds: 5
+          timeoutSeconds: 2
         name: kyverno
         ports:
         - containerPort: 9443
@@ -7873,6 +7873,7 @@ spec:
           timeoutSeconds: 5
         resources:
           limits:
+            cpu: 200m
             memory: 384Mi
           requests:
             cpu: 100m
@@ -7947,38 +7948,3 @@ spec:
       app: kyverno
       app.kubernetes.io/instance: kyverno
       app.kubernetes.io/name: kyverno
----
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    helm.sh/hook: test
-  labels:
-    app.kubernetes.io/component: kyverno
-    app.kubernetes.io/instance: kyverno
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: kyverno-test
-    app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v2.5.2
-    helm.sh/chart: kyverno-v2.5.2
-  name: kyverno-test
-  namespace: kyverno
-spec:
-  containers:
-  - command:
-    - /bin/sh
-    - -c
-    - |
-      sleep 20 ; wget -O- -S --no-check-certificate https://kyverno-svc:443/health/liveness
-    image: busybox
-    imagePullPolicy: IfNotPresent
-    name: wget
-  - command:
-    - /bin/sh
-    - -c
-    - |
-      sleep 20 ; wget -O- -S --no-check-certificate http://kyverno-svc-metrics:8000/metrics
-    image: busybox
-    imagePullPolicy: IfNotPresent
-    name: wget-metrics
-  restartPolicy: Never
