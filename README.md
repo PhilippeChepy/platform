@@ -65,13 +65,13 @@ Terraform configurations:
 
 The whole infrastructure is provisioned by applying 5 configurations, one after another:
 - `terraform-base`: for the Vault infrastructure
-- `terraform-base-configuration`: for the Vault configuration
+- `terraform-base-configuration`: for the Vault configuration and required Exoscale IAM keys
 - `terraform-kubernetes`: for the Etcd and Kubernetes infrastructure
 - `terraform-kubernetes-deployments-bootstrap`: for required Kubernetes deployments
 - `terraform-kubernetes-deployments-core`: for core Kubernetes and ingress-controller deployments
 
 Additionally, integration with Cloudflare is set by applying an additional configuration:
-- `terraform-cloudflare`: deploys external-DNS and lets-encrypt integration using DNS01 issuer
+- `terraform-cloudflare`: (optional, only if using Cloudflare) deploys external-DNS and lets-encrypt integration using DNS01 issuer
 
 ## Base components and secret management with Vault (terraform-base)
 

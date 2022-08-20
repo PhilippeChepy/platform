@@ -134,7 +134,7 @@
 - Create the base infrastructure:
     - Terraform: from the `terraform-base` sub-directory, run `terraform init` and `terraform apply`.
     - Ansible: from the **root directory**, run `ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-bootstrap.yaml`
-- Configure the base infrastructure:
+- Configure the base infrastructure & Exoscale IAM Keys:
     - Terraform: from the `terraform-base-configuration` sub-directory, run `terraform init` and `terraform apply`.
     - Ansible: from the **root directory**, run `ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml`
 - Create the Kubernetes infrastructure:
