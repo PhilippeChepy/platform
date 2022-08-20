@@ -2,6 +2,7 @@ resources:
 - https://raw.githubusercontent.com/dexidp/dex/master/examples/k8s/dex.yaml
 - secret.yaml
 - ingress.yaml
+- pod-disruption-budget.yaml
 
 patchesStrategicMerge:
 - patch-delete-namespace.yaml
@@ -35,17 +36,48 @@ patches:
           name: vault-ca
           secret:
             secretName: vault-ca
-      - op: replace
-        path: /spec/template/spec/containers/0/readinessProbe
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe
         value:
           httpGet:
             path: /healthz
             port: 5556
             scheme: HTTP
       - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/scheme
+        value: HTTP
+      - op: replace
         path: /spec/template/spec/containers/0/ports
         value:
         - containerPort: 5556
           name: http
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          limits:
+            cpu: 50m
+            memory: 16Mi
+          requests:
+            cpu: 50m
+            memory: 16Mi
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: dex
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
 
 namespace: dex

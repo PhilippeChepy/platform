@@ -129,12 +129,24 @@ spec:
       labels:
         app: dex
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: dex
+            topologyKey: kubernetes.io/hostname
       containers:
       - command:
         - /usr/local/bin/dex
         - serve
         - /etc/dex/cfg/config.yaml
         image: ghcr.io/dexidp/dex:v2.33.0
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5556
+            scheme: HTTP
         name: dex
         ports:
         - containerPort: 5556
@@ -144,6 +156,21 @@ spec:
             path: /healthz
             port: 5556
             scheme: HTTP
+        resources:
+          limits:
+            cpu: 50m
+            memory: 16Mi
+          requests:
+            cpu: 50m
+            memory: 16Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
         volumeMounts:
         - mountPath: /etc/dex/cfg
           name: config
@@ -165,6 +192,19 @@ spec:
       - name: vault-ca
         secret:
           secretName: vault-ca
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: dex
+  name: dex
+  namespace: dex
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: dex
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
