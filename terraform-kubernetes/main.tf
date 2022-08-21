@@ -330,6 +330,42 @@ EOT
   filename = "${path.module}/../artifacts/admin.kubeconfig"
 }
 
+resource "local_file" "user_kubeconfig" {
+  content  = <<EOT
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: ${base64encode(data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"])}
+    server: ${module.kubernetes_control_plane.url}
+  name: ${local.platform_name}
+contexts:
+- context:
+    cluster: ${local.platform_name}
+    user: oidc
+  name: ${local.platform_name}
+current-context: ${local.platform_name}
+kind: Config
+preferences: {}
+users:
+- name: oidc
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - oidc-login
+      - get-token
+      - --oidc-issuer-url=https://dex.${local.platform_domain}
+      - --oidc-client-id=kubectl
+      - --oidc-client-secret=kubectl-secret
+      - --oidc-extra-scope=profile
+      - --oidc-extra-scope=groups
+      command: kubectl
+      env: null
+      provideClusterInfo: false
+EOT
+  filename = "${path.module}/../artifacts/user.kubeconfig"
+}
+
 resource "local_file" "etcd_cluster_inventory" {
   content  = <<-EOT
 all:
