@@ -146,3 +146,10 @@
 
 Optionnally, if you want to integrate the infrastructure with Cloudflare, you can also apply the
 `terraform-cloudflare` configuration.
+
+### User namespaces
+
+This platform tenancy model is a "Namespace as a service" model. This means isolation is made on a namespace level, using role bindings, resource limits/quotas, and network policies.
+
+Assisted namespace management can be made through the `terraform-kubernetes-app-namespaces` sub-directory.
+From there you can run `terraform init` then `terraform apply` to provision namespaces according to definitions found in the `locals.tf` file.
