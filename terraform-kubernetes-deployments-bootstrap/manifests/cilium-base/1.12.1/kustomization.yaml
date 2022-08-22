@@ -10,7 +10,9 @@ patches:
     name: cilium
   patch: |-
     - op: remove
-      path: /spec/template/metadata/annotations
+      path: /spec/template/metadata/annotations/container.apparmor.security.beta.kubernetes.io~1mount-cgroup
+    - op: remove
+      path: /spec/template/metadata/annotations/container.apparmor.security.beta.kubernetes.io~1apply-sysctl-overwrites
 - target:
     kind: ConfigMap
     name: cilium-config
@@ -86,7 +88,7 @@ helmCharts:
           cpu: 50m
           memory: 50Mi
 
-    # Misconfiguration from the Helm chart
-    # https://github.com/cilium/cilium/issues/20636
-    securityContext:
-      privileged: true
+    cgroup:
+      hostRoot: /sys/fs/cgroup
+      autoMount:
+        enabled: false

@@ -309,7 +309,7 @@ data:
   bpf-map-dynamic-size-ratio: "0.0025"
   bpf-policy-map-max: "16384"
   bpf-root: /sys/fs/bpf
-  cgroup-root: /run/cilium/cgroupv2
+  cgroup-root: /sys/fs/cgroup
   cilium-endpoint-gc-interval: 5m0s
   cluster-id: "0"
   cluster-name: default
@@ -355,6 +355,7 @@ data:
   nodes-gc-interval: 5m0s
   operator-api-serve-addr: 127.0.0.1:9234
   preallocate-bpf-maps: "false"
+  procfs: /host/proc
   remove-cilium-node-taints: "true"
   set-cilium-is-up-condition: "true"
   sidecar-istio-proxy-image: cilium/istio_proxy
@@ -504,6 +505,9 @@ spec:
       k8s-app: cilium
   template:
     metadata:
+      annotations:
+        container.apparmor.security.beta.kubernetes.io/cilium-agent: unconfined
+        container.apparmor.security.beta.kubernetes.io/clean-cilium-state: unconfined
       labels:
         k8s-app: cilium
     spec:
@@ -596,7 +600,25 @@ spec:
             cpu: 50m
             memory: 192Mi
         securityContext:
-          privileged: true
+          capabilities:
+            add:
+            - CHOWN
+            - KILL
+            - NET_ADMIN
+            - NET_RAW
+            - IPC_LOCK
+            - SYS_MODULE
+            - SYS_ADMIN
+            - SYS_RESOURCE
+            - DAC_OVERRIDE
+            - FOWNER
+            - SETGID
+            - SETUID
+            drop:
+            - ALL
+          seLinuxOptions:
+            level: s0
+            type: spc_t
         startupProbe:
           failureThreshold: 105
           httpGet:
@@ -610,9 +632,15 @@ spec:
           periodSeconds: 2
           successThreshold: 1
         volumeMounts:
+        - mountPath: /host/proc/sys/net
+          name: host-proc-sys-net
+        - mountPath: /host/proc/sys/kernel
+          name: host-proc-sys-kernel
         - mountPath: /sys/fs/bpf
-          mountPropagation: Bidirectional
+          mountPropagation: HostToContainer
           name: bpf-maps
+        - mountPath: /sys/fs/cgroup
+          name: cilium-cgroup
         - mountPath: /var/run/cilium
           name: cilium-run
         - mountPath: /host/opt/cni/bin
@@ -632,48 +660,21 @@ spec:
           name: xtables-lock
       hostNetwork: true
       initContainers:
-      - command:
-        - sh
-        - -ec
-        - |
-          cp /usr/bin/cilium-mount /hostbin/cilium-mount;
-          nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-mount" $CGROUP_ROOT;
-          rm /hostbin/cilium-mount
-        env:
-        - name: CGROUP_ROOT
-          value: /run/cilium/cgroupv2
-        - name: BIN_PATH
-          value: /opt/cni/bin
+      - args:
+        - mount | grep "/sys/fs/bpf type bpf" || mount -t bpf bpf /sys/fs/bpf
+        command:
+        - /bin/bash
+        - -c
+        - --
         image: quay.io/cilium/cilium:v1.12.1@sha256:ea2db1ee21b88127b5c18a96ad155c25485d0815a667ef77c2b7c7f31cab601b
         imagePullPolicy: Always
-        name: mount-cgroup
+        name: mount-bpf-fs
         securityContext:
           privileged: true
         volumeMounts:
-        - mountPath: /hostproc
-          name: hostproc
-        - mountPath: /hostbin
-          name: cni-path
-      - command:
-        - sh
-        - -ec
-        - |
-          cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;
-          nsenter --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-sysctlfix";
-          rm /hostbin/cilium-sysctlfix
-        env:
-        - name: BIN_PATH
-          value: /opt/cni/bin
-        image: quay.io/cilium/cilium:v1.12.1@sha256:ea2db1ee21b88127b5c18a96ad155c25485d0815a667ef77c2b7c7f31cab601b
-        imagePullPolicy: Always
-        name: apply-sysctl-overwrites
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - mountPath: /hostproc
-          name: hostproc
-        - mountPath: /hostbin
-          name: cni-path
+        - mountPath: /sys/fs/bpf
+          mountPropagation: Bidirectional
+          name: bpf-maps
       - command:
         - /init-container.sh
         env:
@@ -701,11 +702,21 @@ spec:
             cpu: 100m
             memory: 100Mi
         securityContext:
-          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_MODULE
+            - SYS_ADMIN
+            - SYS_RESOURCE
+            drop:
+            - ALL
+          seLinuxOptions:
+            level: s0
+            type: spc_t
         volumeMounts:
         - mountPath: /sys/fs/bpf
           name: bpf-maps
-        - mountPath: /run/cilium/cgroupv2
+        - mountPath: /sys/fs/cgroup
           mountPropagation: HostToContainer
           name: cilium-cgroup
         - mountPath: /var/run/cilium
@@ -729,11 +740,7 @@ spec:
           type: DirectoryOrCreate
         name: bpf-maps
       - hostPath:
-          path: /proc
-          type: Directory
-        name: hostproc
-      - hostPath:
-          path: /run/cilium/cgroupv2
+          path: /sys/fs/cgroup
           type: DirectoryOrCreate
         name: cilium-cgroup
       - hostPath:
@@ -759,6 +766,14 @@ spec:
       - configMap:
           name: cilium-config
         name: cilium-config-path
+      - hostPath:
+          path: /proc/sys/net
+          type: Directory
+        name: host-proc-sys-net
+      - hostPath:
+          path: /proc/sys/kernel
+          type: Directory
+        name: host-proc-sys-kernel
   updateStrategy:
     rollingUpdate:
       maxUnavailable: 2
