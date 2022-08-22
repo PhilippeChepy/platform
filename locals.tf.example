@@ -39,6 +39,41 @@ locals {
     }
   }
 
+  platform_app_namespaces = {
+    # Here we define targets and their environments
+    # Resources declared here will end up as namespaces and related resources:
+    # - Namespace with `<target>-<environment>` as name
+    # - LimitRange for CPU request, memory request, and memory limits
+    # - Resource quotas for CPU request, memory request, memory limit and maximum number of Pods
+    # - RBAC resources (a set of Roles, RoleBindings, ClusterRoles & ClusterRoleBindings) to allow 
+    #   defined groups / users to access a subset of resources for this namespace, and the namespace
+    #   itself.
+    #
+    # The example below will create two namespaces:
+    # - `target-production`:
+    #     - default resources for a pod are 100m CPU, 128M Memory, and 256M Memory (hard) limit
+    #     - resources quota for the whole namespace are 400m CPU, 512M Memory, 1G Memory (hard) limit, and 4 Pods
+    #     - all users belonging to the "developer" group
+    # - `target-staging`
+    #     - default resources for a pod are 100m CPU, 128M Memory, and 256M Memory (hard) limit
+    #     - resources quota for the whole namespace are 200m CPU, 256M Memory, 512M Memory (hard) limit, and 2 Pods
+    #     - all users belonging to the "developer" group
+    #     - the "lucy.l" user
+    target = {
+      production = {
+        resource-quota    = { cpu-request = "400m", memory-request = "512Mi", memory-limit = "1Gi", pods = 4 }
+        resource-defaults = { cpu-request = "100m", memory-request = "128Mi", memory-limit = "256Mi" }
+        groups            = ["developer"]
+      }
+      staging = {
+        resource-quota    = { cpu-request = "200m", memory-request = "256Mi", memory-limit = "512Mi", pods = 2 }
+        resource-defaults = { cpu-request = "100m", memory-request = "128Mi", memory-limit = "256Mi" }
+        groups            = ["developer"]
+        users             = ["lucy.l"]
+      }
+    }
+  }
+
   platform_components = {
     vault = {
       endpoint = "vault.${local.platform_domain}"
