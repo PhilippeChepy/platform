@@ -1,17 +1,16 @@
 locals {
   groups_users = transpose(merge([
-    for username, user in local.platform_authentication.users: {(username) = try(user.groups, [])}
+    for username, user in local.platform_authentication.users : { (username) = try(user.groups, []) }
   ]...))
 
   namespaces = merge([
     for project_name, project in local.platform_app_namespaces : {
       for environment_name, environment in project : "${project_name}-${environment_name}" => {
         environment = environment,
-        project = project
-        # groups = try(environment.groups, [])
+        project     = project
         users = toset(concat(
           try(environment.users, []),
-          [for group in try(environment.groups, []): try(local.groups_users[group])]...
+          [for group in try(environment.groups, []) : try(local.groups_users[group])]...
         ))
       }
     }
@@ -23,7 +22,7 @@ locals {
     }
   ]...)
 
-  users_namespaces = transpose({for namespace, spec in local.namespaces: namespace => spec.users})
+  users_namespaces = transpose({ for namespace, spec in local.namespaces : namespace => spec.users })
 }
 
 # Namespaces & Namespace quotas
@@ -126,7 +125,7 @@ resource "kubernetes_role_v1" "namespace_role" {
 }
 
 resource "kubernetes_role_binding_v1" "user_role_binding" {
-  for_each   = local.namespace_users
+  for_each = local.namespace_users
   depends_on = [
     kubernetes_role_v1.namespace_role,
   ]
@@ -157,23 +156,23 @@ resource "kubernetes_cluster_role_v1" "cluster_role" {
   metadata {
     name = "user-${each.key}"
   }
-  
+
   rule {
-    api_groups = [""]
-    resources  = ["namespaces"]
-    verbs      = ["get", "watch", "list"]
+    api_groups     = [""]
+    resources      = ["namespaces"]
+    verbs          = ["get", "watch", "list"]
     resource_names = each.value # restrict to only allowed namespaces ?
   }
 }
 
 resource "kubernetes_cluster_role_binding_v1" "user_cluster_role_binding" {
-  for_each   = toset(local.groups_users["developer"])
+  for_each = toset(local.groups_users["developer"])
   depends_on = [
     kubernetes_cluster_role_v1.cluster_role
   ]
 
   metadata {
-    name      = each.value
+    name = each.value
   }
 
   role_ref {
