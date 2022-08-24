@@ -23,7 +23,7 @@ ExecStart=/usr/local/bin/containerd
 
 Type=notify
 Delegate=yes
-KillMode=process
+KillMode=mixed
 Restart=always
 RestartSec=5
 # Having non-zero Limit*s causes performance problems due to accounting overhead
