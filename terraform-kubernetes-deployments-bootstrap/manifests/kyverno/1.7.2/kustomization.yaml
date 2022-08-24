@@ -1,5 +1,9 @@
 patchesStrategicMerge:
   - patch-delete-pod.yaml
+  - patch-delete-pod-disruption-budget.yaml
+
+resources:
+  - pod-disruption-budget.yaml
 
 patches:
 - target:
