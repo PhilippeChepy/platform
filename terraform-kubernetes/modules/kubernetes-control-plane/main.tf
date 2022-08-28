@@ -25,6 +25,7 @@ resource "exoscale_security_group" "kubelet" {
 resource "exoscale_security_group_rule" "cluster_rule" {
   for_each = merge({
     "tcp-6443-6443--${exoscale_security_group.clients.name}" = { type = "INGRESS", protocol = "TCP", port = "6443", source = exoscale_security_group.clients.id, target = exoscale_security_group.cluster.id }
+    "tcp-6443-6443--${exoscale_security_group.cluster.name}" = { type = "INGRESS", protocol = "TCP", port = "6443", source = exoscale_security_group.cluster.id, target = exoscale_security_group.cluster.id }
     }, {
     for name, id in var.admin_security_groups :
     "tcp-22-22--${name}" => { type = "INGRESS", protocol = "TCP", port = "22", source = id, target = exoscale_security_group.cluster.id }
