@@ -806,7 +806,7 @@ resource "vault_generic_endpoint" "user_base" {
 }
 
 locals {
-  user_groups = toset(concat(tolist([for _, user in local.platform_authentication["users"] : toset(user.groups)]...)))
+  user_groups = toset(concat([for _, user in local.platform_authentication["users"] : user.groups]...))
 }
 
 resource "vault_identity_entity" "user_entity" {
