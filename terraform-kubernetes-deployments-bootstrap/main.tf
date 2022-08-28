@@ -49,7 +49,7 @@ locals {
   # in order to enforce non-sensitiveness of the variable.
   bootstrap_resources = {
     for resource in try(nonsensitive(local.bootstrap_manifests), local.bootstrap_manifests) :
-    "${try("${resource.metadata.namespace}", "(global)")}|${resource.kind}/${resource.metadata.name}" => resource
+    "apiVersion=${resource.apiVersion},${try("namespace=${resource.metadata.namespace},", "")}kind=${resource.kind},name=${resource.metadata.name}" => resource
   }
 }
 
