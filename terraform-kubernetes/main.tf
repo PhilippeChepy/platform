@@ -256,7 +256,7 @@ locals {
     }
     if try(deployment.vault-service-account, null) != null
     },
-    concat([
+    concat([], [
       for name, ingress in local.platform_components.kubernetes.ingresses : [
         {
           for _, deployment in ingress.deployments :

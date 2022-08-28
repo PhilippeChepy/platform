@@ -62,7 +62,7 @@ locals {
     ]
   ]...)
 
-  ingress_manifests = concat([
+  ingress_manifests = concat([], [
     for name, ingress in local.platform_components.kubernetes.ingresses :
     concat([
       for _, deployment in ingress.deployments : [
