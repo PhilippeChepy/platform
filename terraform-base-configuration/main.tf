@@ -1011,7 +1011,8 @@ resource "vault_generic_endpoint" "oidc_configuration" {
   depends_on = [vault_generic_endpoint.oidc_scopes]
   path       = "identity/oidc/provider/default"
 
-  disable_read = true
+  disable_read   = true
+  disable_delete = true
   data_json = jsonencode({
     issuer           = "https://vault.${local.platform_domain}:8200"
     scopes_supported = "groups,user"
@@ -1088,7 +1089,8 @@ resource "vault_generic_endpoint" "oidc_scopes" {
   } : {}
   path = "identity/oidc/scope/${each.key}"
 
-  disable_read = true
+  disable_read   = true
+  disable_delete = true
   data_json = jsonencode({
     template = each.value
   })
