@@ -17,6 +17,7 @@ if [ ! -f {{ kube_controller_manager_config_path }}/service-account-private-key.
   --cluster-cidr="$KUBE_CONTROLLER_MANAGER_CLUSTER_CIDR" \
   --cluster-signing-cert-file={{ kube_controller_manager_config_path }}/node-ca.pem \
   --cluster-signing-key-file={{ kube_controller_manager_config_path }}/node-ca.key \
+  --feature-gates=EndpointSliceTerminatingCondition=true \
   --node-cidr-mask-size-ipv4="$KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV4" \
   --node-cidr-mask-size-ipv6="$KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV6" \
   --kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \

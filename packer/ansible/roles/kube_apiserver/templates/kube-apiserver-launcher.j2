@@ -53,6 +53,7 @@ EOF
   --egress-selector-config-file={{ kube_apiserver_config_path }}/egress-selector-configuration.yaml \
   --enable-aggregator-routing=true \
   --encryption-provider-config={{ kube_apiserver_config_path }}/encryption-configuration.yaml \
+  --feature-gates=EndpointSliceTerminatingCondition=true \
   --kubelet-certificate-authority={{ kube_apiserver_config_path }}/kubelet-ca.pem \
   --kubelet-client-certificate={{ kube_apiserver_config_path }}/kubelet-client.pem \
   --kubelet-client-key={{ kube_apiserver_config_path }}/kubelet-client.key \
