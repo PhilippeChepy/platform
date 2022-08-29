@@ -30,12 +30,10 @@ write_files:
       cpu: 100m
       memory: 128Mi
       ephemeral-storage: 2Gi
-      pid: "1000"
     kubeReserved:
       cpu: 100m
       memory: 128Mi
       ephemeral-storage: 1Gi
-      pid: "1000"
     serverTLSBootstrap: true
     registerNode: true
     %{~ if length(taints) > 0 ~}
