@@ -20,6 +20,7 @@ write_files:
     authentication:
       x509:
         clientCAFile: "/etc/kubernetes/kubelet/node-ca.pem"
+    cgroupDriver: systemd
     clusterDomain: "${kube_cluster_domain}"
     clusterDNS:
       - "${kube_dns_service_ipv4}"
