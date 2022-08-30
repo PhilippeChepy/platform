@@ -42,7 +42,7 @@ write_files:
     RCLONE_BACKUP_RETENTION_KEEP=7
 - path: /usr/local/bin/wait-vault
   owner: etcd:etcd
-  permissions: "0777"
+  permissions: "0755"
   content: |
     #!/bin/bash
     while [ $(curl -sk -o /dev/null -w "%%{http_code}" "${vault_cluster_healthcheck_url}") != '200' ]; do

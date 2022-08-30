@@ -10,7 +10,7 @@
     force: true
     owner: root
     group: root
-    mode: "0777"
+    mode: "0755"
 
 - name: Install additional templated files
   tags:
@@ -22,4 +22,4 @@
     force: true
     owner: "{{ etcd_user }}"
     group: "{{ etcd_group }}"
-    mode: "0777"
+    mode: "0755"

@@ -60,7 +60,7 @@
     force: true
     owner: root
     group: root
-    mode: "0777"
+    mode: "0755"
   loop:
     - exoscale-cloud-controller-manager-launcher
 

@@ -55,7 +55,7 @@ write_files:
   content: ${exoscale_cluster_autoscaler_manifests}
 - path: /usr/local/bin/wait-vault
   owner: kube:kube
-  permissions: "0777"
+  permissions: "0755"
   content: |
     #!/bin/bash
     while [ $(curl -sk -o /dev/null -w "%%{http_code}" "${vault_cluster_healthcheck_url}") != '200' ]; do
@@ -63,7 +63,7 @@ write_files:
     done
 - path: /usr/local/bin/wait-etcd
   owner: kube:kube
-  permissions: "0777"
+  permissions: "0755"
   content: |
     #!/bin/bash
     while [ $(curl -s -o /dev/null -w "%%{http_code}" "${etcd_healthcheck_url}") != '200' ]; do
@@ -71,7 +71,7 @@ write_files:
     done
 - path: /usr/local/bin/wait-apiserver
   owner: root:root
-  permissions: "0777"
+  permissions: "0755"
   content: |
     #!/bin/bash
     while [ $(curl -s -o /dev/null -w "%%{http_code}" "http://127.0.0.1:6444/healthz") != '200' ]; do

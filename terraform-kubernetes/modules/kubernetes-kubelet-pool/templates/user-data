@@ -75,7 +75,7 @@ write_files:
     %{~ endif ~}
 - path: /usr/local/bin/wait-apiserver
   owner: root:root
-  permissions: "0777"
+  permissions: "0755"
   content: |
     #!/bin/bash
     while [ $(curl -s -o /dev/null -w "%%{http_code}" "${kube_cluster_healthcheck_address}") != '200' ]; do

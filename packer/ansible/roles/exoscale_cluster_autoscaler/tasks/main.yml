@@ -93,6 +93,6 @@
     force: true
     owner: root
     group: root
-    mode: "0777"
+    mode: "0755"
   loop:
     - cluster-autoscaler-launcher
