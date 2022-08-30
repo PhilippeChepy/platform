@@ -82,3 +82,19 @@
     mode: "0755"
   loop:
     - kubelet-launcher
+
+- name: Install additional configuration files
+  tags:
+    - kubelet
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - etc/modules-load.d/kubernetes.conf
+    - etc/sysctl.d/kubernetes.conf
+
