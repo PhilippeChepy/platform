@@ -1,6 +1,7 @@
 locals {
   # Control plane CAs & deployment properties
   deployment_variables = {
+    "platform_domain"                       = local.platform_domain
     "kubernetes_aggregationlayer_ca_cert"   = base64encode(data.vault_generic_secret.kubernetes["aggregation-layer-ca"].data["ca_chain"])
     "kubernetes_kubelet_ca_cert"            = base64encode(data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"])
     "kubernetes_apiserver_ipv4"             = local.kubernetes.control_plane_ip_address
@@ -8,6 +9,7 @@ locals {
     "kubernetes_pod_cidr_ipv4"              = local.platform_components.kubernetes.pod_cidr_ipv4
     "kubernetes_pod_cidr_ipv6"              = local.platform_components.kubernetes.pod_cidr_ipv6
     "kubernetes_dns_service_ipv4"           = local.platform_components.kubernetes.dns_service_ipv4
+    "kubernetes_dns_service_ipv6"           = local.platform_components.kubernetes.dns_service_ipv6
     "kubernetes_service_cidr_ipv4"          = local.platform_components.kubernetes.service_cidr_ipv4
     "kubernetes_service_cidr_ipv6"          = local.platform_components.kubernetes.service_cidr_ipv6
     "kubernetes_proxy_server_0_ipv4"        = local.kubernetes.control_plane_instance_ip_address[0]

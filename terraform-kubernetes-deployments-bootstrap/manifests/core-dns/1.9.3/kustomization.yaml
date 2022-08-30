@@ -74,6 +74,19 @@ patches:
       kind: Service
       name: coredns-coredns
     patch: |-
+      - op: add
+        path: /spec/ipFamilyPolicy
+        value: PreferDualStack
+      - op: add
+        path: /spec/ipFamilies
+        value:  
+          - IPv4
+          - IPv6
+      - op: add
+        path: /spec/clusterIPs
+        value:
+        - ${ kubernetes_dns_service_ipv4 }
+        - ${ kubernetes_dns_service_ipv6 }
       - op: replace
         path: /spec/clusterIP
         value: ${ kubernetes_dns_service_ipv4 }

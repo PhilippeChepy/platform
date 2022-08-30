@@ -99,6 +99,13 @@ metadata:
   namespace: kube-system
 spec:
   clusterIP: ${ kubernetes_dns_service_ipv4 }
+  clusterIPs:
+  - ${ kubernetes_dns_service_ipv4 }
+  - ${ kubernetes_dns_service_ipv6 }
+  ipFamilies:
+  - IPv4
+  - IPv6
+  ipFamilyPolicy: PreferDualStack
   ports:
   - name: udp-53
     port: 53
@@ -140,7 +147,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 7b95307092ff8bb037142b0b90f000ab2aa6eb1f0924bf4c985f0ddbdc953fce
+        checksum/config: 368856ba1efaf29577f1c83ee497198d4627a481b912ba14100e7ecea2412594
         scheduler.alpha.kubernetes.io/critical-pod: ""
         scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly",
           "operator":"Exists"}]'
