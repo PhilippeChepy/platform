@@ -9438,6 +9438,13 @@ spec:
         app.kubernetes.io/version: v1.9.1
         helm.sh/chart: cert-manager-v1.9.1
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: cainjector
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - --v=2
@@ -9503,6 +9510,13 @@ spec:
         app.kubernetes.io/version: v1.9.1
         helm.sh/chart: cert-manager-v1.9.1
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: webhook
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - --v=2

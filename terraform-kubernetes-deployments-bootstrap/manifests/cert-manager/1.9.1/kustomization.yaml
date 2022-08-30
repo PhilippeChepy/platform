@@ -96,7 +96,7 @@ patches:
                 app: cert-manager
 - target:
     kind: Deployment
-    name: cainjector
+    name: cert-manager-cainjector
   patch: |-
     - op: add
       path: /spec/template/spec/affinity
@@ -109,7 +109,7 @@ patches:
                 app: cainjector
 - target:
     kind: Deployment
-    name: webhook
+    name: cert-manager-webhook
   patch: |-
     - op: add
       path: /spec/template/spec/affinity
