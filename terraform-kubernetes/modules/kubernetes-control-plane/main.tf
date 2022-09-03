@@ -48,7 +48,7 @@ resource "exoscale_security_group_rule" "cluster_rule" {
     "tcp-4240-4240--kube-cilium-healthcheck"   = { type = "INGRESS", protocol = "TCP", port = "4240", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     "tcp-4244-4244--kube-cilium-hubble-server" = { type = "INGRESS", protocol = "TCP", port = "4244", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     "tcp-4245-4245--kube-cilium-hubble-relay"  = { type = "INGRESS", protocol = "TCP", port = "4245", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
-    "tcp-8472-8472--kube-cilium-vxlan"         = { type = "INGRESS", protocol = "UDP", port = "8472", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
+    "udp-8472-8472--kube-cilium-vxlan"         = { type = "INGRESS", protocol = "UDP", port = "8472", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     "tcp-10250-10250--svc-kubelet-logs"        = { type = "INGRESS", protocol = "TCP", port = "10250", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     # node -> control-plane
     "tcp-6443-6443--kubelet"      = { type = "INGRESS", protocol = "TCP", port = "6443", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.cluster.id }
