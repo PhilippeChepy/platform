@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-exoscale_cloud_controller_manager_version: "0.9.0"
+exoscale_cloud_controller_manager_version: "0.12.0"
 exoscale_cloud_controller_manager_pkg: "exoscale-cloud-controller-manager_{{ exoscale_cloud_controller_manager_version }}_linux_amd64.tar.gz"
 exoscale_cloud_controller_manager_shasums: "exoscale-cloud-controller-manager_{{ exoscale_cloud_controller_manager_version }}-SHA256SUMS"
 exoscale_cloud_controller_manager_tgz_url: "https://github.com/exoscale/exoscale-cloud-controller-manager/releases/download/v{{ exoscale_cloud_controller_manager_version }}/exoscale-cloud-controller-manager_{{ exoscale_cloud_controller_manager_version }}_linux_amd64.tar.gz"
