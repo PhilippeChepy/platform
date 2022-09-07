@@ -23,5 +23,6 @@ if [ ! -f {{ kube_controller_manager_config_path }}/service-account-private-key.
   --kubeconfig={{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig \
   --requestheader-client-ca-file={{ kube_controller_manager_config_path }}/aggregation-layer-ca.pem \
   --root-ca-file={{ kube_controller_manager_config_path }}/server-ca.pem \
+  --service-cluster-ip-range="$KUBE_CONTROLLER_MANAGER_SERVICE_CLUSTER_IP_RANGE" \
   --service-account-private-key-file={{ kube_controller_manager_config_path }}/service-account-private-key.pem \
   --use-service-account-credentials=true
