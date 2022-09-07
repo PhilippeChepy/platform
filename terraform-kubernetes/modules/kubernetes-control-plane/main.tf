@@ -44,7 +44,7 @@ resource "exoscale_security_group_rule" "cluster_rule" {
     }, {
     # node <-> node
     "icmp-8-0--kube-cilium-healthcheck"        = { type = "INGRESS", protocol = "ICMP", icmp_type = "8", icmp_code = "0", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
-    "icmp6-128-0--kube-cilium-healthcheck"        = { type = "INGRESS", protocol = "ICMPv6", icmp_type = "128", icmp_code = "0", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
+    "icmp6-128-0--kube-cilium-healthcheck"     = { type = "INGRESS", protocol = "ICMPv6", icmp_type = "128", icmp_code = "0", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     "tcp-4240-4240--kube-cilium-healthcheck"   = { type = "INGRESS", protocol = "TCP", port = "4240", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     "tcp-4244-4244--kube-cilium-hubble-server" = { type = "INGRESS", protocol = "TCP", port = "4244", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
     "tcp-4245-4245--kube-cilium-hubble-relay"  = { type = "INGRESS", protocol = "TCP", port = "4245", source = exoscale_security_group.kubelet.id, target = exoscale_security_group.kubelet.id }
