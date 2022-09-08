@@ -2,7 +2,7 @@ locals {
 
   platform_ingress_class = one([
     for name, ingress in local.platform_components.kubernetes.ingresses : "nginx-${name}"
-    if try(ingress.domain, null) != null && trimsuffix(".${local.platform_domain}", ".${ingress.domain}") != ".${local.platform_domain}"
+    if try(ingress.domain, null) != null && trimsuffix(".${local.platform_domain}", ".${try(ingress.domain, "")}") != ".${local.platform_domain}"
   ])
 
   # Control plane CAs & deployment properties
