@@ -205,7 +205,7 @@ EOT
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_dex_ca_chain'] }}{% raw %}" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_kube_control_plane_paths['pki_oidc_ca_chain'] }}{% raw %}" -}}
 {{ .Data.ca_chain }}
 {{- end }}
 {% endraw %}

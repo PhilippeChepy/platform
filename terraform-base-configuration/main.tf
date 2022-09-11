@@ -169,25 +169,30 @@ path "sys/storage/raft/snapshot"
 EOT
 }
 
-# Dex
+# Deployments
 
-resource "vault_mount" "pki_dex" {
-  path        = "pki/platform/dex"
-  description = "Dex ICA"
+resource "vault_mount" "pki_deployment" {
+  for_each = {
+    core = { description = "Kubernetes Core deployments CA" }
+  }
+
+  path        = "pki/platform/deployment/${each.key}"
+  description = each.value.description
 
   type                      = "pki"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.ica * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.ica * 3600
+  default_lease_ttl_seconds = local.platform_default_tls_ttl.ca * 3600
+  max_lease_ttl_seconds     = local.platform_default_tls_ttl.ca * 3600
 }
 
-resource "vault_pki_secret_backend_intermediate_cert_request" "pki_dex" {
-  depends_on = [vault_mount.pki_dex]
-  backend    = vault_mount.pki_dex.path
+resource "vault_pki_secret_backend_intermediate_cert_request" "pki_deployment" {
+  for_each   = vault_mount.pki_deployment
+  depends_on = [vault_mount.pki_deployment]
+  backend    = each.value.path
   type       = "internal"
   key_type   = lower(local.platform_default_tls_algorithm.algorithm)
   key_bits   = local.platform_default_tls_algorithm.rsa_bits
 
-  common_name    = "Dex ICA"
+  common_name    = each.value.description
   ou             = try(local.platform_default_tls_subject.organizational_unit, null)
   organization   = try(local.platform_default_tls_subject.organization, null)
   street_address = try(join("-", local.platform_default_tls_subject.street_address), null)
@@ -197,17 +202,18 @@ resource "vault_pki_secret_backend_intermediate_cert_request" "pki_dex" {
   country        = try(local.platform_default_tls_subject.country, null)
 }
 
-resource "vault_pki_secret_backend_root_sign_intermediate" "pki_dex" {
+resource "vault_pki_secret_backend_root_sign_intermediate" "pki_deployment" {
+  for_each = vault_mount.pki_deployment
   depends_on = [
-    vault_pki_secret_backend_intermediate_cert_request.pki_dex,
+    vault_pki_secret_backend_intermediate_cert_request.pki_deployment,
     vault_pki_secret_backend_config_ca.pki_root
   ]
   backend = vault_mount.pki_root.path
 
-  csr = vault_pki_secret_backend_intermediate_cert_request.pki_dex.csr
+  csr = vault_pki_secret_backend_intermediate_cert_request.pki_deployment[each.key].csr
   ttl = local.platform_default_tls_ttl.ica * 3600
 
-  common_name    = "Dex ICA"
+  common_name    = each.value.description
   ou             = try(local.platform_default_tls_subject.organizational_unit, null)
   organization   = try(local.platform_default_tls_subject.organization, null)
   street_address = try(join("-", local.platform_default_tls_subject.street_address), null)
@@ -217,31 +223,30 @@ resource "vault_pki_secret_backend_root_sign_intermediate" "pki_dex" {
   country        = try(local.platform_default_tls_subject.country, null)
 }
 
-resource "vault_pki_secret_backend_intermediate_set_signed" "pki_dex" {
-  backend = vault_mount.pki_dex.path
+resource "vault_pki_secret_backend_intermediate_set_signed" "pki_deployment" {
+  for_each   = vault_mount.pki_deployment
+  depends_on = [vault_mount.pki_deployment]
+  backend    = each.value.path
 
   certificate = <<-EOT
-  ${vault_pki_secret_backend_root_sign_intermediate.pki_dex.certificate}
-  ${vault_pki_secret_backend_root_sign_intermediate.pki_dex.issuing_ca}
+  ${vault_pki_secret_backend_root_sign_intermediate.pki_deployment[each.key].certificate}
+  ${vault_pki_secret_backend_root_sign_intermediate.pki_deployment[each.key].issuing_ca}
   EOT
 }
 
-resource "vault_pki_secret_backend_config_urls" "pki_dex" {
-  depends_on           = [vault_mount.pki_dex]
-  backend              = vault_mount.pki_dex.path
-  issuing_certificates = ["https://${local.platform_components.vault.endpoint}/v1/${vault_mount.pki_dex.path}/ca"]
+resource "vault_pki_secret_backend_config_urls" "pki_deployment" {
+  for_each             = vault_mount.pki_deployment
+  depends_on           = [vault_mount.pki_deployment]
+  backend              = each.value.path
+  issuing_certificates = ["https://${local.platform_components.vault.endpoint}/v1/${each.value.path}/ca"]
 }
 
-## Dex roles
+resource "vault_pki_secret_backend_role" "pki_deployment_server" {
+  for_each   = vault_mount.pki_deployment
+  depends_on = [vault_mount.pki_deployment]
 
-resource "vault_pki_secret_backend_role" "pki_dex" {
-  depends_on = [vault_mount.pki_dex]
-  for_each = {
-    "server" = { name = "server", server_flag = true, client_flag = false }
-  }
-
-  backend            = vault_mount.pki_dex.path
-  name               = try(each.value.name, each.key)
+  backend            = each.value.path
+  name               = "server"
   ttl                = local.platform_default_tls_ttl.cert * 3600
   key_type           = lower(local.platform_default_tls_algorithm.algorithm)
   key_bits           = local.platform_default_tls_algorithm.rsa_bits
@@ -249,10 +254,10 @@ resource "vault_pki_secret_backend_role" "pki_dex" {
   allow_ip_sans      = true
   allow_bare_domains = true
   allow_any_name     = true
-  server_flag        = each.value.server_flag
-  client_flag        = each.value.client_flag
+  server_flag        = true
+  client_flag        = false
 
-  ou             = ["dex"]
+  ou             = [each.value.description]
   organization   = try([local.platform_default_tls_subject.organization], null)
   street_address = try([join("-", local.platform_default_tls_subject.street_address)], null)
   postal_code    = try([local.platform_default_tls_subject.postal_code], null)
@@ -261,13 +266,12 @@ resource "vault_pki_secret_backend_role" "pki_dex" {
   country        = try([local.platform_default_tls_subject.country], null)
 }
 
-## Dex policy
-
-resource "vault_policy" "dex_server" {
-  name = "platform-deployment-certificate-dex"
+resource "vault_policy" "deployments_server" {
+  for_each = vault_mount.pki_deployment
+  name     = "platform-deployment-certificate-${each.key}"
 
   policy = <<EOT
-path "${vault_mount.pki_dex.path}/sign/server" {
+path "${each.value.path}/sign/server" {
   capabilities = ["create", "update"]
 }
 EOT
@@ -630,7 +634,7 @@ path "${vault_mount.pki_kubernetes["kubelet"].path}/issue/apiserver" {
   capabilities = ["create", "update"]
 }
 
-path "${vault_mount.pki_dex.path}/cert/ca_chain" {
+path "${vault_mount.pki_deployment["core"].path}/cert/ca_chain" {
   capabilities = ["read"]
 }
 
@@ -1096,14 +1100,14 @@ resource "vault_generic_endpoint" "oidc_scopes" {
   })
 }
 
-
-
 # TODO: admin token
 
 resource "local_file" "properties_vault" {
   content = jsonencode({
     pki_sign_aggregation_layer = "${vault_mount.pki_kubernetes["aggregation-layer"].path}/sign/metrics-server"
-    pki_sign_dex               = "${vault_mount.pki_dex.path}/sign/server"
+    pki_sign_deployment = {
+      for name, description in vault_mount.pki_deployment : name => "${vault_mount.pki_deployment[name].path}/sign/server"
+    }
   })
   filename = "${path.module}/../artifacts/properties-vault-configuration.json"
 }

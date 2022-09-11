@@ -256,6 +256,13 @@ locals {
     }
     if try(deployment.vault-service-account, null) != null
     },
+    {
+      for name in ["core"] :
+      "certificate-${name}" => {
+        namespace       = "cert-manager"
+        service-account = "cert-manager-deployment-${name}"
+      }
+    },
     concat([], [
       for name, ingress in local.platform_components.kubernetes.ingresses : [
         {
