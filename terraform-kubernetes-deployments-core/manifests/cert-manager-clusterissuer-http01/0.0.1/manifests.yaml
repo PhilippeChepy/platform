@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: http01-issuer-${ ingress_class_suffix }
+  name: http01-ingress-${ ingress_class_suffix }
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory

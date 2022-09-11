@@ -9,7 +9,7 @@ spec:
   duration: "2160h0m0s"
   renewBefore: "1440h0m0s"
   issuerRef:
-    name: ingress-${ ingress_class_suffix }-dns01-issuer
+    name: dns01-ingress-${ ingress_class_suffix }
     kind: ClusterIssuer
   commonName: "*.${ ingress_domain }"
   dnsNames:

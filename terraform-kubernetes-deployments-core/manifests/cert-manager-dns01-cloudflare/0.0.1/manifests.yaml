@@ -79,7 +79,7 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: ingress-${ ingress_class_suffix }-dns01-issuer
+  name: dns01-ingress-${ ingress_class_suffix }
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
