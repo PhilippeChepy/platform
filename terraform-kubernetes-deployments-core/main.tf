@@ -22,7 +22,7 @@ locals {
     "vault_cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
     "vault_path_pki_sign_aggregation_layer" = local.pki.pki_sign_aggregation_layer
     "vault_path_pki_sign_dex"               = local.pki.pki_sign_dex
-    "dex_issuer_domain"                     = "dex.${local.platform_domain}"
+    "dex_hostname"                          = "dex.${local.platform_domain}"
     "dex_ingress_class_name"                = local.platform_ingress_class
     "oidc_issuer"                           = "https://vault.${local.platform_domain}:8200/v1/identity/oidc/provider/default"
     "oidc_provider_url"                     = "https://dex.${local.platform_domain}"

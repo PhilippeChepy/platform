@@ -216,7 +216,7 @@ metadata:
 spec:
   ingressClassName: ${ dex_ingress_class_name }
   rules:
-  - host: ${ dex_issuer_domain }
+  - host: ${ dex_hostname }
     http:
       paths:
       - backend:
@@ -228,5 +228,5 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - ${ dex_issuer_domain }
+    - ${ dex_hostname }
     secretName: dex-cert
