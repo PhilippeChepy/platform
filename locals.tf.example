@@ -113,11 +113,12 @@ locals {
         }
 
         core = {
-          certificate-metrics-server = { version = "0.0.1", namespace = "kube-system", vault-service-account = "cert-manager-metrics-server" }
-          certificate-dex            = { version = "0.0.1", namespace = "dex", vault-service-account = "cert-manager-dex" }
-          dex                        = { version = "2.33.0", namespace = "dex" }
-          metrics-server             = { version = "0.6.1", namespace = "kube-system" }
-          reloader                   = { version = "0.0.118", namespace = "reloader" }
+          cert-manager-clusterissuer-deployments = { version = "0.0.1", namespace = "cert-manager" }
+          certificate-dex                        = { version = "0.0.1", namespace = "dex" }
+          certificate-metrics-server             = { version = "0.0.1", namespace = "kube-system", vault-service-account = "cert-manager-metrics-server" }
+          dex                                    = { version = "2.33.0", namespace = "dex" } # requires an ingress serving platform_domain
+          metrics-server                         = { version = "0.6.1", namespace = "kube-system" }
+          reloader                               = { version = "0.0.118", namespace = "reloader" }
         }
 
         # Unless explicitely specified (e.g. cert-manager), these deployments are put in
