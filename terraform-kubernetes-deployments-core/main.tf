@@ -58,7 +58,11 @@ locals {
 
   core_manifests = concat([
     for name, deployment in local.platform_components.kubernetes.deployments.core : [
-      for manifest in split("\n---\n", templatefile("manifests/${name}/${deployment.version}/manifests.yaml", local.deployment_variables)) :
+      for manifest in split("\n---\n",
+        try(deployment.templated, true) ?
+        templatefile("manifests/${name}/${deployment.version}/manifests.yaml", local.deployment_variables) :
+        file("manifests/${name}/${deployment.version}/manifests.yaml")
+      ) :
       yamldecode(manifest)
       if manifest != ""
     ]
@@ -68,7 +72,11 @@ locals {
     for name, ingress in local.platform_components.kubernetes.ingresses :
     concat([
       for _, deployment in ingress.deployments : [
-        for manifest in split("\n---\n", templatefile("manifests/${deployment}/${local.platform_components.kubernetes.deployments.ingress[deployment].version}/manifests.yaml", local.ingress_variables[name])) :
+        for manifest in split("\n---\n",
+          try(deployment.templated, true) ?
+          templatefile("manifests/${deployment}/${local.platform_components.kubernetes.deployments.ingress[deployment].version}/manifests.yaml", local.ingress_variables[name]) :
+          file("manifests/${deployment}/${local.platform_components.kubernetes.deployments.ingress[deployment].version}/manifests.yaml")
+        ) :
         yamldecode(manifest)
         if manifest != "" && (
           try(local.platform_components.kubernetes.deployments.ingress[deployment].provider, null) == null ||

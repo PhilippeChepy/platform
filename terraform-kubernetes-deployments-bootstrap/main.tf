@@ -38,7 +38,11 @@ locals {
   # - this result is stored in the manifest array, unless manifest is empty
   bootstrap_manifests = concat([
     for name, deployment in local.platform_components.kubernetes.deployments.bootstrap : [
-      for manifest in split("\n---\n", templatefile("manifests/${name}/${deployment.version}/manifests.yaml", local.deployment_variables)) :
+      for manifest in split("\n---\n",
+        try(deployment.templated, true) ?
+        templatefile("manifests/${name}/${deployment.version}/manifests.yaml", local.deployment_variables) :
+        file("manifests/${name}/${deployment.version}/manifests.yaml")
+      ) :
       yamldecode(manifest)
       if manifest != ""
     ]
