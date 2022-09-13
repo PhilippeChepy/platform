@@ -39,6 +39,7 @@ data:
     staticClients:
       - id: kubectl
         name: Kubernetes CLI
+        public: true
         secret: kubectl-secret
         redirectURIs:
         - http://localhost:8000
