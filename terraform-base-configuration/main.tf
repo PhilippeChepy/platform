@@ -831,10 +831,13 @@ resource "vault_identity_group" "user_group" {
   for_each = local.platform_authentication["provider"] == "vault" ? local.user_groups : []
 
 
-  name              = each.key
-  type              = "internal"
-  policies          = ["platform-vault-user-${each.key}"]
-  member_entity_ids = [for username, user in local.platform_authentication["users"] : vault_identity_entity.user_entity[username].id if contains(user.groups, "cluster-admin")]
+  name     = each.key
+  type     = "internal"
+  policies = ["platform-vault-user-${each.key}"]
+  member_entity_ids = [
+    for username, user in local.platform_authentication["users"] : vault_identity_entity.user_entity[username].id
+    if contains(user.groups, each.key)
+  ]
 
   metadata = {
     version = "2"
