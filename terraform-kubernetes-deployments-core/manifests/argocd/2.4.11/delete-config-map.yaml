@@ -1,0 +1,18 @@
+---
+$patch: delete
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+---
+$patch: delete
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+---
+$patch: delete
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm

@@ -1104,7 +1104,37 @@ resource "vault_generic_endpoint" "oidc_scopes" {
   })
 }
 
-# TODO: admin token
+# Dex <---> OIDC clients
+
+resource "vault_mount" "secret_oidc" {
+  path        = "kv/platform/oidc"
+  description = "OIDC Secrets"
+
+  type                      = "kv"
+  default_lease_ttl_seconds = local.platform_default_tls_ttl.cert * 3600
+  max_lease_ttl_seconds     = local.platform_default_tls_ttl.cert * 3600
+}
+
+resource "random_password" "oidc_client_secret" {
+  for_each = toset(try(local.platform_components.kubernetes.deployments.core.argocd, null) != null ? ["argocd"] : [])
+
+  length  = 32
+  lower   = true
+  numeric = true
+  special = true
+  upper   = true
+}
+
+resource "vault_generic_secret" "oidc_client_secret" {
+  for_each   = random_password.oidc_client_secret
+  depends_on = [vault_mount.secret_oidc]
+  path       = "${vault_mount.secret_oidc.path}/${each.key}"
+
+  data_json = jsonencode({
+    client-secret = each.value.result
+  })
+}
+
 
 resource "local_file" "properties_vault" {
   content = jsonencode({

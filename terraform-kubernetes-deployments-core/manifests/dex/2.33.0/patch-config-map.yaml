@@ -44,6 +44,13 @@ data:
         redirectURIs:
         - http://localhost:8000
         - http://localhost:8080/oauth2/callback
+      %{ if try(argocd_oidc_client_secret, "") != "" }
+      - id: argocd
+        name: ArgoCD
+        secret: ${try(argocd_oidc_client_secret, "")}
+        redirectURIs:
+        - https://${argocd_hostname}/auth/callback
+      %{ endif }
 
 # kubectl oidc-login setup --oidc-issuer-url=https://dex.platform.i6h.io --oidc-client-id=kubectl
 

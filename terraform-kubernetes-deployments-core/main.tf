@@ -1,5 +1,7 @@
 locals {
 
+  oidc_clients = toset(try(local.platform_components.kubernetes.deployments.core.argocd, null) != null ? ["argocd"] : [])
+
   platform_ingress_class = one([
     for name, ingress in local.platform_components.kubernetes.ingresses : "nginx-${name}"
     if try(ingress.domain, null) != null && trimsuffix(".${local.platform_domain}", ".${try(ingress.domain, "")}") != ".${local.platform_domain}"
@@ -22,16 +24,22 @@ locals {
     "vault_cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
     "vault_path_pki_sign_aggregation_layer" = local.pki.pki_sign_aggregation_layer
     "vault_path_pki_sign_deployment"        = local.pki.pki_sign_deployment
+    "dex_ca_cert"                           = data.local_file.root_ca_certificate_pem.content
     "dex_hostname"                          = "dex.${local.platform_domain}"
     "dex_ingress_class_name"                = local.platform_ingress_class
     "oidc_issuer"                           = "https://vault.${local.platform_domain}:8200/v1/identity/oidc/provider/default"
     "oidc_provider_url"                     = "https://dex.${local.platform_domain}"
-    },
-    local.platform_authentication["provider"] == "vault" ? {
-      "oidc_client_id"     = data.vault_generic_secret.vault_dex[0].data["client_id"]
-      "oidc_client_secret" = data.vault_generic_secret.vault_dex[0].data["client_secret"]
-      } : {
-  })
+    "admin_user_emails"                     = [for user in local.platform_authentication.users : user.email if contains(user.groups, "administrator")]
+    }, contains(local.oidc_clients, "argocd") ? {
+    "argocd_hostname"               = "cd.${local.platform_domain}"
+    "argocd_ingress_class_name"     = local.platform_ingress_class
+    "argocd_oidc_client_secret_b64" = base64encode(data.vault_generic_secret.oidc_client_secret["argocd"].data["client-secret"])
+    "argocd_oidc_client_secret"     = data.vault_generic_secret.oidc_client_secret["argocd"].data["client-secret"]
+    } : {}, local.platform_authentication["provider"] == "vault" ? {
+    "oidc_client_id"     = data.vault_generic_secret.vault_dex[0].data["client_id"]
+    "oidc_client_secret" = data.vault_generic_secret.vault_dex[0].data["client_secret"]
+    } : {}
+  )
 
   # Ingress-related workloads
   ingress_variables = {
@@ -112,6 +120,12 @@ data "vault_generic_secret" "kubernetes" {
 data "vault_generic_secret" "vault_dex" {
   count = local.platform_authentication["provider"] == "vault" ? 1 : 0
   path  = "identity/oidc/client/dex"
+}
+
+data "vault_generic_secret" "oidc_client_secret" {
+  for_each = local.oidc_clients
+
+  path = "kv/platform/oidc/${each.key}"
 }
 
 # Deployments: only ServiceAccount

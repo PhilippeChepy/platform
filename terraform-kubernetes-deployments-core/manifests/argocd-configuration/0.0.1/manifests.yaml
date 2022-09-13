@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-cmd-params-cm
+  namespace: argocd
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-cm
+  namespace: argocd
+data:
+  admin.enabled: "false"
+  url: https://${argocd_hostname}
+  oidc.config: |
+    name: OIDC
+    issuer: https://${dex_hostname}
+    clientID: argocd
+    clientSecret: $argocd-oidc-secret:oidc.dex.clientSecret
+
+    requestedScopes: ["openid", "profile", "email", "groups"]
+    requestedIDTokenClaims: {"groups": {"essential": true}}
+
+    rootCA: |
+      ${indent(6, dex_ca_cert)}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-rbac-cm
+  namespace: argocd
+data:
+  policy.csv: |
+  %{~ for user in admin_user_emails ~}
+    g, ${user}, role:admin
+  %{~ endfor ~}
+
+  policy.default: role:''
+  scopes: "[email]"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-oidc-secret
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-secret
+    app.kubernetes.io/part-of: argocd
+type: Opaque
+data:
+  oidc.dex.clientSecret: "${argocd_oidc_client_secret_b64}"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  secretName: argocd-secret
+  duration: 24h0m0s
+  renewBefore: 18h0m0s
+  subject:
+    organizations:
+      - argocd
+  commonName: argocd.argocd.svc
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    size: 4096
+  usages:
+    - server auth
+  dnsNames:
+    - argocd.argocd.svc
+    - ${ argocd_hostname }
+  issuerRef:
+    name: vault-platform-deployment-core
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  ingressClassName: ${ argocd_ingress_class_name }
+  rules:
+  - host: ${ argocd_hostname }
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              name: https
+  tls:
+  - hosts:
+    - ${ argocd_hostname }
+    secretName: argocd-secret
