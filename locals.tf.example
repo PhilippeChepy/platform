@@ -31,9 +31,11 @@ locals {
     provider = "vault"
     users = {
       "lucy.l" = {
+        email  = "lucy@domain.tld"
         groups = ["administrator"]
       }
       "lucas.c" = {
+        email  = "lucas@domain.tld"
         groups = ["developer"]
       }
     }

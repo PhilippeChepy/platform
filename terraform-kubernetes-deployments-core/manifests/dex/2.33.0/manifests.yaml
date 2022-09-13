@@ -70,9 +70,9 @@ data:
 
         scopes:
         - user
+        - email
         - groups
         userNameKey: username
-
         insecureEnableGroups: true
 
     staticClients:

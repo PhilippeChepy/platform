@@ -817,6 +817,9 @@ resource "vault_identity_entity" "user_entity" {
   for_each = local.platform_authentication["provider"] == "vault" ? local.platform_authentication["users"] : {}
 
   name = each.key
+  metadata = {
+    "email" = each.value.email
+  }
   policies = concat(
     ["default"],
     [for policy in vault_policy.vault_user : policy.name],
@@ -1019,7 +1022,7 @@ resource "vault_generic_endpoint" "oidc_configuration" {
   disable_delete = true
   data_json = jsonencode({
     issuer           = "https://vault.${local.platform_domain}:8200"
-    scopes_supported = "groups,user"
+    scopes_supported = "groups,user,email"
   })
 }
 
@@ -1072,10 +1075,8 @@ locals {
   scope_template_user = <<EOT
 {
     "username": {{identity.entity.name}},
-    "contact": {
-        "email": {{identity.entity.metadata.email}},
-        "phone_number": {{identity.entity.metadata.phone_number}}
-    }
+    "email": {{identity.entity.metadata.email}},
+    "email_verified": true
 }
 EOT
 
