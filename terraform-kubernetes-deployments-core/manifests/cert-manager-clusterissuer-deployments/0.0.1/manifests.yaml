@@ -34,7 +34,7 @@ metadata:
 spec:
   vault:
     path: ${ vault_path_pki_sign_deployment["core"] }
-    server: ${ vault_cluster_addr }
+    server: ${ vault_cluster_url }
     caBundle: ${ vault_cluster_ca_cert }
     auth:
       kubernetes:

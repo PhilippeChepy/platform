@@ -198,5 +198,5 @@ spec:
         name: ingress-${ ingress_class_suffix }-vault-cloudflare
         type: Secret
       path: kv/platform/cloudflare
-      server: ${ vault_cluster_addr }
+      server: ${ vault_cluster_url }
       version: v1

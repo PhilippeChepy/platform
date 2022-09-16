@@ -43,7 +43,7 @@ metadata:
 spec:
   provider:
     vault:
-      server: "${ vault_cluster_addr }"
+      server: "${ vault_cluster_url }"
       caProvider:
         type: Secret
         name: ingress-${ ingress_class_suffix }-vault-cloudflare
