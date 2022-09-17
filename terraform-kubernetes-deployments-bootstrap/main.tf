@@ -15,6 +15,7 @@ locals {
     "kubernetes_proxy_server_0_ipv4"        = local.kubernetes.control_plane_instance_ip_address[0]
     "kubernetes_proxy_server_1_ipv4"        = local.kubernetes.control_plane_instance_ip_address[1]
     "vault_cluster_url"                     = local.vault.url
+    "vault_cluster_ipv4"                    = local.vault.ip_address
     "vault_cluster_ca_cert"                 = base64encode(data.local_file.root_ca_certificate_pem.content)
     "vault_path_pki_sign_aggregation_layer" = local.pki.pki_sign_aggregation_layer
 

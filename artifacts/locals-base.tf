@@ -27,6 +27,7 @@ locals {
     client_security_group = local.inventory_vars.vault_client_security_group_id
     server_security_group = local.inventory_vars.vault_server_security_group_id
     url                   = local.inventory_vars.vault_url
+    ip_address            = local.inventory_vars.vault_ip_address
     token                 = data.local_file.root_token.content
   }
 
