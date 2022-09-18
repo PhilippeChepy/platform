@@ -114,6 +114,8 @@ module "kubernetes_control_plane" {
     bootstrap_token_id     = data.vault_generic_secret.kubernetes["bootstrap-token"].data["id"]
     bootstrap_token_secret = data.vault_generic_secret.kubernetes["bootstrap-token"].data["secret"]
     cluster_domain         = local.platform_components.kubernetes.cluster_domain
+    pod_cidr_ipv4          = local.platform_components.kubernetes.pod_cidr_ipv4
+    pod_cidr_ipv6          = local.platform_components.kubernetes.pod_cidr_ipv6
     service_cidr_ipv4      = local.platform_components.kubernetes.service_cidr_ipv4
     service_cidr_ipv6      = local.platform_components.kubernetes.service_cidr_ipv6
   }

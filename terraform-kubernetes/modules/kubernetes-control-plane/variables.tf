@@ -111,6 +111,8 @@ variable "kubernetes" {
     bootstrap_token_id     = string
     bootstrap_token_secret = string
     cluster_domain         = string
+    pod_cidr_ipv4          = string
+    pod_cidr_ipv6          = string
     service_cidr_ipv4      = string
     service_cidr_ipv6      = string
   })

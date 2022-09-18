@@ -114,6 +114,8 @@ resource "exoscale_instance_pool" "cluster" {
     kubernetes_cluster_ip_address  = data.exoscale_nlb.endpoint.ip_address
     kubernetes_cluster_internal_ip = var.kubernetes.apiserver_service_ipv4
     kubernetes_cluster_name        = var.name
+    kubernetes_pod_cidr_ipv4       = var.kubernetes.pod_cidr_ipv4
+    kubernetes_pod_cidr_ipv6       = var.kubernetes.pod_cidr_ipv6
     kubernetes_service_cidr_ipv4   = var.kubernetes.service_cidr_ipv4
     kubernetes_service_cidr_ipv6   = var.kubernetes.service_cidr_ipv6
     oidc_issuer_url                = var.oidc.issuer_url
