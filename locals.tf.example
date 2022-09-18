@@ -107,7 +107,7 @@ locals {
       deployments = {
         bootstrap = {
           cert-manager       = { version = "1.9.1", namespace = "cert-manager" }
-          cilium-base        = { version = "1.12.1", namespace = "kube-system" }
+          cilium-base        = { version = "1.12.2", namespace = "kube-system" }
           core-dns           = { version = "1.9.4", namespace = "kube-system" }
           konnectivity-agent = { version = "0.0.32", namespace = "kube-system" }
           kyverno            = { version = "1.7.3", namespace = "kyverno" }
