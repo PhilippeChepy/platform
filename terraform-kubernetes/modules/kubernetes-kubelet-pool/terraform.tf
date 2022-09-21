@@ -2,8 +2,9 @@ terraform {
   required_providers {
     exoscale = {
       source  = "exoscale/exoscale"
-      version = ">= 0.40.0"
+      version = ">= 0.41.0"
     }
   }
-  experiments = [module_variable_optional_attrs]
+
+  required_version = ">= 1.3.0"
 }
