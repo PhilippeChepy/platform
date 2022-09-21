@@ -9,6 +9,16 @@ namespace: reloader
 
 patches:
 - target:
+    kind: ClusterRoleBinding
+  patch: |-
+    - op: remove
+      path: /metadata/namespace
+- target:
+    kind: ClusterRole
+  patch: |-
+    - op: remove
+      path: /metadata/namespace
+- target:
     kind: .*
     name: .*
   patch: |-
