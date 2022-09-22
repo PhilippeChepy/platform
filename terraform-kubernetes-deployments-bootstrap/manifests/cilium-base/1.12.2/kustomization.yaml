@@ -5,6 +5,16 @@ patches:
   patch: |-
     - op: remove
       path: /spec/template/metadata/annotations
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+- target:
+    kind: DaemonSet
+    name: cilium
+  patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
 - target:
     kind: ConfigMap
     name: cilium-config

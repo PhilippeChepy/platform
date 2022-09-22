@@ -402,6 +402,7 @@ spec:
       labels:
         io.cilium/app: operator
         name: cilium-operator
+        rule.${platform_domain}/allow-egress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:
@@ -511,6 +512,7 @@ spec:
         container.apparmor.security.beta.kubernetes.io/clean-cilium-state: unconfined
       labels:
         k8s-app: cilium
+        rule.${platform_domain}/allow-egress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:
