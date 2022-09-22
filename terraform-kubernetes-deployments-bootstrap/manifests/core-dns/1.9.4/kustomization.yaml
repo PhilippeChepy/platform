@@ -46,6 +46,12 @@ patches:
       kind: Deployment
       name: coredns-coredns
     patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+        value: "true"
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-dns
+        value: "true"
       - op: replace
         path: /metadata/name
         value: coredns

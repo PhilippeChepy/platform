@@ -155,6 +155,8 @@ spec:
         app.kubernetes.io/instance: coredns
         app.kubernetes.io/name: coredns
         k8s-app: coredns
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-egress-dns: "true"
     spec:
       affinity:
         podAntiAffinity:
