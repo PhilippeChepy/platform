@@ -8,6 +8,9 @@ patches:
       kind: DaemonSet
       name: konnectivity-agent
     patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-konnectivity-server
+        value: "true"
       - op: replace
         path: /kind
         value: Deployment

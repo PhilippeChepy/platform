@@ -40,6 +40,7 @@ spec:
     metadata:
       labels:
         k8s-app: konnectivity-agent
+        rule.${platform_domain}/allow-egress-konnectivity-server: "true"
     spec:
       affinity:
         podAntiAffinity:
