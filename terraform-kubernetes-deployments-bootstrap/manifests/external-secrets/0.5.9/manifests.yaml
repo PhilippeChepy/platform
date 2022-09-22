@@ -7310,6 +7310,7 @@ spec:
       labels:
         app.kubernetes.io/instance: external-secrets
         app.kubernetes.io/name: external-secrets
+        rule.${platform_domain}/allow-egress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:
@@ -7368,6 +7369,7 @@ spec:
       labels:
         app.kubernetes.io/instance: external-secrets
         app.kubernetes.io/name: external-secrets-cert-controller
+        rule.${platform_domain}/allow-egress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:
@@ -7447,6 +7449,8 @@ spec:
       labels:
         app.kubernetes.io/instance: external-secrets
         app.kubernetes.io/name: external-secrets-webhook
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-ingress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:

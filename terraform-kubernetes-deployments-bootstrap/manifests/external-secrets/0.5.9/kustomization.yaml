@@ -10,6 +10,9 @@ patches:
     name: external-secrets
   patch: |-
     - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+    - op: add
       path: /spec/template/spec/affinity
       value:
         podAntiAffinity:
@@ -24,6 +27,9 @@ patches:
     kind: Deployment
     name: external-secrets-cert-controller
   patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
     - op: add
       path: /spec/template/spec/affinity
       value:
@@ -51,6 +57,12 @@ patches:
     kind: Deployment
     name: external-secrets-webhook
   patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-ingress-api-server
+      value: "true"
     - op: remove
       path: /spec/template/spec/hostNetwork
     - op: add
