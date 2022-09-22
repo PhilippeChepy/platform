@@ -13,6 +13,12 @@ patches:
       kind: Deployment
       name: ingress-nginx-controller
     patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+        value: "true"
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-ingress-api-server
+        value: "true"
       - op: replace
         path: /kind
         value: DaemonSet

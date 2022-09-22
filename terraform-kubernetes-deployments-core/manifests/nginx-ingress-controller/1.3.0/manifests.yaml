@@ -542,6 +542,8 @@ spec:
         app.kubernetes.io/component: controller
         app.kubernetes.io/instance: ingress-nginx
         app.kubernetes.io/name: ingress-nginx
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-ingress-api-server: "true"
     spec:
       containers:
       - args:
