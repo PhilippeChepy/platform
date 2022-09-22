@@ -134,6 +134,8 @@ spec:
     metadata:
       labels:
         app: dex
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-egress-vault: "true"
     spec:
       affinity:
         podAntiAffinity:
