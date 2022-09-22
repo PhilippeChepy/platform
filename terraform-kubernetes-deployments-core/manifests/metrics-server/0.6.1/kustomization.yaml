@@ -17,6 +17,15 @@ patches:
       kind: Deployment
       name: metrics-server
     patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+        value: "true"
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-kubelet
+        value: "true"
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-ingress-api-server
+        value: "true"
       - op: replace
         path: /spec/template/spec/containers/0/volumeMounts
         value:

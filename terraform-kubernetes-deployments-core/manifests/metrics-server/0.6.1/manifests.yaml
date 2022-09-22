@@ -140,6 +140,9 @@ spec:
     metadata:
       labels:
         k8s-app: metrics-server
+        rule.${platform_domain}/allow-ingress-api-server: "true"
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-egress-kubelet: "true"
     spec:
       affinity:
         podAntiAffinity:
