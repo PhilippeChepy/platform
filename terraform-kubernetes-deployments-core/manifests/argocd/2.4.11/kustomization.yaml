@@ -5,4 +5,16 @@ patchesStrategicMerge:
   - delete-dex.yaml
   - delete-config-map.yaml
 
+patches:
+  - target:
+      kind: Deployment
+      name: argocd-server
+    patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+        value: "true"
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-dex
+        value: "true"
+
 namespace: argocd

@@ -10031,6 +10031,8 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: argocd-server
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-egress-dex: "true"
     spec:
       affinity:
         podAntiAffinity:
