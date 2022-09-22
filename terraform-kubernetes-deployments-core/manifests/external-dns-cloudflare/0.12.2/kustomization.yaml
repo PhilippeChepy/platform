@@ -35,6 +35,9 @@ patches:
     kind: Deployment
     name: external-dns
   patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
     - op: replace
       path: /spec/template/spec/containers/0/args
       value:

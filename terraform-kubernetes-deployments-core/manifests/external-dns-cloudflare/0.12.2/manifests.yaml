@@ -108,6 +108,7 @@ spec:
     metadata:
       labels:
         app: external-dns
+        rule.${platform_domain}/allow-egress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:
