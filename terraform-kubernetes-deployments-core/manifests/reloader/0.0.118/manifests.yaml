@@ -76,6 +76,7 @@ spec:
     metadata:
       labels:
         app: reloader
+        rule.${platform_domain}/allow-egress-api-server: true
     spec:
       affinity:
         podAntiAffinity:

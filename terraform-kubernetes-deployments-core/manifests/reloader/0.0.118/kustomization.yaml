@@ -43,6 +43,7 @@ patches:
       path: /spec/template/metadata/labels
       value:
         app: reloader
+        rule.${platform_domain}/allow-egress-api-server: true
     - op: replace
       path: /spec/template/spec/containers/0/name
       value: reloader
