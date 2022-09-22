@@ -86,6 +86,15 @@ patches:
     name: cert-manager
   patch: |-
     - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-vault
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-dns
+      value: "true"
+    - op: add
       path: /spec/template/spec/affinity
       value:
         podAntiAffinity:
@@ -99,6 +108,9 @@ patches:
     name: cert-manager-cainjector
   patch: |-
     - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+    - op: add
       path: /spec/template/spec/affinity
       value:
         podAntiAffinity:
@@ -111,6 +123,12 @@ patches:
     kind: Deployment
     name: cert-manager-webhook
   patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-ingress-api-server
+      value: "true"
     - op: add
       path: /spec/template/spec/affinity
       value:

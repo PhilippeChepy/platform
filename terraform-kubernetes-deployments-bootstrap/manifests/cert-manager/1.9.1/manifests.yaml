@@ -9360,6 +9360,9 @@ spec:
         app.kubernetes.io/name: cert-manager
         app.kubernetes.io/version: v1.9.1
         helm.sh/chart: cert-manager-v1.9.1
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-egress-dns: "true"
+        rule.${platform_domain}/allow-egress-vault: "true"
     spec:
       affinity:
         podAntiAffinity:
@@ -9437,6 +9440,7 @@ spec:
         app.kubernetes.io/name: cainjector
         app.kubernetes.io/version: v1.9.1
         helm.sh/chart: cert-manager-v1.9.1
+        rule.${platform_domain}/allow-egress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:
@@ -9509,6 +9513,8 @@ spec:
         app.kubernetes.io/name: webhook
         app.kubernetes.io/version: v1.9.1
         helm.sh/chart: cert-manager-v1.9.1
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-ingress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:
