@@ -7806,6 +7806,8 @@ spec:
         app.kubernetes.io/part-of: kyverno
         app.kubernetes.io/version: v2.5.3
         helm.sh/chart: kyverno-v2.5.3
+        rule.${platform_domain}/allow-egress-api-server: "true"
+        rule.${platform_domain}/allow-ingress-api-server: "true"
     spec:
       affinity:
         podAntiAffinity:

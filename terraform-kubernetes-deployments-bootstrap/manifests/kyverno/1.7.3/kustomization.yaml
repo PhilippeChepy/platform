@@ -13,7 +13,14 @@ patches:
       path: /metadata/creationTimestamp
 - target:
     kind: Deployment
+    name: kyverno
   patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-ingress-api-server
+      value: "true"
     - op: add
       path: /spec/replicas
       value: 2
