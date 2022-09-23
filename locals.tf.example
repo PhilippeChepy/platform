@@ -116,7 +116,6 @@ locals {
 
         core = {
           argocd                                 = { version = "2.4.11", namespace = "argocd" }
-          argocd-configuration                   = { version = "0.0.1", namespace = "argocd" }
           cert-manager-clusterissuer-deployments = { version = "0.0.1", namespace = "cert-manager" }
           certificate-dex                        = { version = "0.0.1", namespace = "dex" }
           certificate-metrics-server             = { version = "0.0.1", namespace = "kube-system", vault-service-account = "cert-manager-metrics-server" }

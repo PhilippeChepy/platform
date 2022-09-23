@@ -9410,6 +9410,38 @@ subjects:
   namespace: argocd
 ---
 apiVersion: v1
+data:
+  admin.enabled: "false"
+  oidc.config: |-
+    name: OIDC
+    issuer: https://${dex_hostname}
+    clientID: argocd
+    clientSecret: $argocd-oidc-secret:oidc.dex.clientSecret
+
+    requestedScopes: ["openid", "profile", "email", "groups"]
+    requestedIDTokenClaims: {"groups": {"essential": true}}
+
+    rootCA: |
+      ${indent(6, dex_ca_cert)}
+  url: https://${argocd_hostname}
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-cm
+  namespace: argocd
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-cmd-params-cm
+  namespace: argocd
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
@@ -9422,6 +9454,22 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: argocd-notifications-cm
+  namespace: argocd
+---
+apiVersion: v1
+data:
+  policy.csv: |
+    %{~ for user in admin_user_emails ~}
+      g, ${user}, role:admin
+    %{~ endfor ~}
+  policy.default: role:''
+  scopes: '[email]'
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-rbac-cm
   namespace: argocd
 ---
 apiVersion: v1
@@ -9457,6 +9505,18 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: argocd-notifications-secret
+  namespace: argocd
+type: Opaque
+---
+apiVersion: v1
+data:
+  oidc.dex.clientSecret: ${argocd_oidc_client_secret_b64}
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-secret
+    app.kubernetes.io/part-of: argocd
+  name: argocd-oidc-secret
   namespace: argocd
 type: Opaque
 ---
@@ -10463,6 +10523,59 @@ spec:
             path: ca.crt
           optional: true
           secretName: argocd-repo-server-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  commonName: argocd.argocd.svc
+  dnsNames:
+  - argocd.argocd.svc
+  - ${ argocd_hostname }
+  duration: 24h0m0s
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: vault-platform-deployment-core
+  privateKey:
+    algorithm: RSA
+    rotationPolicy: Always
+    size: 4096
+  renewBefore: 18h0m0s
+  secretName: argocd-secret
+  subject:
+    organizations:
+    - argocd
+  usages:
+  - server auth
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+  name: argocd-server-ingress
+  namespace: argocd
+spec:
+  ingressClassName: ${ argocd_ingress_class_name }
+  rules:
+  - host: ${ argocd_hostname }
+    http:
+      paths:
+      - backend:
+          service:
+            name: argocd-server
+            port:
+              name: https
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - ${ argocd_hostname }
+    secretName: argocd-secret
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
