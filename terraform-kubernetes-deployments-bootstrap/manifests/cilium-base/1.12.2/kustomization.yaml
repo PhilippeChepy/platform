@@ -67,6 +67,11 @@ helmCharts:
 
     hubble:
       enabled: false
+      # enabled: true
+      # relay:
+      #   enabled: true
+      # ui:
+      #   enabled: true
 
     ipam:
       operator:
@@ -78,6 +83,8 @@ helmCharts:
 
     ipv6:
       enabled: true
+
+    # policyEnforcementMode: "always"
 
     operator:
       image:
