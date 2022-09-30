@@ -1,0 +1,83 @@
+resources:
+- https://raw.githubusercontent.com/kubernetes/website/main/content/en/examples/admin/konnectivity/konnectivity-rbac.yaml
+- https://raw.githubusercontent.com/kubernetes/website/main/content/en/examples/admin/konnectivity/konnectivity-agent.yaml
+- pod-disruption-budget.yaml
+
+patches:
+  - target:
+      kind: DaemonSet
+      name: konnectivity-agent
+    patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-konnectivity-server
+        value: "true"
+      - op: replace
+        path: /kind
+        value: Deployment
+      - op: add
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - --logtostderr=true
+          - --ca-cert=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          - --admin-server-port=8095
+          - --health-server-port=8134
+          - --service-account-token-path=/var/run/secrets/tokens/konnectivity-agent-token
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  k8s-app: konnectivity-agent
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe
+        value:
+          httpGet:
+            path: /healthz
+            port: 8134
+          initialDelaySeconds: 5
+          timeoutSeconds: 15
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          limits:
+            cpu: 50m
+            memory: 10Mi
+          requests:
+            cpu: 50m
+            memory: 10Mi
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent:v0.0.33
+      - op: copy
+        from: /spec/template/spec/containers/0
+        path: /spec/template/spec/containers/1
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: "konnectivity-agent-to-server-0"
+      - op: replace
+        path: /spec/template/spec/containers/1/name
+        value: "konnectivity-agent-to-server-1"
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: "--proxy-server-host=${ kubernetes_proxy_server_0_ipv4 }"
+      - op: add
+        path: /spec/template/spec/containers/1/args/-
+        value: "--proxy-server-host=${ kubernetes_proxy_server_1_ipv4 }"
+
+namespace: kube-system
