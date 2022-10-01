@@ -28,7 +28,6 @@ ls -lah artifacts/latest-vault.snapshot
 # -rw-r--r--  1 philippe  staff    20M 16 jul 13:37 artifacts/latest-vault.snapshot
 ```
 
-
 # Etcd Snapshots
 
 ```bash
