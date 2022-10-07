@@ -86,4 +86,4 @@
     force: true
     owner: root
     group: root
-    mode: "0666"
+    mode: "0644"
