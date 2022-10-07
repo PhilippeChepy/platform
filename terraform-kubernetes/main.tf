@@ -245,66 +245,6 @@ module "kubernetes_nodepool" {
   kubelet_taints = try(each.value.taints, {})
 }
 
-# Services interactions
-
-## Vault <---> Kubernetes deployments
-
-locals {
-  vault_deployment_roles = merge({
-    for name, deployment in merge(local.platform_components.kubernetes.deployments.core, local.platform_components.kubernetes.deployments.bootstrap) :
-    name => {
-      namespace       = deployment.namespace
-      service-account = deployment.vault-service-account
-    }
-    if try(deployment.vault-service-account, null) != null
-    },
-    {
-      for name in ["core"] :
-      "certificate-${name}" => {
-        namespace       = "cert-manager"
-        service-account = "cert-manager-deployment-${name}"
-      }
-    },
-    concat([], [
-      for name, ingress in local.platform_components.kubernetes.ingresses : [
-        {
-          for _, deployment in ingress.deployments :
-          "ingress-${name}-${deployment}" => {
-            namespace       = try(local.platform_components.kubernetes.deployments.ingress[deployment].namespace, "ingress-nginx-${name}")
-            service-account = "ingress-${name}-${local.platform_components.kubernetes.deployments.ingress[deployment].vault-service-account}"
-          }
-          if try(local.platform_components.kubernetes.deployments.ingress[deployment].vault-service-account, null) != null
-        }
-      ]
-    ]...)...
-  )
-}
-
-resource "vault_auth_backend" "kubernetes" {
-  type = "kubernetes"
-  path = "kubernetes"
-}
-
-resource "vault_kubernetes_auth_backend_config" "kubernetes" {
-  depends_on         = [vault_auth_backend.kubernetes]
-  backend            = "kubernetes"
-  kubernetes_host    = module.kubernetes_control_plane.url
-  kubernetes_ca_cert = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
-  pem_keys           = [chomp(data.vault_generic_secret.kubernetes["service_account_key"].data["public_key"])]
-}
-
-resource "vault_kubernetes_auth_backend_role" "roles" {
-  depends_on = [vault_auth_backend.kubernetes]
-  for_each   = local.vault_deployment_roles
-
-  backend                          = "kubernetes"
-  role_name                        = each.key
-  bound_service_account_namespaces = [each.value.namespace]
-  bound_service_account_names      = [each.value.service-account]
-  token_policies                   = ["default", "platform-deployment-${each.key}"]
-  token_ttl                        = 3600
-}
-
 # User interactions
 
 resource "vault_pki_secret_backend_cert" "operator" {

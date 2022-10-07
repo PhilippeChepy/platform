@@ -5,19 +5,6 @@ metadata:
   name: cert-manager-metrics-server
   namespace: kube-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: cert-manager-metrics-server-tokenreview-binding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:auth-delegator
-subjects:
-  - kind: ServiceAccount
-    name: cert-manager-metrics-server
-    namespace: kube-system
----
 apiVersion: v1
 kind: Secret
 metadata:
