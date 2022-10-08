@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 cluster-health-check-url agent-service-name" >&2
+    exit 2
+fi
+
+VAULT_CLUSTER_ADDR="$1"
+VAULT_AGENT_SERVICE_NAME="$2"
+
+while [ $(curl -sk -o /dev/null -w "%{http_code}" "${VAULT_CLUSTER_ADDR}") != '200' ]; do
+    sleep 1;
+done
+
+systemctl enable "$VAULT_AGENT_SERVICE_NAME.service"
+systemctl start "$VAULT_AGENT_SERVICE_NAME.service"

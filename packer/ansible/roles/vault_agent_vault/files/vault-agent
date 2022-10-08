@@ -1,0 +1,1 @@
+VAULT_AGENT_ADDR=unix:///run/vault/vault-agent.sock

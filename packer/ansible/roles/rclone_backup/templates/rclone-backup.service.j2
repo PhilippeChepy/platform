@@ -9,6 +9,9 @@ User={{ rclone_backup_user }}
 Group={{ rclone_backup_group }}
 EnvironmentFile=-/etc/default/rclone-backup
 EnvironmentFile=-{{ rclone_config_path }}/credentials
+{% for extra_environment_file in rclone_backup_service_extra_environment_files %}
+EnvironmentFile={{ extra_environment_file }}
+{% endfor %}
 {% for command in rclone_backup_service_snapshot_commands %}
 ExecStartPre={{ command }}
 {% endfor %}

@@ -37,6 +37,8 @@
     # vault integration with vault agent
     vault_agent_vault_auth_path: auth/exoscale
     # backups
+    rclone_backup_service_extra_environment_files:
+      - "/etc/default/vault-agent"
     rclone_backup_service_name: "vault"
     rclone_backup_service_snapshot_commands:
       - "/bin/sh -c \". /etc/default/vault && vault operator raft snapshot save /var/backups/vault/vault.snapshot\""

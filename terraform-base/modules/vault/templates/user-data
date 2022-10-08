@@ -13,29 +13,6 @@ write_files:
   owner: vault:vault
   permissions: "0600"
   content: "{{ ds.meta_data.instance_id }}"
-- path: /etc/rclone/backup.conf
-  owner: vault:vault
-  permissions: "0644"
-  content: |
-    [sos-backup]
-    type = s3
-    provider = Other
-    region = ${backup_zone}
-    endpoint = https://sos-${backup_zone}.exo.io
-    env_auth = true
-    acl = private
-- path: /etc/default/rclone-backup
-  owner: root:root
-  permission: "0644"
-  content: |
-    RCLONE_BACKUP_TIMESTAMP_FORMAT="%Y%m%d%H%M%S"
-    RCLONE_BACKUP_SOURCE_PATH=/var/backups/vault
-    RCLONE_BACKUP_REMOTE_PATH="${backup_bucket}/{{ ds.meta_data.public_hostname }}"
-    RCLONE_BACKUP_ENCRYPT_KEY_PUBLIC="/etc/rclone/backup-public-key.pem"
-    RCLONE_BACKUP_ENCRYPT_KEY_PRIVATE="/etc/rclone/backup-private-key.pem"
-    RCLONE_BACKUP_RCLONE_PROFILE="sos-backup"
-    RCLONE_BACKUP_RETENTION_KEEP=7
-    VAULT_AGENT_ADDR=unix:///run/vault/vault-agent.sock
 
 bootcmd:
 # Vault CLI
@@ -52,3 +29,9 @@ bootcmd:
 - [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/vault/agent-conf.d/vault.hcl"]
 - [sed, -i, "s|CLUSTER_NLB_ADDRESS|${cluster_ip_address}|g", "/etc/vault/agent-conf.d/vault.hcl"]
 - [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/agent-conf.d/vault.hcl"]
+# Rclone
+- [sed, -i, "s|S3_ZONE|${backup_zone}|g", "/etc/rclone/backup.conf"]
+- [sed, -i, "s|S3_ENDPOINT|https://sos-${backup_zone}.exo.io|g", "/etc/rclone/backup.conf"]
+- [sed, -i, "s|S3_REMOTE_PATH|${backup_bucket}/{{ ds.meta_data.public_hostname }}|g", "/etc/default/rclone-backup"]
+- [sed, -i, "s|S3_RETENTION|7|g", "/etc/default/rclone-backup"]
+- [sed, -i, "s|LOCAL_PATH|/var/backups/vault|g", "/etc/default/rclone-backup"]

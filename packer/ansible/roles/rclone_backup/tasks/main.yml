@@ -26,6 +26,30 @@
     group: root
     mode: "0755"
 
+- name: Install rclone-backup environment-file stub
+  tags:
+    - rclone-backup
+  become: true
+  ansible.builtin.copy:
+    src: "rclone-backup.env"
+    dest: "/etc/default/rclone-backup"
+    force: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install rclone-backup-init helper script
+  tags:
+    - rclone-backup
+  become: true
+  ansible.builtin.copy:
+    src: "rclone-backup-init"
+    dest: "/usr/local/bin/rclone-backup-init"
+    force: true
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: systemd unit & timer
   tags:
     - rclone-backup

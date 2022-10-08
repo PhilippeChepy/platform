@@ -111,6 +111,20 @@
   when:
     - vault_mode == 'agent'
 
+- name: Install vault-agent-init helper script
+  tags:
+    - vault
+  become: true
+  ansible.builtin.copy:
+    src: "vault-agent-init"
+    dest: "/usr/local/bin/vault-agent-init"
+    force: true
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - vault_mode == 'agent'
+
 - name: Insert vault source in dotfile
   tags:
     - vault

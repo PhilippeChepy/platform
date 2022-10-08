@@ -75,3 +75,25 @@
     owner: "root"
     group: "root"
     mode: "0755"
+
+- name: Create rclone configuration directory
+  tags:
+    - rclone
+  become: true
+  ansible.builtin.file:
+    dest: "/etc/rclone"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: 0750
+
+- name: Install rclone configuration file stub
+  tags:
+    - rclone
+  become: true
+  ansible.builtin.copy:
+    src: "backup.conf"
+    dest: "/etc/rclone/backup.conf"
+    owner: root
+    group: root
+    mode: "0755"

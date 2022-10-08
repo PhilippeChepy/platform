@@ -1,6 +1,7 @@
 ---
 
 rclone_backup_service_name: null
+rclone_backup_service_extra_environment_files: null
 rclone_backup_service_snapshot_commands: null
 
 rclone_backup_public_key_path: "/etc/rclone/backup-public-key.pem"

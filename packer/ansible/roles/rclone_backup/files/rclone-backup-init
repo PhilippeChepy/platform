@@ -1,0 +1,4 @@
+#!/bin/sh
+
+systemctl enable rclone-backup.timer
+systemctl start rclone-backup.timer

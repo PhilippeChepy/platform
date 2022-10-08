@@ -24,6 +24,7 @@
     # etcd integration with vault agent
     vault_agent_exoscale_etcd_auth_path: auth/exoscale
     # backups
+    rclone_backup_service_extra_environment_files: []
     rclone_backup_service_name: "etcd"
     rclone_backup_service_snapshot_commands:
       - "/bin/sh -c \". /etc/default/etcdctl && etcdctl defrag\""
