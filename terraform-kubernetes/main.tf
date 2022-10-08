@@ -11,12 +11,12 @@ locals {
   # Settings for Kubernetes clients
 
   kubernetes_settings = {
-    apiserver_url             = module.kubernetes_control_plane.url
-    apiserver_healthcheck_url = module.kubernetes_control_plane.healthcheck_url
-    cluster_domain            = local.platform_components.kubernetes.cluster_domain
-    controlplane_ca_pem       = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
-    dns_service_ipv4          = local.platform_components.kubernetes.dns_service_ipv4
-    dns_service_ipv6          = local.platform_components.kubernetes.dns_service_ipv6
+    apiserver_ip_address = data.exoscale_nlb.endpoint.ip_address
+    apiserver_url        = module.kubernetes_control_plane.url
+    cluster_domain       = local.platform_components.kubernetes.cluster_domain
+    controlplane_ca_pem  = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
+    dns_service_ipv4     = local.platform_components.kubernetes.dns_service_ipv4
+    dns_service_ipv6     = local.platform_components.kubernetes.dns_service_ipv6
     kubelet_authentication_token = join("", [
       data.vault_generic_secret.kubernetes["bootstrap-token"].data["id"],
       ".",
@@ -105,8 +105,7 @@ module "kubernetes_control_plane" {
   vault = local.vault_settings
 
   etcd = {
-    address         = module.etcd_cluster.url
-    healthcheck_url = module.etcd_cluster.healthcheck_url
+    ip_address = data.exoscale_nlb.endpoint.ip_address
   }
 
   kubernetes = {

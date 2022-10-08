@@ -99,8 +99,7 @@ variable "vault" {
 variable "etcd" {
   description = "Settings related to etcd, for use by the API Server as storage backend for the cluster state."
   type = object({
-    address         = string
-    healthcheck_url = string
+    ip_address = string
   })
 }
 

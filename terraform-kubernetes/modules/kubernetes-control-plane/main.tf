@@ -70,8 +70,7 @@ resource "exoscale_security_group_rule" "cluster_rule" {
 
 resource "exoscale_nlb_service" "endpoint" {
   for_each = {
-    kube-api             = { port = 6443 }
-    kube-api-healthcheck = { port = 6444 }
+    kube-api = { port = 6443 }
   }
   nlb_id      = var.endpoint_loadbalancer_id
   zone        = var.zone
@@ -108,8 +107,7 @@ resource "exoscale_instance_pool" "cluster" {
   security_group_ids = concat([exoscale_security_group.cluster.id], values(var.additional_security_groups))
   user_data = templatefile("${path.module}/templates/user-data", {
     domain                         = var.domain
-    etcd_address                   = var.etcd.address
-    etcd_healthcheck_url           = var.etcd.healthcheck_url
+    etcd_cluster_ip_address        = var.etcd.ip_address
     kubernetes_cluster_domain      = var.kubernetes.cluster_domain
     kubernetes_cluster_ip_address  = data.exoscale_nlb.endpoint.ip_address
     kubernetes_cluster_internal_ip = var.kubernetes.apiserver_service_ipv4
@@ -142,11 +140,4 @@ resource "exoscale_instance_pool" "cluster" {
   })
 
   labels = var.labels
-}
-
-resource "null_resource" "wait" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    command     = "while ! nc -z -w5 ${data.exoscale_nlb.endpoint.ip_address} 6443; do echo \"Waiting for control-plane availability\"; sleep 5; done"
-  }
 }

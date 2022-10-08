@@ -43,8 +43,7 @@ resource "exoscale_security_group_rule" "cluster_rule" {
 
 resource "exoscale_nlb_service" "endpoint" {
   for_each = {
-    etcd             = { port = 2379 }
-    etcd-healthcheck = { port = 2378 }
+    etcd = { port = 2379 }
   }
   nlb_id      = var.endpoint_loadbalancer_id
   zone        = var.zone

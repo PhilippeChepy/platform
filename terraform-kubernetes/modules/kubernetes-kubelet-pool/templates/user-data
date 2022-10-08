@@ -5,7 +5,6 @@ hostname: {{ ds.meta_data.public_hostname }}
 fqdn: {{ ds.meta_data.public_hostname }}.${domain}
 
 write_files:
-
 - path: /etc/kubernetes/kubelet/node-ca.pem
   content: ${node_ca_pem_b64}
   encoding: b64
@@ -74,16 +73,8 @@ write_files:
     %{~ if length(labels) > 0 ~}
     KUBELET_NODE_LABELS="${ labels }"
     %{~ endif ~}
-- path: /usr/local/bin/wait-apiserver
-  owner: root:root
-  permissions: "0755"
-  content: |
-    #!/bin/bash
-    while [ $(curl -s -o /dev/null -w "%%{http_code}" "${kube_cluster_healthcheck_address}") != '200' ]; do
-        sleep 1;
-    done
 
 runcmd:
-- [/usr/local/bin/wait-apiserver]
+- [/usr/local/bin/wait-service, "${kube_apiserver_ip_address}", "6443"]
 - [systemctl, enable, kubelet.service]
 - [systemctl, start, kubelet.service]

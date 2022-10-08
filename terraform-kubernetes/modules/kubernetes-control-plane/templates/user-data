@@ -23,7 +23,7 @@ write_files:
   permissions: "0644"
   content: |
     KUBE_APISERVER_ADVERTISE_ADDRESS={{ ds.meta_data.public_ipv4 }}
-    KUBE_APISERVER_ETCD_SERVERS=${etcd_address}
+    KUBE_APISERVER_ETCD_SERVERS=https://${etcd_cluster_ip_address}:2379
     KUBE_APISERVER_SERVICE_ACCOUNT_ISSUER=https://kubernetes.default.svc.${kubernetes_cluster_domain}
     KUBE_APISERVER_SERVICE_CLUSTER_IP_RANGE=${kubernetes_service_cidr_ipv4},${kubernetes_service_cidr_ipv6}
     KUBE_APISERVER_OIDC_ISSUER_URL=${ oidc_issuer_url }
@@ -54,30 +54,6 @@ write_files:
   encoding: b64
   permissions: "0600"
   content: ${exoscale_cluster_autoscaler_manifests}
-- path: /usr/local/bin/wait-vault
-  owner: kube:kube
-  permissions: "0755"
-  content: |
-    #!/bin/bash
-    while [ $(curl -sk -o /dev/null -w "%%{http_code}" "${vault_cluster_healthcheck_url}") != '200' ]; do
-        sleep 1;
-    done
-- path: /usr/local/bin/wait-etcd
-  owner: kube:kube
-  permissions: "0755"
-  content: |
-    #!/bin/bash
-    while [ $(curl -s -o /dev/null -w "%%{http_code}" "${etcd_healthcheck_url}") != '200' ]; do
-        sleep 1;
-    done
-- path: /usr/local/bin/wait-apiserver
-  owner: root:root
-  permissions: "0755"
-  content: |
-    #!/bin/bash
-    while [ $(curl -s -o /dev/null -w "%%{http_code}" "http://127.0.0.1:6444/healthz") != '200' ]; do
-        sleep 1;
-    done
 
 runcmd:
 # Vault CLI
@@ -92,12 +68,10 @@ runcmd:
 - [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/kubernetes/vault.hcl"]
 - [sed, -i, "s|CLUSTER_NAME|${kubernetes_cluster_name}|g", "/etc/kubernetes/vault.hcl"]
 - [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${zone}|g", "/etc/kubernetes/vault.hcl"]
-
-- [/usr/local/bin/wait-vault]
-- [/usr/local/bin/wait-etcd]
-- [systemctl, enable, kube-vault-agent.service]
-- [systemctl, start, kube-vault-agent.service]
-- [/usr/local/bin/wait-apiserver]
+# Final bootstrap
+- [/usr/local/bin/wait-service, "${etcd_cluster_ip_address}", "2379"]
+- [/usr/local/bin/vault-agent-init, "${vault_cluster_healthcheck_url}", "kube-vault-agent"]
+- [/usr/local/bin/wait-service, "127.0.0.1", "6443"]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/kubelet-bootstrap-rbac.yaml]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cloud-controller-manager-rbac.yaml]
 - [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cluster-autoscaler-rbac.yaml]

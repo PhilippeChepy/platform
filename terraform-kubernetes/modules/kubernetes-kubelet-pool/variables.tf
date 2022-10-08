@@ -90,8 +90,8 @@ variable "pool_size" {
 variable "kubernetes" {
   description = "Kubernetes cluster settings."
   type = object({
+    apiserver_ip_address         = string
     apiserver_url                = string
-    apiserver_healthcheck_url    = string
     cluster_domain               = string
     controlplane_ca_pem          = string
     dns_service_ipv4             = string

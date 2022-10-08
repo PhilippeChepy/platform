@@ -52,17 +52,17 @@ resource "exoscale_instance_pool" "pool" {
   affinity_group_ids = [exoscale_anti_affinity_group.pool.id]
   security_group_ids = concat([exoscale_security_group.pool.id, exoscale_security_group.clients.id], values(var.additional_security_groups))
   user_data = templatefile("${path.module}/templates/user-data", {
-    apiserver_url                    = var.kubernetes.apiserver_url
-    authentication_token             = var.kubernetes.kubelet_authentication_token
-    controlplane_ca_pem_b64          = base64encode(var.kubernetes.controlplane_ca_pem)
-    domain                           = var.domain
-    kube_cluster_domain              = var.kubernetes.cluster_domain
-    kube_cluster_healthcheck_address = var.kubernetes.apiserver_healthcheck_url
-    kube_dns_service_ipv4            = var.kubernetes.dns_service_ipv4
-    kube_dns_service_ipv6            = var.kubernetes.dns_service_ipv6
-    node_ca_pem_b64                  = base64encode(var.kubernetes.kubelet_ca_pem)
-    labels                           = local.kubelet_labels
-    taints                           = var.kubelet_taints
+    apiserver_url             = var.kubernetes.apiserver_url
+    authentication_token      = var.kubernetes.kubelet_authentication_token
+    controlplane_ca_pem_b64   = base64encode(var.kubernetes.controlplane_ca_pem)
+    domain                    = var.domain
+    kube_apiserver_ip_address = var.kubernetes.apiserver_ip_address
+    kube_cluster_domain       = var.kubernetes.cluster_domain
+    kube_dns_service_ipv4     = var.kubernetes.dns_service_ipv4
+    kube_dns_service_ipv6     = var.kubernetes.dns_service_ipv6
+    node_ca_pem_b64           = base64encode(var.kubernetes.kubelet_ca_pem)
+    labels                    = local.kubelet_labels
+    taints                    = var.kubelet_taints
   })
 
   labels = var.labels
