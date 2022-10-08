@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 ip-address port" >&2
+    exit 2
+fi
+
+SVC_IP_ADDR="$1"
+SVC_PORT="$2"
+
+while ! nc -z "$SVC_IP_ADDR" "$SVC_PORT" ; do
+    sleep 1;
+done

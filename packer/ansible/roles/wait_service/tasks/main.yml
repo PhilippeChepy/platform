@@ -1,0 +1,12 @@
+
+- name: Install wait-service helper script
+  tags:
+    - vault
+  become: true
+  ansible.builtin.copy:
+    src: "wait-service"
+    dest: "/usr/local/bin/wait-service"
+    force: true
+    owner: root
+    group: root
+    mode: "0755"

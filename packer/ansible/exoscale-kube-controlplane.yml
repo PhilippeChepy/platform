@@ -36,6 +36,7 @@
     - vault
     - healthcheck
     - cilium_cli
+    - wait_service
     - kube_apiserver
     - konnectivity_server
     - kube_controller_manager

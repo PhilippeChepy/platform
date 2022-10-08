@@ -11,6 +11,7 @@
     - cri_tools
     - cni_plugins
     - containerd
+    - wait_service
     - kubelet
     - cilium_sysctl
 
