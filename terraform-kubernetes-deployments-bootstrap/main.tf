@@ -91,14 +91,13 @@ resource "kubernetes_manifest" "manifest" {
   )
 }
 
-
 # Services interactions
 
 ## Vault <---> Kubernetes deployments
 
 resource "kubernetes_service_account_v1" "vault" {
   metadata {
-    name = "vault-cluster"
+    name      = "vault-cluster"
     namespace = "kube-system"
   }
   default_secret_name = null
@@ -106,7 +105,7 @@ resource "kubernetes_service_account_v1" "vault" {
 
 resource "kubernetes_secret_v1" "vault" {
   metadata {
-    name = "vault-cluster-token"
+    name      = "vault-cluster-token"
     namespace = kubernetes_service_account_v1.vault.metadata[0].namespace
     annotations = {
       "kubernetes.io/service-account.name" = kubernetes_service_account_v1.vault.metadata[0].name
@@ -138,7 +137,7 @@ data "kubernetes_secret_v1" "vault" {
   ]
 
   metadata {
-    name = "vault-cluster-token"
+    name      = "vault-cluster-token"
     namespace = "kube-system"
   }
 }
@@ -185,7 +184,7 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
   kubernetes_host    = "https://${local.kubernetes.control_plane_ip_address}:6443" // module.kubernetes_control_plane.url
   kubernetes_ca_cert = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
   # pem_keys           = [chomp(data.vault_generic_secret.kubernetes["service_account_key"].data["public_key"])]
-  token_reviewer_jwt     = data.kubernetes_secret_v1.vault.data["token"]
+  token_reviewer_jwt = data.kubernetes_secret_v1.vault.data["token"]
   # issuer
   disable_iss_validation = true
 }
