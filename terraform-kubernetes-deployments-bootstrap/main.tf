@@ -65,6 +65,7 @@ data "vault_generic_secret" "kubernetes" {
     control-plane-ca     = "pki/platform/kubernetes/control-plane/cert/ca_chain"
     kubelet-ca           = "pki/platform/kubernetes/kubelet/cert/ca_chain"
     aggregation-layer-ca = "pki/platform/kubernetes/aggregation-layer/cert/ca_chain"
+    service-account-key  = "kv/platform/kubernetes/service-account"
   }
 
   path = each.value
@@ -94,53 +95,6 @@ resource "kubernetes_manifest" "manifest" {
 # Services interactions
 
 ## Vault <---> Kubernetes deployments
-
-resource "kubernetes_service_account_v1" "vault" {
-  metadata {
-    name      = "vault-cluster"
-    namespace = "kube-system"
-  }
-  default_secret_name = null
-}
-
-resource "kubernetes_secret_v1" "vault" {
-  metadata {
-    name      = "vault-cluster-token"
-    namespace = kubernetes_service_account_v1.vault.metadata[0].namespace
-    annotations = {
-      "kubernetes.io/service-account.name" = kubernetes_service_account_v1.vault.metadata[0].name
-    }
-  }
-
-  type = "kubernetes.io/service-account-token"
-}
-
-resource "kubernetes_cluster_role_binding_v1" "vault_auth_token_reviews" {
-  metadata {
-    name = "vault-cluster-token-reviews"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "system:auth-delegator"
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account_v1.vault.metadata[0].name
-    namespace = kubernetes_service_account_v1.vault.metadata[0].namespace
-  }
-}
-
-data "kubernetes_secret_v1" "vault" {
-  depends_on = [
-    kubernetes_secret_v1.vault
-  ]
-
-  metadata {
-    name      = "vault-cluster-token"
-    namespace = "kube-system"
-  }
-}
 
 locals {
   vault_deployment_roles = merge({
@@ -183,10 +137,9 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
   backend            = "kubernetes"
   kubernetes_host    = "https://${local.kubernetes.control_plane_ip_address}:6443" // module.kubernetes_control_plane.url
   kubernetes_ca_cert = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
-  # pem_keys           = [chomp(data.vault_generic_secret.kubernetes["service_account_key"].data["public_key"])]
-  token_reviewer_jwt = data.kubernetes_secret_v1.vault.data["token"]
-  # issuer
-  disable_iss_validation = true
+  pem_keys           = [chomp(data.vault_generic_secret.kubernetes["service-account-key"].data["public_key"])]
+  # token_reviewer_jwt = data.kubernetes_secret_v1.vault.data["token"]
+  
 }
 
 resource "vault_kubernetes_auth_backend_role" "roles" {
