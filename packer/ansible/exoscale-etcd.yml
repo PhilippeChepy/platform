@@ -23,6 +23,12 @@
     healthcheck_script_path: "{{ etcd_bin_path }}/etcd-healthcheck"
     # etcd integration with vault agent
     vault_agent_exoscale_etcd_auth_path: auth/exoscale
+    vault_agent_config_template: "{{ playbook_dir }}/defaults/templates/vault-agent-exoscale-etcd.hcl.j2"
+    vault_agent_secrets:
+      kv_instance_pool_exoscale_api: "kv/platform/exoscale/etcd-instance-pool"
+      kv_backup_exoscale_api: "kv/platform/exoscale/etcd-backup"
+      kv_backup_encryption: "kv/platform/backup/etcd-public"
+      pki_etcd_cert: 'pki/platform/kubernetes/etcd/issue/server'
     # backups
     rclone_backup_service_extra_environment_files: []
     rclone_backup_service_name: "etcd"
@@ -43,7 +49,6 @@
     - exoscale_cli
     - jq
     - exoscale_etcd
-    - vault_agent_exoscale_etcd
     - rclone
     - rclone_backup
     - ssl_exporter

@@ -36,6 +36,11 @@
     vault_mode: agent
     # vault integration with vault agent
     vault_agent_vault_auth_path: auth/exoscale
+    vault_agent_config_template: "{{ playbook_dir }}/defaults/templates/vault-agent-exoscale-vault.hcl.j2"
+    vault_agent_secrets:
+      kv_backup_encryption: "kv/platform/backup/vault-public"
+      kv_backup_exoscale_api: "kv/platform/exoscale/vault-backup"
+      pki_vault_cert: 'pki/platform/vault/issue/server'
     # backups
     rclone_backup_service_extra_environment_files:
       - "/etc/default/vault-agent"
@@ -51,7 +56,6 @@
   roles:
     - systemd
     - vault
-    - vault_agent_vault
     - rclone
     - rclone_backup
     - ssl_exporter

@@ -102,6 +102,20 @@
     - vault
   become: true
   ansible.builtin.template:
+    src: "{{ vault_agent_config_template }}"
+    dest: "{{ vault_config_path }}/vault.hcl"
+    force: true
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0600
+  when:
+    - (vault_mode == 'agent') and (vault_agent_config_template is defined)
+
+- name: vault-agent environment file
+  tags:
+    - vault
+  become: true
+  ansible.builtin.template:
     src: "vault.j2"
     dest: "/etc/default/vault"
     force: true
@@ -122,6 +136,20 @@
     owner: root
     group: root
     mode: "0755"
+  when:
+    - vault_mode == 'agent'
+
+- name: Install vault-agent environment file
+  tags:
+    - vault
+  become: true
+  ansible.builtin.copy:
+    src: "vault-agent"
+    dest: "/etc/default/vault-agent"
+    force: true
+    owner: "root"
+    group: "root"
+    mode: "0644"
   when:
     - vault_mode == 'agent'
 
