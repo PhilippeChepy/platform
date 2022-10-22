@@ -42,7 +42,7 @@ The Vault module allows the provisioning of a Vault cluster:
 Both previous tasks can be performed using the `vault-cluster-bootstrap.yaml` Ansible playbook:
 
 ```bash
-ansible-playbook -i artifacts/inventory.yml playbooks/vault-cluster-bootstrap.yaml
+ansible-playbook -i artifacts/vault-inventory.yml playbooks/vault-cluster-bootstrap.yaml
 ```
 
 ## Base configuration (terraform-base-configuration)
@@ -93,7 +93,7 @@ Once resources from this sub-directory are created, you can start vault-agent (`
 This task can be performed using the `vault-cluster-tls-agent.yaml` Ansible playbook:
 
 ```bash
-ansible-playbook -i artifacts/inventory.yml playbooks/vault-cluster-tls-agent.yaml
+ansible-playbook -i artifacts/vault-inventory.yml playbooks/vault-cluster-tls-agent.yaml
 ```
 
 ## Etcd & Kubernetes cluster (terraform-kubernetes)

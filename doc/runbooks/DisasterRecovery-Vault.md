@@ -9,7 +9,7 @@ This method is based on an Ansible playbook.
 1. Place the snapshot to restore in the `artifact` subdirectory, under the name `latest-vault.snapshot`.
 2. Run the restoration playbook:
     ```bash
-    ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-snapshot-restore.yaml
+    ansible-playbook -i artifacts/vault-inventory.yml ansible-playbooks/vault-snapshot-restore.yaml
     # 【output】
     # ... truncated ...
     # paas-staging-vault-1324e-gojrj : ok=36   changed=20   unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
@@ -38,7 +38,7 @@ This method is based on an Ansible playbook.
 
 2. Now you can rebuild a new cluster. From this repository, run the following playbooks:
     ```bash
-    ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-bootstrap.yaml
+    ansible-playbook -i artifacts/vault-inventory.yml ansible-playbooks/vault-cluster-bootstrap.yaml
     ```
 
 From now, you have a brand new fully fonctionnal Vault cluster, but it doesn't contain your data anymore.
@@ -63,14 +63,14 @@ From now, your cluster contains the content of your snapshot, but it's back in s
 
 5. Unseal the cluster and restart the vault-agent :
     ```bash
-    ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-unseal.yaml
+    ansible-playbook -i artifacts/vault-inventory.yml ansible-playbooks/vault-cluster-unseal.yaml
     # 【output】
     # ... truncated ...
     # paas-staging-vault-addab-mklsr : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     # paas-staging-vault-addab-nvxka : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     # paas-staging-vault-addab-utxcg : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
     #
-    ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml
+    ansible-playbook -i artifacts/vault-inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml
     # 【output】
     # ... truncated ...
     # paas-staging-vault-addab-mklsr : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

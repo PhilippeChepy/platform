@@ -11,7 +11,7 @@ Commands from this document are to be run from the root of this repository.
 # Vault Snapshots
 
 ```bash
-ansible-playbook -i artifacts/inventory.yml ansible-playbooks/vault-snapshot-dump.yaml
+ansible-playbook -i artifacts/vault-inventory.yml ansible-playbooks/vault-snapshot-dump.yaml
 # 【output】
 # 
 # ... truncated ...

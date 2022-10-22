@@ -176,5 +176,5 @@ all:
           ansible_host: ${instance.public_ip_address~}
 %{endfor}
 EOT
-  filename = "${path.module}/../artifacts/inventory.yml"
+  filename = "${path.module}/../artifacts/vault-inventory.yml"
 }

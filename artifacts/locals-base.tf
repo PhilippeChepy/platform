@@ -11,7 +11,7 @@ data "local_file" "root_token" {
 }
 
 data "local_file" "inventory" {
-  filename = "${path.module}/../artifacts/inventory.yml"
+  filename = "${path.module}/../artifacts/vault-inventory.yml"
 }
 
 locals {
