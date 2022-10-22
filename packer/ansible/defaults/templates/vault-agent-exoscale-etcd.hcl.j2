@@ -8,8 +8,8 @@ auto_auth {
     mount_path = "{{ vault_agent_exoscale_etcd_auth_path }}"
 
     config = {
-      role_id_file_path                   = "{{ vault_config_path }}/.role_id"
-      secret_id_file_path                 = "{{ vault_config_path }}/.instance_id"
+      role_id_file_path                   = "{{ vault_agent_approle_path }}/.role_id"
+      secret_id_file_path                 = "{{ vault_agent_approle_path }}/.instance_id"
       remove_secret_id_file_after_reading = false
     }
   }

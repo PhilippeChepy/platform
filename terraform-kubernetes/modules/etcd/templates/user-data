@@ -5,16 +5,16 @@ hostname: {{ ds.meta_data.public_hostname }}
 fqdn: {{ ds.meta_data.public_hostname }}.${domain}
 
 write_files:
-- path: /etc/vault/tls/ca.pem
+- path: /var/vault/tls/ca.pem
   content: ${ vault_ca_pem }
   encoding: b64
   owner: etcd:etcd
   permissions: "0644"
-- path: /etc/etcd/.role_id
+- path: /var/vault/.role_id
   owner: etcd:etcd
   permissions: "0600"
   content: etcd-server
-- path: /etc/etcd/.instance_id
+- path: /var/vault/.instance_id
   owner: etcd:etcd
   permissions: "0600"
   content: "{{ ds.meta_data.instance_id }}"
@@ -23,14 +23,14 @@ runcmd:
 # Vault CLI
 - [sed, -i, "s|CLUSTER_NAME|${vault_cluster_name}|g", "/etc/default/vault"]
 # Vault agent: etcd TLS certs self-renewal
-- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${etcd_cluster_ip_address}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|CLUSTER_NAME|${etcd_cluster_name}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${etcd_cluster_zone}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|EXOSCALE_INSTANCEPOOL_NAME|${etcd_cluster_instance_pool_name}|g", "/etc/etcd/vault.hcl"]
-- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/etcd/vault.hcl"]
+- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${etcd_cluster_ip_address}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NAME|${etcd_cluster_name}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${etcd_cluster_zone}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_INSTANCEPOOL_NAME|${etcd_cluster_instance_pool_name}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/vault.hcl"]
 # etcd
 - [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/default/etcdctl"]
 - [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/etcd/base-environment"]
