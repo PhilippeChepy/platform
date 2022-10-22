@@ -5,11 +5,11 @@ hostname: {{ ds.meta_data.public_hostname }}
 fqdn: {{ ds.meta_data.public_hostname }}.${domain}
 
 write_files:
-- path: /etc/vault/agent-conf.d/.role_id
+- path: /var/vault/.role_id
   owner: vault:vault
   permissions: "0600"
   content: vault-server
-- path: /etc/vault/agent-conf.d/.instance_id
+- path: /var/vault/.instance_id
   owner: vault:vault
   permissions: "0600"
   content: "{{ ds.meta_data.instance_id }}"
@@ -18,17 +18,17 @@ bootcmd:
 # Vault CLI
 - [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/default/vault"]
 # Vault server
-- [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/vault/server-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${cluster_ip_address}|g", "/etc/vault/server-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/server-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/server-conf.d/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/vault/server/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${cluster_ip_address}|g", "/etc/vault/server/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/server/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/server/vault.hcl"]
 # Vault agent for TLS certs self-renewal
-- [sed, -i, "s|VAULT_ADDRESS|https://{{ ds.meta_data.public_ipv4 }}:8200|g", "/etc/vault/agent-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/vault/agent-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/agent-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/vault/agent-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${cluster_ip_address}|g", "/etc/vault/agent-conf.d/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/agent-conf.d/vault.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|https://{{ ds.meta_data.public_ipv4 }}:8200|g", "/etc/vault/agent/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NAME|${cluster_name}|g", "/etc/vault/agent/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/agent/vault.hcl"]
+- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/vault/agent/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${cluster_ip_address}|g", "/etc/vault/agent/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/agent/vault.hcl"]
 # Rclone
 - [sed, -i, "s|S3_ZONE|${backup_zone}|g", "/etc/rclone/backup.conf"]
 - [sed, -i, "s|S3_ENDPOINT|https://sos-${backup_zone}.exo.io|g", "/etc/rclone/backup.conf"]

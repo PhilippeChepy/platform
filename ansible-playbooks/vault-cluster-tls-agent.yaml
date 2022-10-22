@@ -6,12 +6,12 @@
   tasks:
   - name: Remove cert
     ansible.builtin.file:
-      path: /etc/vault/tls/server.pem
+      path: /var/vault/tls/server.pem
       state: absent
 
   - name: Remove key
     ansible.builtin.file:
-      path: /etc/vault/tls/server.key
+      path: /var/vault/tls/server.key
       state: absent
 
   - name: Start agent

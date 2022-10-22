@@ -12,9 +12,9 @@
     vault_user: vault
     vault_environment:
       VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
-      VAULT_CACERT: /etc/vault/tls/ca.pem
-      VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
-      VAULT_CLIENT_KEY: /etc/vault/tls/server.key
+      VAULT_CACERT: /var/vault/tls/ca.pem
+      VAULT_CLIENT_CERT: /var/vault/tls/server.pem
+      VAULT_CLIENT_KEY: /var/vault/tls/server.key
   tasks:
   - name: Initialise Vault
     become_user: "{{ vault_user }}"

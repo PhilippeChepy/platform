@@ -23,7 +23,6 @@ vault_local_storage: /tmp/vault-assets
 # Paths
 vault_bin_path: /usr/local/bin
 vault_config_path: /etc/vault/conf.d
-vault_agent_config_path: /etc/vault/agent-conf.d
 vault_plugin_path: /usr/local/lib/vault/plugins
 vault_data_path: /var/lib/vault
 vault_log_path: /var/log/vault
@@ -49,7 +48,7 @@ vault_log_level: "warn"
 vault_port: 8200
 
 # TLS variables
-vault_tls_config_path: "/etc/vault/tls"
+vault_tls_config_path: "/var/vault/tls"
 vault_tls_ca_cert_file: "ca.pem"
 
 # Storage backend

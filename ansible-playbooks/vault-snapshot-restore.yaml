@@ -75,9 +75,9 @@
         vault status -format json
       environment:
         VAULT_ADDR: "https://{{ ansible_default_ipv4['address'] }}:8200"
-        VAULT_CACERT: /etc/vault/tls/ca.pem
-        VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
-        VAULT_CLIENT_KEY: /etc/vault/tls/server.key
+        VAULT_CACERT: /var/vault/tls/ca.pem
+        VAULT_CLIENT_CERT: /var/vault/tls/server.pem
+        VAULT_CLIENT_KEY: /var/vault/tls/server.key
         VAULT_TOKEN: "{{ vault_token }}"
       register: vault_status
       changed_when: false
@@ -88,9 +88,9 @@
         vault operator raft snapshot restore -force /home/{{ vault_user }}/latest-vault.snapshot
       environment:
         VAULT_ADDR: "{{ vault_status.stdout | from_json | json_query('leader_address') }}"
-        VAULT_CACERT: /etc/vault/tls/ca.pem
-        VAULT_CLIENT_CERT: /etc/vault/tls/server.pem
-        VAULT_CLIENT_KEY: /etc/vault/tls/server.key
+        VAULT_CACERT: /var/vault/tls/ca.pem
+        VAULT_CLIENT_CERT: /var/vault/tls/server.pem
+        VAULT_CLIENT_KEY: /var/vault/tls/server.key
         VAULT_TOKEN: "{{ vault_token }}"
 
     - name: Remove backup dir

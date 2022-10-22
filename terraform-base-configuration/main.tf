@@ -952,7 +952,7 @@ resource "vault_generic_endpoint" "exoscale_auth_plugin_register" {
     name    = "exoscale"
     builtin = false
     command = "vault-plugin-auth-exoscale"
-    args    = ["-ca-cert=/etc/vault/tls/server.pem"]
+    args    = ["-ca-cert=/var/vault/tls/server.pem"]
     sha256  = var.exoscale_auth_plugin_hash
   })
 }
