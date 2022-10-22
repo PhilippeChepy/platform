@@ -1025,7 +1025,7 @@ resource "vault_generic_endpoint" "oidc_configuration" {
   disable_delete = true
   data_json = jsonencode({
     issuer           = "https://vault.${local.platform_domain}:8200"
-    scopes_supported = "groups,user,email"
+    scopes_supported = "groups,user"
   })
 }
 
