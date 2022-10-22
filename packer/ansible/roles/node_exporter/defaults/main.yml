@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-node_exporter_version: "1.3.1"
+node_exporter_version: "1.4.0"
 node_exporter_architecture_map:
   amd64: amd64
   x86_64: amd64
