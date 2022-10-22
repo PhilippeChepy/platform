@@ -65,14 +65,14 @@ resource "exoscale_nlb" "load_balancer" {
 resource "exoscale_security_group" "operator" {
   name = "${local.platform_name}-operator"
 
-  external_sources = try(local.platform_admin_networks == "auto", false) ? ["${chomp(data.http.operator_ip_address[0].body)}/32"] : tolist(local.platform_admin_networks)
+  external_sources = try(local.platform_admin_networks == "auto", false) ? ["${chomp(data.http.operator_ip_address[0].response_body)}/32"] : tolist(local.platform_admin_networks)
 }
 
 resource "exoscale_security_group" "exoscale" {
   name = "${local.platform_name}-exoscale"
 
   external_sources = [
-    for prefix in jsondecode(data.http.exoscale_ip_addresses.body)["prefixes"] : prefix["IPv4Prefix"]
+    for prefix in jsondecode(data.http.exoscale_ip_addresses.response_body)["prefixes"] : prefix["IPv4Prefix"]
     if can(prefix["IPv4Prefix"]) && prefix["zone"] == local.platform_zone
   ]
 }
