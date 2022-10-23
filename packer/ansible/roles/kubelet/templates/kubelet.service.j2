@@ -3,10 +3,18 @@ Description=Kubernetes Kubelet
 Documentation=https://github.com/kubernetes/kubernetes
 After=network-online.target time-sync.target containerd.service
 Requires=network-online.target time-sync.target containerd.service
+ConditionPathExists={{ kubelet_config_path }}/bootstrap-kubelet.kubeconfig
+ConditionPathExists=/etc/default/kubelet
 
 [Service]
 EnvironmentFile=/etc/default/kubelet
-ExecStart={{ kubelet_bin_path }}/kubelet-launcher
+ExecStart={{ kubelet_bin_path }}/kubelet \
+  --bootstrap-kubeconfig={{ kubelet_config_path }}/bootstrap-kubelet.kubeconfig \
+  --config={{ kubelet_config_path }}/config.yaml \
+  --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
+  --kubeconfig={{ kubelet_config_path }}/kubelet.kubeconfig \
+  --node-labels="${KUBELET_NODE_LABELS}" \
+  --v=2
 Restart=on-failure
 RestartSec=5
 

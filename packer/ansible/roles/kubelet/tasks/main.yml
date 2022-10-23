@@ -69,20 +69,6 @@
     mode: "0644"
   notify: reload systemd
 
-- name: kubelet additional helper scripts
-  tags:
-    - kubelet
-  become: true
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "{{ kubelet_bin_path }}/{{ item }}"
-    force: true
-    owner: root
-    group: root
-    mode: "0755"
-  loop:
-    - kubelet-launcher
-
 - name: Install additional configuration files
   tags:
     - kubelet
