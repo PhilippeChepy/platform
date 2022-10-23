@@ -22,7 +22,7 @@
   become: true
   ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/vault"
-    line: "%{{ vault_user }} ALL= NOPASSWD: /bin/systemctl reload {{ vault_service_name }}"
+    line: "%{{ vault_group }} ALL= NOPASSWD: /bin/systemctl reload {{ vault_service_name }}"
     owner: "root"
     group: "root"
     create: true
