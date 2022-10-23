@@ -15,12 +15,11 @@ kube_apiserver_checksum_file_url: "https://storage.googleapis.com/kubernetes-rel
 
 # Paths
 kube_apiserver_bin_path: /usr/local/bin
-kube_apiserver_kubernetes_base_path: /etc/kubernetes
-kube_apiserver_config_path: "{{ kube_apiserver_kubernetes_base_path }}/apiserver"
+kube_apiserver_config_path: "/var/kubernetes/apiserver"
 
 # System user and group
-kube_apiserver_user: kube
-kube_apiserver_group: kube
+kube_apiserver_user: kube-apiserver
+kube_apiserver_group: kubernetes
 kube_apiserver_groups: null
 
 # Misc

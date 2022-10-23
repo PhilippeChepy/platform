@@ -8,8 +8,8 @@ auto_auth {
     mount_path = "{{ vault_agent_kube_control_plane_auth_path }}"
 
     config = {
-      role_id_file_path                   = "{{ vault_config_path }}/.role_id"
-      secret_id_file_path                 = "{{ vault_config_path }}/.instance_id"
+      role_id_file_path                   = "{{ vault_agent_approle_path }}/.role_id"
+      secret_id_file_path                 = "{{ vault_agent_approle_path }}/.instance_id"
       remove_secret_id_file_after_reading = false
     }
   }
@@ -25,8 +25,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/etcd-ca.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -37,8 +39,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/etcd.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -50,7 +54,10 @@ template {
 EOT
   destination = "{{ kube_apiserver_config_path }}/etcd.key"
   command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -67,8 +74,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/server-ca.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -79,8 +88,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/server.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -91,8 +102,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/server.key"
-  command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -103,8 +116,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/aggregation-layer-ca.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -115,8 +130,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/aggregation-layer.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -127,8 +144,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/aggregation-layer.key"
-  command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -139,8 +158,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/kubelet-ca.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -151,8 +172,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/kubelet-client.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -163,8 +186,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/kubelet-client.key"
-  command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -175,8 +200,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/service-account-key.pem"
-  command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -199,8 +226,10 @@ resources:
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/encryption-configuration.yaml"
-  command     = "sudo systemctl restart kube-apiserver"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 template {
@@ -211,8 +240,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_apiserver_config_path }}/oidc-ca.pem"
-  command     = "sudo systemctl restart kube-apiserver"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-apiserver"
+  }
 }
 
 ## Controller Manager
@@ -243,8 +274,10 @@ users:
 {% endraw %}
 EOT
   destination = "{{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig"
-  command     = "sudo systemctl restart kube-controller-manager"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-controller-manager"
+  }
 }
 
 template {
@@ -255,8 +288,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_controller_manager_config_path }}/aggregation-layer-ca.pem"
-  command     = "sudo systemctl restart kube-controller-manager"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-controller-manager"
+  }
 }
 
 template {
@@ -267,8 +302,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_controller_manager_config_path }}/node-ca.pem"
-  command     = "sudo systemctl restart kube-controller-manager"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-controller-manager"
+  }
 }
 
 template {
@@ -280,7 +317,10 @@ template {
 EOT
   destination = "{{ kube_controller_manager_config_path }}/node-ca.key"
   command     = "sudo systemctl restart kube-controller-manager"
-  perms       = 0644
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-controller-manager"
+  }
 }
 
 template {
@@ -293,6 +333,9 @@ EOT
   destination = "{{ kube_controller_manager_config_path }}/server-ca.pem"
   command     = "sudo systemctl restart kube-controller-manager"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-controller-manager"
+  }
 }
 
 template {
@@ -304,7 +347,10 @@ template {
 EOT
   destination = "{{ kube_controller_manager_config_path }}/service-account-private-key.pem"
   command     = "sudo systemctl restart kube-controller-manager"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-controller-manager"
+  }
 }
 
 ## Scheduler
@@ -335,8 +381,10 @@ users:
 {% endraw %}
 EOT
   destination = "{{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig"
-  command     = "sudo systemctl restart kube-scheduler"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-scheduler"
+  }
 }
 
 template {
@@ -347,8 +395,10 @@ template {
 {% endraw %}
 EOT
   destination = "{{ kube_scheduler_config_path }}/server-ca.pem"
-  command     = "sudo systemctl restart kube-scheduler"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart kube-scheduler"
+  }
 }
 
 template {
@@ -380,10 +430,13 @@ users:
 {% endraw %}
 EOT
   destination = "/home/{{ kubectl_user }}/.kube/config"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart kube-scheduler"
+  }
 }
 
-## konnectivity
+## apiserver-network-proxy (server)
 
 template {
   contents    = <<EOT
@@ -410,9 +463,11 @@ users:
 {{- end }}
 {% endraw %}
 EOT
-  destination = "{{ konnectivity_server_config_path }}/konnectivity-server.kubeconfig"
-  command     = "sudo systemctl restart konnectivity"
-  perms       = 0600
+  destination = "{{ apiserver_network_proxy_server_config_path }}/apiserver-network-proxy.kubeconfig"
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart apiserver-network-proxy-server"
+  }
 }
 
 template {
@@ -422,9 +477,11 @@ template {
 {{- end }}
 {% endraw %}
 EOT
-  destination = "{{ konnectivity_server_config_path }}/cluster.key"
-  command     = "sudo systemctl restart konnectivity"
-  perms       = 0600
+  destination = "{{ apiserver_network_proxy_server_config_path }}/cluster.key"
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart apiserver-network-proxy-server"
+  }
 }
 
 template {
@@ -434,9 +491,11 @@ template {
 {{- end }}
 {% endraw %}
 EOT
-  destination = "{{ konnectivity_server_config_path }}/cluster.pem"
-  command     = "sudo systemctl restart konnectivity"
+  destination = "{{ apiserver_network_proxy_server_config_path }}/cluster.pem"
   perms       = 0644
+  exec        = {
+    command = "sudo systemctl restart apiserver-network-proxy-server"
+  }
 }
 
 ## Cloud controller manager: Exoscale
@@ -451,9 +510,11 @@ EXOSCALE_SKS_AGENT_RUNNERS="node-csr-validation"
 {{- end }}
 {% endraw %}
 EOT
-  destination = "{{ exoscale_cloud_controller_manager_config_path }}/environment"
-  command     = "sudo systemctl restart exoscale-cloud-controller-manager"
-  perms       = 0644
+  destination = "{{ exoscale_cloud_controller_manager_config_path }}/cloud-environment"
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart exoscale-cloud-controller-manager"
+  }
 }
 
 template {
@@ -482,27 +543,33 @@ users:
 {% endraw %}
 EOT
   destination = "{{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig"
-  command     = "sudo systemctl restart exoscale-cloud-controller-manager"
-  perms       = 0600
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart exoscale-cloud-controller-manager"
+  }
 }
+
+## autoscaler
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_secrets['kv_exoscale_cluster_autoscaler_exoscale_api'] }}{% raw %}" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_secrets['kv_cluster_autoscaler_exoscale_api'] }}{% raw %}" -}}
 EXOSCALE_API_KEY="{{ .Data.api_key }}"
 EXOSCALE_API_SECRET="{{ .Data.api_secret }}"
 EXOSCALE_ZONE="EXOSCALE_CLUSTER_ZONE"
 {{- end }}
 {% endraw %}
 EOT
-  destination = "{{ exoscale_cluster_autoscaler_config_path }}/environment"
-  command     = "sudo systemctl restart exoscale-cloud-controller-manager"
-  perms       = 0644
+  destination = "{{ cluster_autoscaler_config_path }}/cloud-environment"
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart cluster-autoscaler"
+  }
 }
 
 template {
   contents    = <<EOT
-{% raw %}{{- with secret "{% endraw %}{{ vault_agent_secrets['pki_controlplane_cert_cluster_autoscaler'] }}{% raw %}" "common_name=exoscale-cluster-autoscaler" "ttl=24h" -}}
+{% raw %}{{- with secret "{% endraw %}{{ vault_agent_secrets['pki_controlplane_cert_cluster_autoscaler'] }}{% raw %}" "common_name=cluster-autoscaler" "ttl=24h" -}}
 apiVersion: v1
 clusters:
 - cluster:
@@ -525,7 +592,9 @@ users:
 {{- end }}
 {% endraw %}
 EOT
-  destination = "{{ exoscale_cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig"
-  command     = "sudo systemctl restart cluster-autoscaler"
-  perms       = 0600
+  destination = "{{ cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig"
+  perms       = 0640
+  exec        = {
+    command = "sudo systemctl restart cluster-autoscaler"
+  }
 }

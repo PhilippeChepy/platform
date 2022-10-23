@@ -1,0 +1,10 @@
+---
+
+
+# Paths
+kubernetes_common_config_path: /var/kubernetes
+
+# System user and group
+kubernetes_common_user: kubernetes
+kubernetes_common_group: kubernetes
+kubernetes_common_groups: null

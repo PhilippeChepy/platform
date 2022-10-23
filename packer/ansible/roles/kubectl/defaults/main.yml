@@ -16,6 +16,6 @@ kubectl_checksum_file_url: "https://storage.googleapis.com/kubernetes-release/re
 # Paths
 kubectl_bin_path: /usr/local/bin
 
-kubectl_user: kube
-kubectl_group: kube
+kubectl_user: kubernetes
+kubectl_group: kubernetes
 kubectl_groups: null

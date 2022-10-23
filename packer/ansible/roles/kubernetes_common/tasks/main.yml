@@ -1,0 +1,34 @@
+---
+
+- name: Add Kubernetes common group
+  tags:
+    - kubernetes-common
+  become: true
+  ansible.builtin.group:
+    name: "{{ kubernetes_common_group }}"
+    state: present
+
+- name: Add Kubernetes common user
+  tags:
+    - kubernetes-common
+  become: true
+  ansible.builtin.user:
+    name: "{{ kubernetes_common_user }}"
+    comment: "Kubernetes user"
+    group: "{{ kubernetes_common_group }}"
+    groups: "{{ kubernetes_common_groups }}"
+    shell: /bin/bash
+    system: true
+
+- name: Create directories
+  tags:
+    - kubernetes-common
+  become: true
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ kubernetes_common_user }}"
+    group: "{{ kubernetes_common_group }}"
+    mode: 0755
+  loop:
+    - "{{ kubernetes_common_config_path }}"

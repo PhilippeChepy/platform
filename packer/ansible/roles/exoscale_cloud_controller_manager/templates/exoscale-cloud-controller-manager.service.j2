@@ -2,11 +2,19 @@
 Description=Exoscale Cloud Controller Manager
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
+ConditionPathExists={{ exoscale_cloud_controller_manager_config_path }}/cloud-environment
+ConditionPathExists={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig
 
 [Service]
 User={{ exoscale_cloud_controller_manager_user }}
-EnvironmentFile={{ exoscale_cloud_controller_manager_config_path }}/environment
-ExecStart={{ exoscale_cloud_controller_manager_bin_path }}/exoscale-cloud-controller-manager-launcher
+EnvironmentFile={{ exoscale_cloud_controller_manager_config_path }}/cloud-environment
+ExecStart={{ exoscale_cloud_controller_manager_bin_path }}/exoscale-cloud-controller-manager \
+  --allow-untagged-cloud \
+  --authentication-kubeconfig={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig \
+  --authorization-kubeconfig={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig \
+  --cloud-provider=exoscale \
+  --kubeconfig={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig \
+  --leader-elect=true
 Restart=on-failure
 RestartSec=5
 

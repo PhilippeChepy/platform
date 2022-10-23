@@ -15,9 +15,9 @@ kube_controller_manager_checksum_file_url: "https://storage.googleapis.com/kuber
 
 # Paths
 kube_controller_manager_bin_path: /usr/local/bin
-kube_controller_manager_config_path: /etc/kubernetes/controller-manager
+kube_controller_manager_config_path: /var/kubernetes/controller-manager
 
 # System user and group
-kube_controller_manager_user: kube
-kube_controller_manager_group: kube
+kube_controller_manager_user: kube-controller-manager
+kube_controller_manager_group: kubernetes
 kube_controller_manager_groups: null

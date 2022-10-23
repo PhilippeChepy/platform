@@ -71,7 +71,7 @@ roleRef:
   name: cluster-autoscaler
 subjects:
 - kind: User
-  name: exoscale-cluster-autoscaler
+  name: cluster-autoscaler
   namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -105,5 +105,5 @@ roleRef:
   name: cluster-autoscaler
 subjects:
 - kind: User
-  name: exoscale-cluster-autoscaler
+  name: cluster-autoscaler
   namespace: kube-system

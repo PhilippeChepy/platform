@@ -1,0 +1,14 @@
+---
+
+# Package variables
+# extracted from k8s.gcr.io/autoscaling/cluster-autoscaler:v1.25.0, then compressed
+cluster_autoscaler_binary: "cluster-autoscaler-v1.25.0-linux-amd64.gz"
+
+# Paths
+cluster_autoscaler_bin_path: /usr/local/bin
+cluster_autoscaler_config_path: /var/kubernetes/cluster-autoscaler
+
+# System user and group
+cluster_autoscaler_user: cluster-autoscaler
+cluster_autoscaler_group: kubernetes
+cluster_autoscaler_groups: null

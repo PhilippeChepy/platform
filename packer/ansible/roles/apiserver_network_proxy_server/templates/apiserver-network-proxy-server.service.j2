@@ -1,0 +1,28 @@
+[Unit]
+Description=API Server Network Proxy Server (Konnectivity)
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+ConditionPathExists={{ apiserver_network_proxy_server_config_path }}/apiserver-network-proxy.kubeconfig
+ConditionPathExists={{ apiserver_network_proxy_server_config_path }}/cluster.key
+ConditionPathExists={{ apiserver_network_proxy_server_config_path }}/cluster.pem
+
+[Service]
+User={{ apiserver_network_proxy_server_user }}
+ExecStart={{ apiserver_network_proxy_server_bin_path }}/apiserver-network-proxy-server \
+  --logtostderr=true \
+  --uds-name=/var/run/konnectivity-server/konnectivity-server.socket \
+  --cluster-cert={{ apiserver_network_proxy_server_config_path }}/cluster.pem \
+  --cluster-key={{ apiserver_network_proxy_server_config_path }}/cluster.key \
+  --mode=grpc \
+  --server-port=0 \
+  --agent-namespace=kube-system \
+  --agent-service-account=konnectivity-agent \
+  --kubeconfig={{ apiserver_network_proxy_server_config_path }}/apiserver-network-proxy.kubeconfig \
+  --authentication-audience=system:konnectivity-server
+RuntimeDirectory=konnectivity-server
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

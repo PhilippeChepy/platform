@@ -1,0 +1,20 @@
+[Unit]
+Description=Cluster Autoscaler
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+ConditionPathExists={{ cluster_autoscaler_config_path }}/cloud-environment
+ConditionPathExists={{ cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig
+
+[Service]
+User={{ cluster_autoscaler_user }}
+EnvironmentFile={{ cluster_autoscaler_config_path }}/cloud-environment
+ExecStart={{ cluster_autoscaler_bin_path }}/cluster-autoscaler \
+  --cloud-provider=exoscale \
+  --cordon-node-before-terminating \
+  --kubeconfig={{ cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig \
+  --stderrthreshold=info
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

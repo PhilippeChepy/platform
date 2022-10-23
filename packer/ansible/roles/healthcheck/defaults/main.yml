@@ -1,5 +1,6 @@
 ---
 
 healthcheck_user: www-data
+healthcheck_group: www-data
 healthcheck_port: 8888
 healthcheck_script_path: null

@@ -15,6 +15,7 @@
   ansible.builtin.user:
     name: "{{ kube_scheduler_user }}"
     comment: "Kubernetes Scheduler user"
+    create_home: false
     group: "{{ kube_scheduler_group }}"
     groups: "{{ kube_scheduler_groups }}"
     shell: /bin/bash
@@ -72,7 +73,7 @@
     state: directory
     owner: "{{ kube_scheduler_user }}"
     group: "{{ kube_scheduler_group }}"
-    mode: 0755
+    mode: 0770
   loop:
     - "{{ kube_scheduler_config_path }}"
 
@@ -95,22 +96,8 @@
   become: true
   ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-scheduler"
-    line: "%{{ kube_scheduler_user }} ALL= NOPASSWD: /bin/systemctl restart kube-scheduler"
+    line: "%{{ kube_scheduler_group }} ALL= NOPASSWD: /bin/systemctl restart kube-scheduler"
     owner: "root"
     group: "root"
     create: true
     mode: 0440
-
-- name: scheduler additional helper scripts
-  tags:
-    - kube-scheduler
-  become: true
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "{{ kube_scheduler_bin_path }}/{{ item }}"
-    force: true
-    owner: root
-    group: root
-    mode: "0755"
-  loop:
-    - kube-scheduler-launcher

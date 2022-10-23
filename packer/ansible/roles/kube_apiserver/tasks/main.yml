@@ -15,6 +15,7 @@
   ansible.builtin.user:
     name: "{{ kube_apiserver_user }}"
     comment: "Kubernetes API Server user"
+    create_home: false
     group: "{{ kube_apiserver_group }}"
     groups: "{{ kube_apiserver_groups }}"
     shell: /bin/bash
@@ -70,24 +71,21 @@
   ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
-    owner: "root"
-    group: "root"
-    mode: 0755
-  with_items:
-    - "{{ kube_apiserver_kubernetes_base_path }}"
-
-- name: Create directories
-  tags:
-    - kube-apiserver
-  become: true
-  ansible.builtin.file:
-    dest: "{{ item }}"
-    state: directory
     owner: "{{ kube_apiserver_user }}"
     group: "{{ kube_apiserver_group }}"
-    mode: 0755
+    mode: 0770
   with_items:
     - "{{ kube_apiserver_config_path }}"
+
+- name: Copy egress configuration file
+  tags:
+    - cluster-autoscaler
+  ansible.builtin.copy:
+    src: "egress-selector-configuration.yaml"
+    dest: "{{ kube_apiserver_config_path }}/egress-selector-configuration.yaml"
+    owner: "{{ kube_apiserver_user }}"
+    group: "{{ kube_apiserver_group }}"
+    mode: "0644"
 
 - name: systemd unit
   tags:
@@ -108,7 +106,7 @@
   become: true
   ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-apiserver"
-    line: "%{{ kube_apiserver_user }} ALL= NOPASSWD: /bin/systemctl restart kube-apiserver"
+    line: "%{{ kube_apiserver_group }} ALL= NOPASSWD: /bin/systemctl restart kube-apiserver"
     owner: "root"
     group: "root"
     create: true
@@ -127,4 +125,3 @@
     mode: "0755"
   loop:
     - kube-healthcheck
-    - kube-apiserver-launcher

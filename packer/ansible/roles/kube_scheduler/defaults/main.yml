@@ -15,9 +15,9 @@ kube_scheduler_checksum_file_url: "https://storage.googleapis.com/kubernetes-rel
 
 # Paths
 kube_scheduler_bin_path: /usr/local/bin
-kube_scheduler_config_path: /etc/kubernetes/scheduler
+kube_scheduler_config_path: /var/kubernetes/scheduler
 
 # System user and group
-kube_scheduler_user: kube
-kube_scheduler_group: kube
+kube_scheduler_user: kube-scheduler
+kube_scheduler_group: kubernetes
 kube_scheduler_groups: null

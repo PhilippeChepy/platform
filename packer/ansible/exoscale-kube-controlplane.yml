@@ -5,21 +5,24 @@
   become: true
   vars:
     # vault agent
-    vault_config_path: /etc/kubernetes
-    vault_service_name: kube-vault-agent
+    vault_config_path: /etc/vault
+    vault_tls_config_path: /var/vault/tls
+    vault_service_name: vault-agent
     vault_mode: agent
-    vault_user: kube
-    vault_group: kube
+    vault_user: kubernetes
+    vault_group: kubernetes
     # kubernetes apiserver healthcheck reverse-proxy for the Network Load Balancer
     healthcheck_port: 6444
     healthcheck_user: "{{ kube_apiserver_user }}"
+    healthcheck_group: "{{ kube_apiserver_group }}"
     healthcheck_script_path: "{{ kube_apiserver_bin_path }}/kube-healthcheck"
     # kubernetes control plane components integration with vault agent
     vault_agent_kube_control_plane_auth_path: auth/exoscale
     vault_agent_config_template: "{{ playbook_dir }}/defaults/templates/vault-agent-exoscale-kube-control-plane.hcl.j2"
+    vault_agent_approle_path: /var/vault
     vault_agent_secrets:
       kv_exoscale_cloud_controller_manager_exoscale_api: 'kv/platform/exoscale/cloud-controller-manager'
-      kv_exoscale_cluster_autoscaler_exoscale_api: 'kv/platform/exoscale/cluster-autoscaler'
+      kv_cluster_autoscaler_exoscale_api: 'kv/platform/exoscale/cluster-autoscaler'
       kv_kubelet_pki: 'kv/platform/kubernetes/kubelet-pki'
       kv_secrets_encryption: 'kv/platform/kubernetes/secret-encryption'
       kv_serviceaccount: 'kv/platform/kubernetes/service-account'
@@ -42,13 +45,13 @@
     # monitoring
     ssl_exporter_kubeconfigs:
       cloud-controller-manager-kubeconfig: "{{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig"
-      cluster-autoscaler-kubeconfig: "{{ exoscale_cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig"
-      konnectivity-server-kubeconfig: "{{ konnectivity_server_config_path }}/konnectivity-server.kubeconfig"
+      cluster-autoscaler-kubeconfig: "{{ cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig"
+      konnectivity-server-kubeconfig: "{{ apiserver_network_proxy_server_config_path }}/konnectivity-server.kubeconfig"
       kube-apiserver-kubeconfig: "/home/{{ kubectl_user }}/.kube/config"
       kube-controller-manager-kubeconfig: "{{ kube_controller_manager_config_path }}/kube-controller-manager.kubeconfig"
       kube-scheduler-kubeconfig: "{{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig"
     ssl_exporter_certificates:
-      konnectivity-server-certificates: "{{ konnectivity_server_config_path }}/*.pem"
+      konnectivity-server-certificates: "{{ apiserver_network_proxy_server_config_path }}/*.pem"
       kube-apiserver-certificates: "{{ kube_apiserver_config_path }}/*.pem"
       kube-controller-manager-certificates: "{{ kube_controller_manager_config_path }}/*.pem"
       kube-scheduler-certificates: "{{ kube_scheduler_config_path }}/*.pem"
@@ -60,12 +63,13 @@
     - healthcheck
     - cilium_cli
     - wait_service
+    - kubernetes_common
+    - apiserver_network_proxy_server
     - kube_apiserver
-    - konnectivity_server
     - kube_controller_manager
     - kube_scheduler
+    - cluster_autoscaler
     - exoscale_cloud_controller_manager
-    - exoscale_cluster_autoscaler
     - kubectl
     - exoscale_cli
     - jq

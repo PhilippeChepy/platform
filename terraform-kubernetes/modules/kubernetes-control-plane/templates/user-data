@@ -5,21 +5,21 @@ hostname: {{ ds.meta_data.public_hostname }}
 fqdn: {{ ds.meta_data.public_hostname }}.${domain}
 
 write_files:
-- path: /etc/vault/tls/ca.pem
+- path: /var/vault/tls/ca.pem
   content: ${ vault_ca_pem }
   encoding: b64
-  owner: kube:kube
+  owner: kubernetes:kubernetes
   permissions: "0644"
-- path: /etc/kubernetes/.role_id
-  owner: kube:kube
+- path: /var/vault/.role_id
+  owner: kubernetes:kubernetes
   permissions: "0600"
   content: kubernetes-control-plane
-- path: /etc/kubernetes/.instance_id
-  owner: kube:kube
+- path: /var/vault/.instance_id
+  owner: kubernetes:kubernetes
   permissions: "0600"
   content: "{{ ds.meta_data.instance_id }}"
 - path: /etc/default/kube-apiserver
-  owner: kube:kube
+  owner: kubernetes:kubernetes
   permissions: "0644"
   content: |
     KUBE_APISERVER_ADVERTISE_ADDRESS={{ ds.meta_data.public_ipv4 }}
@@ -32,46 +32,46 @@ write_files:
     KUBE_APISERVER_OIDC_GROUPS_CLAIM=${ oidc_groups }
 
 - path: /etc/default/kube-controller-manager
-  owner: kube:kube
+  owner: kubernetes:kubernetes
   permissions: "0644"
   content: |
     KUBE_CONTROLLER_MANAGER_CLUSTER_CIDR=${kubernetes_pod_cidr_ipv4},${kubernetes_pod_cidr_ipv6}
     KUBE_CONTROLLER_MANAGER_SERVICE_CLUSTER_IP_RANGE=${kubernetes_service_cidr_ipv4},${kubernetes_service_cidr_ipv6}
     KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV4=24
     KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV6=120
-- path: /home/kube/kubelet-bootstrap-rbac.yaml
-  owner: kube:kube
+- path: /home/kubernetes/kubelet-bootstrap-rbac.yaml
+  owner: kubernetes:kubernetes
   encoding: b64
   permissions: "0600"
   content: ${kubelet_bootstrap_manifests}
-- path: /home/kube/exoscale-cloud-controller-manager-rbac.yaml
-  owner: kube:kube
+- path: /home/kubernetes/exoscale-cloud-controller-manager-rbac.yaml
+  owner: kubernetes:kubernetes
   encoding: b64
   permissions: "0600"
   content: ${exoscale_cloud_controller_manager_manifests}
-- path: /home/kube/exoscale-cluster-autoscaler-rbac.yaml
-  owner: kube:kube
+- path: /home/kubernetes/cluster-autoscaler-rbac.yaml
+  owner: kubernetes:kubernetes
   encoding: b64
   permissions: "0600"
-  content: ${exoscale_cluster_autoscaler_manifests}
+  content: ${cluster_autoscaler_manifests}
 
 runcmd:
 # Vault CLI
 - [sed, -i, "s|CLUSTER_NAME|${vault_cluster_name}|g", "/etc/default/vault"]
 # Vault agent: common settings
-- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${kubernetes_cluster_ip_address}|g", "/etc/kubernetes/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/kubernetes/vault.hcl"]
-- [sed, -i, "s|CLUSTER_INTERNAL_ADDRESS|${kubernetes_cluster_internal_ip}|g", "/etc/kubernetes/vault.hcl"]
-- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/kubernetes/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${kubernetes_cluster_ip_address}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_INTERNAL_ADDRESS|${kubernetes_cluster_internal_ip}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/vault.hcl"]
 ## api server
-- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${kubernetes_cluster_domain}|g", "/etc/kubernetes/vault.hcl"]
-- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/kubernetes/vault.hcl"]
-- [sed, -i, "s|CLUSTER_NAME|${kubernetes_cluster_name}|g", "/etc/kubernetes/vault.hcl"]
-- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${zone}|g", "/etc/kubernetes/vault.hcl"]
+- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${kubernetes_cluster_domain}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NAME|${kubernetes_cluster_name}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${zone}|g", "/etc/vault/vault.hcl"]
 # Final bootstrap
 - [/usr/local/bin/wait-service, "${etcd_cluster_ip_address}", "2379"]
-- [/usr/local/bin/vault-agent-init, "${vault_cluster_healthcheck_url}", "kube-vault-agent"]
+- [/usr/local/bin/vault-agent-init, "${vault_cluster_healthcheck_url}", "vault-agent"]
 - [/usr/local/bin/wait-service, "127.0.0.1", "6443"]
-- [sudo, -u, kube, kubectl, apply, -f, /home/kube/kubelet-bootstrap-rbac.yaml]
-- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cloud-controller-manager-rbac.yaml]
-- [sudo, -u, kube, kubectl, apply, -f, /home/kube/exoscale-cluster-autoscaler-rbac.yaml]
+- [sudo, -u, kubernetes, kubectl, apply, -f, /home/kubernetes/kubelet-bootstrap-rbac.yaml]
+- [sudo, -u, kubernetes, kubectl, apply, -f, /home/kubernetes/exoscale-cloud-controller-manager-rbac.yaml]
+- [sudo, -u, kubernetes, kubectl, apply, -f, /home/kubernetes/cluster-autoscaler-rbac.yaml]

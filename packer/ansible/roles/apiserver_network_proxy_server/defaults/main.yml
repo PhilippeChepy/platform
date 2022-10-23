@@ -1,0 +1,14 @@
+---
+
+# Package variables
+# extracted from eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-server:v0.0.33
+apiserver_network_proxy_server_binary: "proxy-server-v0.0.33-linux-amd64"
+
+# Paths
+apiserver_network_proxy_server_bin_path: /usr/local/bin
+apiserver_network_proxy_server_config_path: /var/kubernetes/apiserver-network-proxy
+
+# System user and group
+apiserver_network_proxy_server_user: apiserver-network-proxy
+apiserver_network_proxy_server_group: kubernetes
+apiserver_network_proxy_server_groups: null

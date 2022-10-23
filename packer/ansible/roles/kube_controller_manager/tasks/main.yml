@@ -15,6 +15,7 @@
   ansible.builtin.user:
     name: "{{ kube_controller_manager_user }}"
     comment: "Kubernetes Controller Manager user"
+    create_home: false
     group: "{{ kube_controller_manager_group }}"
     groups: "{{ kube_controller_manager_groups }}"
     shell: /bin/bash
@@ -72,7 +73,7 @@
     state: directory
     owner: "{{ kube_controller_manager_user }}"
     group: "{{ kube_controller_manager_group }}"
-    mode: 0755
+    mode: 0770
   loop:
     - "{{ kube_controller_manager_config_path }}"
 
@@ -95,22 +96,8 @@
   become: true
   ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-controller-manager"
-    line: "%{{ kube_controller_manager_user }} ALL= NOPASSWD: /bin/systemctl restart kube-controller-manager"
+    line: "%{{ kube_controller_manager_group }} ALL= NOPASSWD: /bin/systemctl restart kube-controller-manager"
     owner: "root"
     group: "root"
     create: true
     mode: 0440
-
-- name: controller manager additional helper scripts
-  tags:
-    - kube-controller-manager
-  become: true
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "{{ kube_controller_manager_bin_path }}/{{ item }}"
-    force: true
-    owner: root
-    group: root
-    mode: "0755"
-  loop:
-    - kube-controller-manager-launcher

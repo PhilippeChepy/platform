@@ -2,10 +2,17 @@
 Description=Kubernetes Scheduler
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
+ConditionPathExists={{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig
+ConditionPathExists={{ kube_scheduler_config_path }}/server-ca.pem
 
 [Service]
 User={{ kube_scheduler_user }}
-ExecStart={{ kube_scheduler_bin_path }}/kube-scheduler-launcher
+ExecStart={{ kube_scheduler_bin_path }}/kube-scheduler \
+  --authentication-kubeconfig={{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig \
+  --authorization-kubeconfig={{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig \
+  --client-ca-file={{ kube_scheduler_config_path }}/server-ca.pem \
+  --kubeconfig={{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig \
+  --leader-elect=true
 Restart=on-failure
 RestartSec=5
 

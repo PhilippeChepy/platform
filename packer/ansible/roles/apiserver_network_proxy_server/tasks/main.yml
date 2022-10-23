@@ -1,0 +1,70 @@
+---
+
+- name: Add apiserver-network-proxy-server group
+  tags:
+    - apiserver-network-proxy-server
+  become: true
+  ansible.builtin.group:
+    name: "{{ apiserver_network_proxy_server_group }}"
+    state: present
+
+- name: Add apiserver-network-proxy-server user
+  tags:
+    - apiserver-network-proxy-server
+  become: true
+  ansible.builtin.user:
+    name: "{{ apiserver_network_proxy_server_user }}"
+    comment: "apiserver-network-proxy-server user"
+    create_home: false
+    group: "{{ apiserver_network_proxy_server_group }}"
+    groups: "{{ apiserver_network_proxy_server_groups }}"
+    shell: /bin/bash
+    system: true
+
+- name: "Copy proxy-server binary"
+  tags:
+    - apiserver-network-proxy-server
+  ansible.builtin.copy:
+    src: "{{ apiserver_network_proxy_server_binary }}"
+    dest: "{{ apiserver_network_proxy_server_bin_path }}/apiserver-network-proxy-server"
+    owner: "{{ apiserver_network_proxy_server_user }}"
+    group: "{{ apiserver_network_proxy_server_group }}"
+    mode: "0755"
+
+- name: Create directories
+  tags:
+    - apiserver-network-proxy-server
+  become: true
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ apiserver_network_proxy_server_user }}"
+    group: "{{ apiserver_network_proxy_server_group }}"
+    mode: 0770
+  loop:
+    - "{{ apiserver_network_proxy_server_config_path }}"
+
+- name: systemd unit
+  tags:
+    - apiserver-network-proxy-server
+  become: true
+  ansible.builtin.template:
+    src: "apiserver-network-proxy-server.service.j2"
+    dest: "/etc/systemd/system/apiserver-network-proxy-server.service"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+
+- name: Add user to sudoers for service restart
+  tags:
+    - apiserver-network-proxy-server
+  become: true
+  ansible.builtin.lineinfile:
+    path: "/etc/sudoers.d/apiserver-network-proxy-server"
+    line: "%{{ apiserver_network_proxy_server_group }} ALL= NOPASSWD: /bin/systemctl restart apiserver-network-proxy-server"
+    owner: "root"
+    group: "root"
+    create: true
+    mode: 0440

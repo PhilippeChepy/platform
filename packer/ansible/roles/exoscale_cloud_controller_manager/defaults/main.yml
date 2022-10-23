@@ -10,10 +10,10 @@ exoscale_cloud_controller_manager_checksum_file_url: "https://github.com/exoscal
 exoscale_cloud_controller_manager_local_storage: /tmp/exoscale-cloud-controller-manager-assets
 
 # System user and group
-exoscale_cloud_controller_manager_user: kube
-exoscale_cloud_controller_manager_group: kube
+exoscale_cloud_controller_manager_user: exoscale-ccm
+exoscale_cloud_controller_manager_group: kubernetes
 exoscale_cloud_controller_manager_groups: null
 
 # TLS variables
 exoscale_cloud_controller_manager_bin_path: "/usr/local/bin"
-exoscale_cloud_controller_manager_config_path: "/etc/exoscale/cloud-controller-manager"
+exoscale_cloud_controller_manager_config_path: "/var/kubernetes/exoscale-cloud-controller-manager"
