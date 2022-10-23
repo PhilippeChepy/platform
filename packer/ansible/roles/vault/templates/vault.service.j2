@@ -16,9 +16,7 @@ ProtectHome=read-only
 PrivateTmp=yes
 PrivateDevices=yes
 SecureBits=keep-caps
-{% if systemd_version.stdout is version('230', '>=') %}
 AmbientCapabilities=CAP_SYSLOG CAP_IPC_LOCK
-{% endif %}
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
 ExecStart=/bin/sh -c 'exec {{ vault_bin_path }}/vault {{ vault_mode }} -config={{ vault_config_path }} -log-level={{ vault_log_level | lower }}'
