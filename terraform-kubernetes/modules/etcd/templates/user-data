@@ -42,6 +42,6 @@ runcmd:
 - [sed, -i, "s|LOCAL_PATH|/var/backups/etcd|g", "/etc/default/rclone-backup"]
 
 # Final bootstrap
-- [/usr/local/bin/vault-agent-init, "${vault_cluster_healthcheck_url}", "etcd-vault-agent"]
+- [/usr/local/bin/vault-agent-init, "${vault_cluster_healthcheck_url}", "vault-agent"]
 - [/usr/local/bin/exoscale-etcd-init]
 - [/usr/local/bin/rclone-backup-init]

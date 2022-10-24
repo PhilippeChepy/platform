@@ -14,13 +14,14 @@
     # vault agent
     vault_config_path: /etc/vault
     vault_tls_config_path: /var/vault/tls
-    vault_service_name: etcd-vault-agent
+    vault_service_name: vault-agent
     vault_mode: agent
     vault_user: etcd
     vault_group: etcd
     # etcd healthcheck reverse-proxy for the Network Load Balancer
     healthcheck_port: 2378
     healthcheck_user: etcd
+    healthcheck_group: etcd
     healthcheck_script_path: "{{ etcd_bin_path }}/etcd-healthcheck"
     # etcd integration with vault agent
     vault_agent_exoscale_etcd_auth_path: auth/exoscale
