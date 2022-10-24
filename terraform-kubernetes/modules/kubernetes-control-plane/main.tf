@@ -70,7 +70,7 @@ resource "exoscale_security_group_rule" "cluster_rule" {
 
 resource "exoscale_nlb_service" "endpoint" {
   for_each = {
-    kube-api = { port = 6443 }
+    kube-apiserver = { port = 6443 }
   }
   nlb_id      = var.endpoint_loadbalancer_id
   zone        = var.zone
