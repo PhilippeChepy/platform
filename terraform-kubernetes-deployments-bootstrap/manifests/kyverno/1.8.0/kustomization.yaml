@@ -1,0 +1,55 @@
+patchesStrategicMerge:
+  - patch-delete-pod.yaml
+  - patch-delete-pod-disruption-budget.yaml
+
+resources:
+  - pod-disruption-budget.yaml
+
+patches:
+- target:
+    kind: CustomResourceDefinition
+  patch: |-
+    - op: remove
+      path: /metadata/creationTimestamp
+- target:
+    kind: Deployment
+    name: kyverno
+  patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-ingress-api-server
+      value: "true"
+    - op: add
+      path: /spec/replicas
+      value: 2
+    - op: add
+      path: /spec/template/spec/containers/0/resources/limits/cpu
+      value: 200m
+    - op: add
+      path: /spec/template/spec/containers/0/livenessProbe
+      value:
+        httpGet:
+          path: /health/liveness
+          port: 9443
+          scheme: HTTPS
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
+        timeoutSeconds: 2
+
+helmGlobals:
+  chartHome: .helm
+  configHome: .helm
+
+helmCharts:
+- name: kyverno
+  repo: https://kyverno.github.io/kyverno/
+  releaseName: kyverno
+  namespace: kyverno
+  valuesInline:
+    replicaCount: 3
+
+namespace: kyverno
