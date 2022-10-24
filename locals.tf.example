@@ -119,7 +119,7 @@ locals {
           cert-manager-clusterissuer-deployments = { version = "0.0.1", namespace = "cert-manager" }
           certificate-dex                        = { version = "0.0.1", namespace = "dex" }
           certificate-metrics-server             = { version = "0.0.1", namespace = "kube-system", vault-service-account = "cert-manager-metrics-server" }
-          dex                                    = { version = "2.33.0", namespace = "dex" } # requires an ingress serving platform_domain
+          dex                                    = { version = "2.35.3", namespace = "dex" } # requires an ingress serving platform_domain
           metrics-server                         = { version = "0.6.1", namespace = "kube-system" }
           reloader                               = { version = "0.0.121", namespace = "reloader" }
         }
