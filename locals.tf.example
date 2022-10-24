@@ -132,7 +132,7 @@ locals {
           nginx-ingress-controller          = { version = "1.3.0" }
           cert-manager-clusterissuer-http01 = { version = "0.0.1" }
           cert-manager-dns01-cloudflare     = { provider = "cloudflare", version = "0.0.1", namespace = "cert-manager", credentials = true, vault-service-account = "cert-manager-dns01-cloudflare" }
-          external-dns-cloudflare           = { provider = "cloudflare", version = "0.12.2", credentials = true, vault-service-account = "external-dns-cloudflare" }
+          external-dns-cloudflare           = { provider = "cloudflare", version = "0.13.1", credentials = true, vault-service-account = "external-dns-cloudflare" }
           certificate-wildcard-letsencrypt  = { provider = "any", version = "0.0.1" } # requires a "cert-manager-dns01-*" deployment
         }
 
