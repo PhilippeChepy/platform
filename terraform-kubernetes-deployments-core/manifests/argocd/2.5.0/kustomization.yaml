@@ -1,0 +1,56 @@
+resources:
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.5.0/manifests/install.yaml
+  - secret-oidc.yaml
+  - certificate.yaml
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - delete-dex.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: argocd-server
+    patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-api-server
+        value: "true"
+      - op: add
+        path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-egress-dex
+        value: "true"
+  - target:
+      kind: ConfigMap
+      name: argocd-cm
+    patch: |-
+      - op: add
+        path: /data
+        value:
+          admin.enabled: "false"
+          url: https://${argocd_hostname}
+          oidc.config: |
+            name: OIDC
+            issuer: https://${dex_hostname}
+            clientID: argocd
+            clientSecret: $argocd-oidc-secret:oidc.dex.clientSecret
+
+            requestedScopes: ["openid", "profile", "email", "groups"]
+            requestedIDTokenClaims: {"groups": {"essential": true}}
+
+            rootCA: |
+              ${indent(6, dex_ca_cert)}
+  - target:
+      kind: ConfigMap
+      name: argocd-rbac-cm
+    patch: |-
+      - op: add
+        path: /data
+        value:
+          policy.csv: |
+            %{~ for user in admin_user_emails ~}
+              g, ${user}, role:admin
+            %{~ endfor ~}
+
+          policy.default: role:''
+          scopes: "[email]"
+
+namespace: argocd
