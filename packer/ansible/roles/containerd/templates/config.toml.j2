@@ -77,11 +77,16 @@ version = 2
 
     [plugins."io.containerd.grpc.v1.cri".containerd]
       default_runtime_name = "runc"
-      disable_snapshot_annotations = true
       discard_unpacked_layers = false
       ignore_rdt_not_enabled_errors = false
       no_pivot = false
+{% if containerd_stargz_enabled %}
+      disable_snapshot_annotations = false
+      snapshotter = "stargz"
+{% else %}
+      disable_snapshot_annotations = true
       snapshotter = "overlayfs"
+{% endif %}
 
       [plugins."io.containerd.grpc.v1.cri".containerd.default_runtime]
         base_runtime_spec = ""
@@ -220,6 +225,11 @@ version = 2
     protocol = ""
 
 [proxy_plugins]
+{% if containerd_stargz_enabled %}
+  [proxy_plugins.stargz]
+    type = "snapshot"
+    address = "/run/containerd-stargz-grpc/containerd-stargz-grpc.sock"
+{% endif %}
 
 [stream_processors]
 

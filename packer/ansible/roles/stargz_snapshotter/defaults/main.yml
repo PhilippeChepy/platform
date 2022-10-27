@@ -1,0 +1,22 @@
+---
+
+# Package variables
+stargz_snapshotter_version: "0.12.1"
+stargz_snapshotter_architecture_map:
+  amd64: amd64
+  x86_64: amd64
+
+stargz_snapshotter_architecture: "{{ stargz_snapshotter_architecture_map[ansible_architecture] }}"
+stargz_snapshotter_os: "{{ ansible_system|lower }}"
+stargz_snapshotter_pkg: "stargz-snapshotter-v{{ stargz_snapshotter_version }}-{{ stargz_snapshotter_os }}-{{ stargz_snapshotter_architecture }}.tar.gz"
+stargz_snapshotter_shasums: "crictl-v{{ stargz_snapshotter_version }}-{{ stargz_snapshotter_os }}-{{ stargz_snapshotter_architecture }}.tar.gz.sha256"
+
+stargz_snapshotter_tgz_url: "https://github.com/containerd/stargz-snapshotter/releases/download/v{{ stargz_snapshotter_version }}/stargz-snapshotter-v{{ stargz_snapshotter_version }}-{{ stargz_snapshotter_os }}-{{ stargz_snapshotter_architecture }}.tar.gz"
+stargz_snapshotter_checksum_file_url: "https://github.com/containerd/stargz-snapshotter/releases/download/v{{ stargz_snapshotter_version }}/stargz-snapshotter-v{{ stargz_snapshotter_version }}-{{ stargz_snapshotter_os }}-{{ stargz_snapshotter_architecture }}.tar.gz.sha256sum"
+
+# Paths
+stargz_snapshotter_bin_path: /usr/local/bin
+stargz_snapshotter_binaries:
+  - containerd-stargz-grpc
+  - ctr-remote
+  - stargz-store

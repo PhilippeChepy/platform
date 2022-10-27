@@ -93,8 +93,8 @@
   tags:
     - containerd
   become: true
-  ansible.builtin.copy:
-    src: "config.toml"
+  ansible.builtin.template:
+    src: "config.toml.j2"
     dest: "{{ containerd_config_path }}/config.toml"
     force: true
     owner: root

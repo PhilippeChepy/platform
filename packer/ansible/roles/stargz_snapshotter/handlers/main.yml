@@ -1,0 +1,8 @@
+---
+
+- name: enable stargz-snapshotter
+  become: true
+  ansible.builtin.systemd:
+    name: stargz-snapshotter
+    enabled: true
+    state: started

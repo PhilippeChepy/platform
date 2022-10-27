@@ -10,6 +10,7 @@
     - runc
     - cri_tools
     - cni_plugins
+    - stargz_snapshotter
     - containerd
     - wait_service
     - kubelet

@@ -17,6 +17,8 @@ containerd_checksum_file_url: "https://github.com/containerd/containerd/releases
 containerd_bin_path: /usr/local/bin
 containerd_config_path: /etc/containerd
 
+containerd_stargz_enabled: true
+
 containerd_enabled:
   - containerd
   - containerd-shim-runc-v1
