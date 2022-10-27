@@ -110,7 +110,7 @@ locals {
           cilium-base        = { version = "1.12.3", namespace = "kube-system" }
           core-dns           = { version = "1.10.0", namespace = "kube-system" }
           konnectivity-agent = { version = "0.0.33", namespace = "kube-system" }
-          kyverno            = { version = "1.8.0", namespace = "kyverno" }
+          kyverno            = { version = "1.8.1", namespace = "kyverno" }
           external-secrets   = { version = "0.5.9", namespace = "external-secrets" }
         }
 
