@@ -198,21 +198,44 @@ module "kubernetes_nodepool" {
 
   for_each = merge({
     "general" = {
-      size                 = 3
-      instance_type        = "standard.small"
-      security_group_rules = {}
-      disk_size            = 20
+      size          = 3
+      instance_type = "standard.small"
+      root_size     = 10
     }
-    }, {
-    for name, ingress in local.platform_components.kubernetes.ingresses :
-    "ingress-${name}" => {
-      size                 = ingress.pool_size
-      instance_type        = "standard.tiny"
-      security_group_rules = local.ingress_security_group_rules
-      disk_size            = 20
-      labels               = { (split("=", ingress.label)[0]) = split("=", ingress.label)[1] }
-      taints               = { (split("=", ingress.label)[0]) = { value = split("=", ingress.label)[1], effect = "NoSchedule" } }
-    }
+    },
+    local.platform_components.kubernetes.storage.enabled ? {
+      "ceph-mon" = {
+        size          = 3
+        instance_type = "standard.small"
+        disk_size     = 80
+        labels        = { (local.platform_components.kubernetes.storage.label) = "monitor" }
+        taints        = { (local.platform_components.kubernetes.storage.label) = { value = "monitor", effect = "NoSchedule" } }
+      },
+      "ceph-osd" = {
+        size          = 3
+        instance_type = "standard.small"
+        disk_size     = 100
+        labels        = { (local.platform_components.kubernetes.storage.label) = "data" }
+        taints        = { (local.platform_components.kubernetes.storage.label) = { value = "data", effect = "NoSchedule" } }
+      },
+      "ceph-mds" = {
+        size          = 2
+        instance_type = "standard.small"
+        disk_size     = 10
+        labels        = { (local.platform_components.kubernetes.storage.label) = "metadata" }
+        taints        = { (local.platform_components.kubernetes.storage.label) = { value = "metadata", effect = "NoSchedule" } }
+      }
+    } : {},
+    {
+      for name, ingress in local.platform_components.kubernetes.ingresses :
+      "ingress-${name}" => {
+        size                 = ingress.pool_size
+        instance_type        = "standard.tiny"
+        security_group_rules = local.ingress_security_group_rules
+        root_size            = 10
+        labels               = { (split("=", ingress.label)[0]) = split("=", ingress.label)[1] }
+        taints               = { (split("=", ingress.label)[0]) = { value = split("=", ingress.label)[1], effect = "NoSchedule" } }
+      }
   })
 
   zone = local.platform_zone
@@ -227,7 +250,7 @@ module "kubernetes_nodepool" {
     vault   = local.vault.client_security_group, # for vault-related agents
     kubelet = module.kubernetes_control_plane.kubelet_security_group_id
   }
-  security_group_rules = each.value.security_group_rules
+  security_group_rules = try(each.value.security_group_rules, {})
   ssh_key              = "${local.platform_name}-management"
 
   labels = {
@@ -242,6 +265,8 @@ module "kubernetes_nodepool" {
   kubernetes     = local.kubernetes_settings
   kubelet_labels = try(each.value.labels, {})
   kubelet_taints = try(each.value.taints, {})
+  
+  root_size      = try(each.value.root_size, 10)
 }
 
 # User interactions

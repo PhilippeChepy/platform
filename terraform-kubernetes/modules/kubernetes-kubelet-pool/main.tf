@@ -45,7 +45,7 @@ resource "exoscale_instance_pool" "pool" {
   size               = var.pool_size
   template_id        = var.template_id
   instance_type      = var.instance_type
-  disk_size          = var.disk_size
+  disk_size          = var.root_size + var.data_size
   key_pair           = var.ssh_key
   instance_prefix    = var.name
   ipv6               = var.ipv6
@@ -63,6 +63,8 @@ resource "exoscale_instance_pool" "pool" {
     node_ca_pem_b64           = base64encode(var.kubernetes.kubelet_ca_pem)
     labels                    = local.kubelet_labels
     taints                    = var.kubelet_taints
+    root_size                 = var.root_size
+    storage_partition         = var.data_size > 0
   })
 
   labels = var.labels

@@ -21,10 +21,16 @@ variable "instance_type" {
   default     = "standard.small"
 }
 
-variable "disk_size" {
+variable "root_size" {
   description = "Size of the root partition in GB. `10` should be sufficient."
   type        = number
   default     = 10
+}
+
+variable "data_size" {
+  description = "Size of an additional data partition in GB. `0` to disable."
+  type        = number
+  default     = 0
 }
 
 variable "ipv4" {

@@ -74,6 +74,17 @@ write_files:
     KUBELET_NODE_LABELS="${ labels }"
     %{~ endif ~}
 
+%{~ if storage_partition }
+growpart:
+  mode: 'off'
+
+bootcmd:
+- [ cloud-init-per, once, move-second, sgdisk, --move-second-header, /dev/vda]
+- [ cloud-init-per, once, create-vda2, parted, --script, /dev/vda, 'mkpart 2 ${root_size}GiB -1' ]
+- [ cloud-init-per, once, resize-vda1, resize2fs, /dev/vda1]
+- [ cloud-init-per, once, partprobe, partprobe]
+%{ endif ~}
+
 runcmd:
 - [/usr/local/bin/wait-service, "${kube_apiserver_ip_address}", "6443"]
 - [systemctl, enable, kubelet.service]
