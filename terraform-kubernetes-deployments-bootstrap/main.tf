@@ -138,8 +138,6 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
   kubernetes_host    = "https://${local.kubernetes.control_plane_ip_address}:6443" // module.kubernetes_control_plane.url
   kubernetes_ca_cert = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
   pem_keys           = [chomp(data.vault_generic_secret.kubernetes["service-account-key"].data["public_key"])]
-  # token_reviewer_jwt = data.kubernetes_secret_v1.vault.data["token"]
-  
 }
 
 resource "vault_kubernetes_auth_backend_role" "roles" {
