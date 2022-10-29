@@ -22,9 +22,6 @@ patches:
       path: /spec/template/metadata/labels/rule.${platform_domain}~1allow-ingress-api-server
       value: "true"
     - op: add
-      path: /spec/replicas
-      value: 2
-    - op: add
       path: /spec/template/spec/containers/0/resources/limits/cpu
       value: 200m
     - op: add
