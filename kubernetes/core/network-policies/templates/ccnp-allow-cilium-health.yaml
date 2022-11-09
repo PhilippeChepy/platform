@@ -1,0 +1,18 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-cilium-health
+spec:
+  endpointSelector:
+    matchLabels:
+      'reserved:health': ''
+  ingress:
+    - fromEntities:
+      - remote-node
+      icmps:
+        - fields:
+          - type: 8
+            family: IPv4
+          - type: 128
+            family: IPv6

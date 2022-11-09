@@ -1,0 +1,90 @@
+resources:
+- https://raw.githubusercontent.com/dexidp/dex/master/examples/k8s/dex.yaml
+- certificate.yaml
+- secret.yaml
+- ingress.yaml
+- pod-disruption-budget.yaml
+
+patchesStrategicMerge:
+- patch-delete-namespace.yaml
+- patch-config-map.yaml
+- patch-service.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: dex
+    patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/rule.{{ .Values.platform.domain }}~1allow-egress-api-server
+        value: "true"
+      - op: add
+        path: /spec/template/metadata/labels/rule.{{ .Values.platform.domain }}~1allow-egress-vault
+        value: "true"
+      - op: remove
+        path: /spec/template/spec/containers/0/env
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: ghcr.io/dexidp/dex:v2.35.3
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: vault-ca
+          mountPath: /etc/ssl/certs/
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/template/spec/volumes/1/secret/secretName
+        value: dex-cert
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: vault-ca
+          secret:
+            secretName: vault-ca
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe
+        value:
+          httpGet:
+            path: /healthz
+            port: 5556
+            scheme: HTTP
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/scheme
+        value: HTTP
+      - op: replace
+        path: /spec/template/spec/containers/0/ports
+        value:
+        - containerPort: 5556
+          name: http
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          limits:
+            cpu: 50m
+            memory: 32Mi
+          requests:
+            cpu: 50m
+            memory: 16Mi
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: dex
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+
+namespace: dex
