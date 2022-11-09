@@ -1,0 +1,16 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-ingress-api-server
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s-app: konnectivity-agent
+            io.kubernetes.pod.namespace: kube-system
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            rule.{{ .Values.platform.domain }}/allow-ingress-api-server: "true"

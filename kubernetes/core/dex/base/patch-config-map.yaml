@@ -1,0 +1,60 @@
+apiVersion: v1
+data:
+  config.yaml: |
+    issuer: "https://{{ .Values.platform.dex.hostname }}"
+
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+
+    loger:
+      level: debug
+
+    web:
+      http: 0.0.0.0:5556
+
+    oauth2:
+      skipApprovalScreen: true
+
+    connectors:
+    - type: oidc
+      id: oidc
+      name: Default OIDC provider
+      config:
+        issuer: "{{ .Values.platform.dex.oidc.issuer }}"
+
+        clientID: "{{ .Values.platform.dex.oidc.clientID }}"
+        clientSecret: "{{ .Values.platform.dex.oidc.clientSecret }}"
+
+        redirectURI: "https://{{ .Values.platform.dex.hostname }}/callback"
+
+        scopes:
+        - user
+        - email
+        - groups
+        userNameKey: username
+        insecureEnableGroups: true
+
+    staticClients:
+      - id: kubectl
+        name: Kubernetes CLI
+        public: true
+        secret: kubectl-secret
+        redirectURIs:
+        - http://localhost:8000
+        - http://localhost:8080/oauth2/callback
+      {{- if .Values.platform.argocd.oidc.clientSecret }}
+      - id: argocd
+        name: ArgoCD
+        secret: "{{ .Values.platform.argocd.oidc.clientSecret }}"
+        redirectURIs:
+        - "https://{{ .Values.platform.argocd.hostname }}/auth/callback"
+      {{- end }}
+
+# kubectl oidc-login setup --oidc-issuer-url=https://dex.platform.i6h.io --oidc-client-id=kubectl
+
+kind: ConfigMap
+metadata:
+  name: dex
+  namespace: dex

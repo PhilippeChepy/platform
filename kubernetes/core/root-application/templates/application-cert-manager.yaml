@@ -1,0 +1,28 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+spec:
+  destination:
+    name: ''
+    namespace: cert-manager
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "{{ .Values.deployment.certManager.path }}"
+    repoURL: "{{ .Values.deployment.certManager.repoURL }}"
+    targetRevision: "{{ .Values.deployment.certManager.targetRevision }}"
+    helm:
+      values: |-
+        platform:
+          domain: "{{ .Values.platform.domain }}"
+          vault:
+            corePKISignPath: "{{ .Values.platform.vault.corePKISignPath }}"
+            baseUrl: "{{ .Values.platform.vault.baseUrl }}"
+            caCert: |
+              {{- .Values.platform.vault.caCert | nindent 14 }}
+  project: "{{ .Values.core.projectName }}"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: {{ .Values.deployment.certManager.selfHeal }}

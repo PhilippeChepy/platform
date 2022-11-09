@@ -1,0 +1,29 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium
+spec:
+  destination:
+    name: ''
+    namespace: kube-system
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "{{ .Values.deployment.cilium.path }}"
+    repoURL: "{{ .Values.deployment.cilium.repoURL }}"
+    targetRevision: "{{ .Values.deployment.cilium.targetRevision }}"
+    helm:
+      values: |-
+        platform:
+          domain: "{{ .Values.platform.domain }}"
+          kubernetes:
+            apiserver:
+              address: "{{ .Values.platform.kubernetes.apiserver.address }}"
+            cluster:
+              podCidrIPv4: "{{ .Values.platform.kubernetes.cluster.podCidrIPv4 }}"
+              podCidrIPv6: "{{ .Values.platform.kubernetes.cluster.podCidrIPv6 }}"
+  project: "{{ .Values.core.projectName }}"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: {{ .Values.deployment.cilium.selfHeal }}
