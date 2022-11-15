@@ -3,7 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cert-manager-dns01-cloudflare
+  name: cert-manager-selfsigned
 spec:
   destination:
     name: ''
