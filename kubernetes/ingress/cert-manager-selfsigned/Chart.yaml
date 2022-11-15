@@ -1,0 +1,4 @@
+apiVersion: v2
+name: helm-platform-cert-manager-selfsigned
+type: application
+version: 0.1.0

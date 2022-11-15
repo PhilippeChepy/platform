@@ -1,4 +1,4 @@
-{{- if ((.Values.platform.ingress.cloudflare).apiToken) }}
+{{- if not ((.Values.platform.ingress.cloudflare).apiToken) }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -10,21 +10,19 @@ spec:
     namespace: "{{ .Values.platform.ingress.name }}"
     server: 'https://kubernetes.default.svc'
   source:
-    path: "{{ .Values.deployment.certManagerDns01Cloudflare.path }}"
-    repoURL: "{{ .Values.deployment.certManagerDns01Cloudflare.repoURL }}"
-    targetRevision: "{{ .Values.deployment.certManagerDns01Cloudflare.targetRevision }}"
+    path: "{{ .Values.deployment.certManagerSelfsigned.path }}"
+    repoURL: "{{ .Values.deployment.certManagerSelfsigned.repoURL }}"
+    targetRevision: "{{ .Values.deployment.certManagerSelfsigned.targetRevision }}"
     helm:
       values: |-
         platform:
           ingress:
             name: "{{ .Values.platform.ingress.name }}"
             domain: "{{ .Values.platform.ingress.domain }}"
-            cloudflare:
-              apiToken: "{{ .Values.platform.ingress.cloudflare.apiToken }}"
 
   project: "{{ .Values.core.projectName }}"
   syncPolicy:
     automated:
       prune: false
-      selfHeal: {{ .Values.deployment.certManagerDns01Cloudflare.selfHeal }}
+      selfHeal: {{ .Values.deployment.certManagerSelfsigned.selfHeal }}
 {{- end }}

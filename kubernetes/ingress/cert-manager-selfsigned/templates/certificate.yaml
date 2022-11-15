@@ -1,0 +1,19 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "{{ .Values.platform.ingress.name }}-wildcard"
+spec:
+  secretName: "{{ .Values.platform.ingress.name }}-wildcard"
+  duration: "2160h0m0s"
+  renewBefore: "1440h0m0s"
+  issuerRef:
+    name: "selfsigned-{{ .Values.platform.ingress.name }}"
+    kind: ClusterIssuer
+{{- if (.Values.platform.ingress.domain) }}
+  commonName: "*.{{ .Values.platform.ingress.domain }}"
+  dnsNames:
+    - "*.{{ .Values.platform.ingress.domain }}"
+{{- else }}
+  commonName: "{{ .Values.platform.ingress.name }} fallback certificate"
+{{- end }}

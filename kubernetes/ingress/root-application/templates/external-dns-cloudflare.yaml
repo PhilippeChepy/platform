@@ -1,3 +1,4 @@
+{{- if ((.Values.platform.ingress.cloudflare).apiToken) }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -27,3 +28,4 @@ spec:
     automated:
       prune: false
       selfHeal: {{ .Values.deployment.externalDnsCloudflare.selfHeal }}
+{{- end }}
