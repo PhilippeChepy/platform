@@ -34,8 +34,8 @@ resource "vault_mount" "pki_root" {
   description = "Platform CA"
 
   type                      = "pki"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.ca * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.ca * 3600
+  default_lease_ttl_seconds = local.platform_tls_settings.ttl_hours.ca * 3600
+  max_lease_ttl_seconds     = local.platform_tls_settings.ttl_hours.ca * 3600
 }
 
 resource "vault_pki_secret_backend_config_ca" "pki_root" {
@@ -58,25 +58,25 @@ resource "vault_mount" "pki_vault" {
   description = "Vault ICA"
 
   type                      = "pki"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.ica * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.ica * 3600
+  default_lease_ttl_seconds = local.platform_tls_settings.ttl_hours.ica * 3600
+  max_lease_ttl_seconds     = local.platform_tls_settings.ttl_hours.ica * 3600
 }
 
 resource "vault_pki_secret_backend_intermediate_cert_request" "pki_vault" {
   depends_on = [vault_mount.pki_vault]
   backend    = vault_mount.pki_vault.path
   type       = "internal"
-  key_type   = lower(local.platform_default_tls_algorithm.algorithm)
-  key_bits   = local.platform_default_tls_algorithm.rsa_bits
+  key_type   = lower(local.platform_tls_settings.algorithm)
+  key_bits   = local.platform_tls_settings.rsa_bits
 
   common_name    = "Vault ICA"
-  ou             = try(local.platform_default_tls_subject.organizational_unit, null)
-  organization   = try(local.platform_default_tls_subject.organization, null)
-  street_address = try(join("-", local.platform_default_tls_subject.street_address), null)
-  postal_code    = try(local.platform_default_tls_subject.postal_code, null)
-  locality       = try(local.platform_default_tls_subject.locality, null)
-  province       = try(local.platform_default_tls_subject.province, null)
-  country        = try(local.platform_default_tls_subject.country, null)
+  ou             = try(local.platform_tls_settings.subject.organizational_unit, null)
+  organization   = try(local.platform_tls_settings.subject.organization, null)
+  street_address = try(join("-", local.platform_tls_settings.subject.street_address), null)
+  postal_code    = try(local.platform_tls_settings.subject.postal_code, null)
+  locality       = try(local.platform_tls_settings.subject.locality, null)
+  province       = try(local.platform_tls_settings.subject.province, null)
+  country        = try(local.platform_tls_settings.subject.country, null)
 }
 
 resource "vault_pki_secret_backend_root_sign_intermediate" "pki_vault" {
@@ -87,16 +87,16 @@ resource "vault_pki_secret_backend_root_sign_intermediate" "pki_vault" {
   backend = vault_mount.pki_root.path
 
   csr = vault_pki_secret_backend_intermediate_cert_request.pki_vault.csr
-  ttl = local.platform_default_tls_ttl.ica * 3600
+  ttl = local.platform_tls_settings.ttl_hours.ica * 3600
 
   common_name    = "Vault ICA"
-  ou             = try(local.platform_default_tls_subject.organizational_unit, null)
-  organization   = try(local.platform_default_tls_subject.organization, null)
-  street_address = try(join("-", local.platform_default_tls_subject.street_address), null)
-  postal_code    = try(local.platform_default_tls_subject.postal_code, null)
-  locality       = try(local.platform_default_tls_subject.locality, null)
-  province       = try(local.platform_default_tls_subject.province, null)
-  country        = try(local.platform_default_tls_subject.country, null)
+  ou             = try(local.platform_tls_settings.subject.organizational_unit, null)
+  organization   = try(local.platform_tls_settings.subject.organization, null)
+  street_address = try(join("-", local.platform_tls_settings.subject.street_address), null)
+  postal_code    = try(local.platform_tls_settings.subject.postal_code, null)
+  locality       = try(local.platform_tls_settings.subject.locality, null)
+  province       = try(local.platform_tls_settings.subject.province, null)
+  country        = try(local.platform_tls_settings.subject.country, null)
 }
 
 resource "vault_pki_secret_backend_intermediate_set_signed" "pki_vault" {
@@ -124,9 +124,9 @@ resource "vault_pki_secret_backend_role" "pki_vault" {
 
   backend            = vault_mount.pki_vault.path
   name               = try(each.value.name, each.key)
-  ttl                = local.platform_default_tls_ttl.cert * 3600
-  key_type           = lower(local.platform_default_tls_algorithm.algorithm)
-  key_bits           = local.platform_default_tls_algorithm.rsa_bits
+  ttl                = local.platform_tls_settings.ttl_hours.cert * 3600
+  key_type           = lower(local.platform_tls_settings.algorithm)
+  key_bits           = local.platform_tls_settings.rsa_bits
   key_usage          = ["DigitalSignature", "KeyEncipherment"]
   allow_ip_sans      = true
   allow_bare_domains = true
@@ -135,12 +135,12 @@ resource "vault_pki_secret_backend_role" "pki_vault" {
   client_flag        = each.value.client_flag
 
   ou             = ["vault"]
-  organization   = try([local.platform_default_tls_subject.organization], null)
-  street_address = try([join("-", local.platform_default_tls_subject.street_address)], null)
-  postal_code    = try([local.platform_default_tls_subject.postal_code], null)
-  locality       = try([local.platform_default_tls_subject.locality], null)
-  province       = try([local.platform_default_tls_subject.province], null)
-  country        = try([local.platform_default_tls_subject.country], null)
+  organization   = try([local.platform_tls_settings.subject.organization], null)
+  street_address = try([join("-", local.platform_tls_settings.subject.street_address)], null)
+  postal_code    = try([local.platform_tls_settings.subject.postal_code], null)
+  locality       = try([local.platform_tls_settings.subject.locality], null)
+  province       = try([local.platform_tls_settings.subject.province], null)
+  country        = try([local.platform_tls_settings.subject.country], null)
 }
 
 ## Vault policy
@@ -180,8 +180,8 @@ resource "vault_mount" "pki_deployment" {
   description = each.value.description
 
   type                      = "pki"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.ca * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.ca * 3600
+  default_lease_ttl_seconds = local.platform_tls_settings.ttl_hours.ca * 3600
+  max_lease_ttl_seconds     = local.platform_tls_settings.ttl_hours.ca * 3600
 }
 
 resource "vault_pki_secret_backend_intermediate_cert_request" "pki_deployment" {
@@ -189,17 +189,17 @@ resource "vault_pki_secret_backend_intermediate_cert_request" "pki_deployment" {
   depends_on = [vault_mount.pki_deployment]
   backend    = each.value.path
   type       = "internal"
-  key_type   = lower(local.platform_default_tls_algorithm.algorithm)
-  key_bits   = local.platform_default_tls_algorithm.rsa_bits
+  key_type   = lower(local.platform_tls_settings.algorithm)
+  key_bits   = local.platform_tls_settings.rsa_bits
 
   common_name    = each.value.description
-  ou             = try(local.platform_default_tls_subject.organizational_unit, null)
-  organization   = try(local.platform_default_tls_subject.organization, null)
-  street_address = try(join("-", local.platform_default_tls_subject.street_address), null)
-  postal_code    = try(local.platform_default_tls_subject.postal_code, null)
-  locality       = try(local.platform_default_tls_subject.locality, null)
-  province       = try(local.platform_default_tls_subject.province, null)
-  country        = try(local.platform_default_tls_subject.country, null)
+  ou             = try(local.platform_tls_settings.subject.organizational_unit, null)
+  organization   = try(local.platform_tls_settings.subject.organization, null)
+  street_address = try(join("-", local.platform_tls_settings.subject.street_address), null)
+  postal_code    = try(local.platform_tls_settings.subject.postal_code, null)
+  locality       = try(local.platform_tls_settings.subject.locality, null)
+  province       = try(local.platform_tls_settings.subject.province, null)
+  country        = try(local.platform_tls_settings.subject.country, null)
 }
 
 resource "vault_pki_secret_backend_root_sign_intermediate" "pki_deployment" {
@@ -211,16 +211,16 @@ resource "vault_pki_secret_backend_root_sign_intermediate" "pki_deployment" {
   backend = vault_mount.pki_root.path
 
   csr = vault_pki_secret_backend_intermediate_cert_request.pki_deployment[each.key].csr
-  ttl = local.platform_default_tls_ttl.ica * 3600
+  ttl = local.platform_tls_settings.ttl_hours.ica * 3600
 
   common_name    = each.value.description
-  ou             = try(local.platform_default_tls_subject.organizational_unit, null)
-  organization   = try(local.platform_default_tls_subject.organization, null)
-  street_address = try(join("-", local.platform_default_tls_subject.street_address), null)
-  postal_code    = try(local.platform_default_tls_subject.postal_code, null)
-  locality       = try(local.platform_default_tls_subject.locality, null)
-  province       = try(local.platform_default_tls_subject.province, null)
-  country        = try(local.platform_default_tls_subject.country, null)
+  ou             = try(local.platform_tls_settings.subject.organizational_unit, null)
+  organization   = try(local.platform_tls_settings.subject.organization, null)
+  street_address = try(join("-", local.platform_tls_settings.subject.street_address), null)
+  postal_code    = try(local.platform_tls_settings.subject.postal_code, null)
+  locality       = try(local.platform_tls_settings.subject.locality, null)
+  province       = try(local.platform_tls_settings.subject.province, null)
+  country        = try(local.platform_tls_settings.subject.country, null)
 }
 
 resource "vault_pki_secret_backend_intermediate_set_signed" "pki_deployment" {
@@ -247,9 +247,9 @@ resource "vault_pki_secret_backend_role" "pki_deployment_server" {
 
   backend            = each.value.path
   name               = "server"
-  ttl                = local.platform_default_tls_ttl.cert * 3600
-  key_type           = lower(local.platform_default_tls_algorithm.algorithm)
-  key_bits           = local.platform_default_tls_algorithm.rsa_bits
+  ttl                = local.platform_tls_settings.ttl_hours.cert * 3600
+  key_type           = lower(local.platform_tls_settings.algorithm)
+  key_bits           = local.platform_tls_settings.rsa_bits
   key_usage          = ["DigitalSignature", "KeyEncipherment"]
   allow_ip_sans      = true
   allow_bare_domains = true
@@ -258,12 +258,12 @@ resource "vault_pki_secret_backend_role" "pki_deployment_server" {
   client_flag        = false
 
   ou             = [each.value.description]
-  organization   = try([local.platform_default_tls_subject.organization], null)
-  street_address = try([join("-", local.platform_default_tls_subject.street_address)], null)
-  postal_code    = try([local.platform_default_tls_subject.postal_code], null)
-  locality       = try([local.platform_default_tls_subject.locality], null)
-  province       = try([local.platform_default_tls_subject.province], null)
-  country        = try([local.platform_default_tls_subject.country], null)
+  organization   = try([local.platform_tls_settings.subject.organization], null)
+  street_address = try([join("-", local.platform_tls_settings.subject.street_address)], null)
+  postal_code    = try([local.platform_tls_settings.subject.postal_code], null)
+  locality       = try([local.platform_tls_settings.subject.locality], null)
+  province       = try([local.platform_tls_settings.subject.province], null)
+  country        = try([local.platform_tls_settings.subject.country], null)
 }
 
 resource "vault_policy" "deployments_server" {
@@ -296,9 +296,9 @@ resource "random_string" "token_secret" {
 }
 
 resource "tls_private_key" "kubelet_ca" {
-  algorithm   = local.platform_default_tls_algorithm.algorithm
-  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
-  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+  algorithm   = local.platform_tls_settings.algorithm
+  ecdsa_curve = try(local.platform_tls_settings.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_tls_settings.rsa_bits, null)
 }
 
 resource "tls_self_signed_cert" "kubelet_ca" {
@@ -306,18 +306,18 @@ resource "tls_self_signed_cert" "kubelet_ca" {
 
   subject {
     common_name         = "Kubernetes Kubelets CA"
-    country             = try(local.platform_default_tls_subject.country, null)
-    locality            = try(local.platform_default_tls_subject.locality, null)
-    organization        = try(local.platform_default_tls_subject.organization, null)
-    organizational_unit = try(local.platform_default_tls_subject.organizational_unit, null)
-    postal_code         = try(local.platform_default_tls_subject.postal_code, null)
-    province            = try(local.platform_default_tls_subject.province, null)
+    country             = try(local.platform_tls_settings.subject.country, null)
+    locality            = try(local.platform_tls_settings.subject.locality, null)
+    organization        = try(local.platform_tls_settings.subject.organization, null)
+    organizational_unit = try(local.platform_tls_settings.subject.organizational_unit, null)
+    postal_code         = try(local.platform_tls_settings.subject.postal_code, null)
+    province            = try(local.platform_tls_settings.subject.province, null)
     serial_number       = ""
-    street_address      = try(local.platform_default_tls_subject.street_address, null)
+    street_address      = try(local.platform_tls_settings.subject.street_address, null)
   }
 
   is_ca_certificate     = true
-  validity_period_hours = local.platform_default_tls_ttl.ca
+  validity_period_hours = local.platform_tls_settings.ttl_hours.ca
   allowed_uses = [
     "cert_signing",
   ]
@@ -336,8 +336,8 @@ resource "vault_mount" "pki_kubernetes" {
   description = each.value.description
 
   type                      = "pki"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.ca * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.ca * 3600
+  default_lease_ttl_seconds = local.platform_tls_settings.ttl_hours.ca * 3600
+  max_lease_ttl_seconds     = local.platform_tls_settings.ttl_hours.ca * 3600
 }
 
 resource "vault_pki_secret_backend_root_cert" "pki_kubernetes" {
@@ -346,18 +346,18 @@ resource "vault_pki_secret_backend_root_cert" "pki_kubernetes" {
 
   backend  = vault_mount.pki_kubernetes[each.key].path
   type     = "internal"
-  key_type = lower(local.platform_default_tls_algorithm.algorithm)
-  key_bits = local.platform_default_tls_algorithm.rsa_bits
-  ttl      = local.platform_default_tls_ttl.ca * 3600
+  key_type = lower(local.platform_tls_settings.algorithm)
+  key_bits = local.platform_tls_settings.rsa_bits
+  ttl      = local.platform_tls_settings.ttl_hours.ca * 3600
 
   common_name    = each.value.description
-  ou             = try(local.platform_default_tls_subject.organizational_unit, null)
-  organization   = try(local.platform_default_tls_subject.organization, null)
-  street_address = try(join("-", local.platform_default_tls_subject.street_address), null)
-  postal_code    = try(local.platform_default_tls_subject.postal_code, null)
-  locality       = try(local.platform_default_tls_subject.locality, null)
-  province       = try(local.platform_default_tls_subject.province, null)
-  country        = try(local.platform_default_tls_subject.country, null)
+  ou             = try(local.platform_tls_settings.subject.organizational_unit, null)
+  organization   = try(local.platform_tls_settings.subject.organization, null)
+  street_address = try(join("-", local.platform_tls_settings.subject.street_address), null)
+  postal_code    = try(local.platform_tls_settings.subject.postal_code, null)
+  locality       = try(local.platform_tls_settings.subject.locality, null)
+  province       = try(local.platform_tls_settings.subject.province, null)
+  country        = try(local.platform_tls_settings.subject.country, null)
 }
 
 resource "vault_pki_secret_backend_config_ca" "pki_kubernetes_kubelet" {
@@ -380,14 +380,14 @@ resource "vault_mount" "secret_kubernetes" {
   description = "Kubernetes Secrets"
 
   type                      = "kv"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.cert * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.cert * 3600
+  default_lease_ttl_seconds = local.platform_tls_settings.ttl_hours.cert * 3600
+  max_lease_ttl_seconds     = local.platform_tls_settings.ttl_hours.cert * 3600
 }
 
 resource "tls_private_key" "service_account" {
-  algorithm   = local.platform_default_tls_algorithm.algorithm
-  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
-  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+  algorithm   = local.platform_tls_settings.algorithm
+  ecdsa_curve = try(local.platform_tls_settings.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_tls_settings.rsa_bits, null)
 }
 
 resource "random_password" "default_encryption_key" {
@@ -544,9 +544,9 @@ resource "vault_pki_secret_backend_role" "pki_kubernetes" {
 
   backend            = vault_mount.pki_kubernetes[each.value.backend].path
   name               = try(each.value.name, each.key)
-  ttl                = local.platform_default_tls_ttl.cert * 3600
-  key_type           = lower(local.platform_default_tls_algorithm.algorithm)
-  key_bits           = local.platform_default_tls_algorithm.rsa_bits
+  ttl                = local.platform_tls_settings.ttl_hours.cert * 3600
+  key_type           = lower(local.platform_tls_settings.algorithm)
+  key_bits           = local.platform_tls_settings.rsa_bits
   key_usage          = ["DigitalSignature", "KeyEncipherment"]
   allow_ip_sans      = true
   allow_bare_domains = true
@@ -557,12 +557,12 @@ resource "vault_pki_secret_backend_role" "pki_kubernetes" {
   client_flag        = each.value.client_flag
 
   ou             = ["kubernetes"]
-  organization   = try([each.value.organization], [local.platform_default_tls_subject.organization], null)
-  street_address = try([join("-", local.platform_default_tls_subject.street_address)], null)
-  postal_code    = try([local.platform_default_tls_subject.postal_code], null)
-  locality       = try([local.platform_default_tls_subject.locality], null)
-  province       = try([local.platform_default_tls_subject.province], null)
-  country        = try([local.platform_default_tls_subject.country], null)
+  organization   = try([each.value.organization], [local.platform_tls_settings.subject.organization], null)
+  street_address = try([join("-", local.platform_tls_settings.subject.street_address)], null)
+  postal_code    = try([local.platform_tls_settings.subject.postal_code], null)
+  locality       = try([local.platform_tls_settings.subject.locality], null)
+  province       = try([local.platform_tls_settings.subject.province], null)
+  country        = try([local.platform_tls_settings.subject.country], null)
 }
 
 ## Policies
@@ -743,15 +743,15 @@ resource "vault_mount" "secret_rclone_backup" {
   description = "Backup Secrets"
 
   type                      = "kv"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.cert * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.cert * 3600
+  default_lease_ttl_seconds = local.platform_tls_settings.ttl_hours.cert * 3600
+  max_lease_ttl_seconds     = local.platform_tls_settings.ttl_hours.cert * 3600
 }
 
 resource "tls_private_key" "backup" {
   for_each    = toset(["etcd", "vault"])
-  algorithm   = local.platform_default_tls_algorithm.algorithm
-  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
-  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+  algorithm   = local.platform_tls_settings.algorithm
+  ecdsa_curve = try(local.platform_tls_settings.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_tls_settings.rsa_bits, null)
 }
 
 resource "vault_generic_secret" "backup_public" {
@@ -1111,8 +1111,8 @@ resource "vault_mount" "secret_oidc" {
   description = "OIDC Secrets"
 
   type                      = "kv"
-  default_lease_ttl_seconds = local.platform_default_tls_ttl.cert * 3600
-  max_lease_ttl_seconds     = local.platform_default_tls_ttl.cert * 3600
+  default_lease_ttl_seconds = local.platform_tls_settings.ttl_hours.cert * 3600
+  max_lease_ttl_seconds     = local.platform_tls_settings.ttl_hours.cert * 3600
 }
 
 resource "random_password" "oidc_client_secret" {

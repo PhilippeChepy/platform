@@ -279,7 +279,7 @@ resource "vault_pki_secret_backend_cert" "operator" {
   backend     = "pki/platform/kubernetes/client"
   name        = "operator-admin"
   common_name = "cluster-admin"
-  ttl         = local.platform_default_tls_ttl.cert * 3600
+  ttl         = local.platform_tls_settings.ttl_hours.cert * 3600
 }
 
 resource "local_file" "kubeconfig" {
@@ -349,7 +349,7 @@ all:
   vars:
     ansible_ssh_user: ubuntu
     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
-    ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
+    ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_settings.algorithm)}
 
     kubernetes_ingress:
 %{~for ingress, _ in local.platform_components.kubernetes.ingresses}
