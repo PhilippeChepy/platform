@@ -166,7 +166,7 @@ locals {
     }
   }
 
-  platform_ssh_algorithm = {
+  platform_ssh_settings = {
     # Key Algorithm (e.g. 'RSA', 'ECDSA' or 'ED25519'), with 'ED25519' as the default.
     algorithm = "ED25519"
 
@@ -177,7 +177,7 @@ locals {
     # rsa_bits = 4096
   }
 
-  platform_default_tls_algorithm = {
+  platform_tls_settings = {
     # Key Algorithm (e.g. 'RSA', 'ECDSA' or 'ED25519'), with 'ED25519' as the default.
     algorithm = "RSA"
 
@@ -186,22 +186,21 @@ locals {
 
     # Defaults to '4096' bits.
     rsa_bits = 4096
-  }
 
-  platform_default_tls_ttl = {
-    ca   = 262800 # 30y
-    ica  = 87600  # 10y
-    cert = 96     # 4d
-  }
+    ttl_hours = {
+      ca   = 262800 # 30y
+      ica  = 87600  # 10y
+      cert = 96     # 4d
+    }
 
-  # Set your organization details here
-  platform_default_tls_subject = {
-    organizational_unit = "Internal PaaS"
-    organization        = "Organization"
-    street_address      = ["Street Address"]
-    postal_code         = "postal code"
-    locality            = "Locality"
-    province            = "Province"
-    country             = "Country"
+    subject = {
+      organizational_unit = "Internal PaaS"
+      organization        = "Organization"
+      street_address      = ["Street Address"]
+      postal_code         = "postal code"
+      locality            = "Locality"
+      province            = "Province"
+      country             = "Country"
+    }
   }
 }

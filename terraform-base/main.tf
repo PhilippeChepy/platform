@@ -12,9 +12,9 @@ data "http" "exoscale_ip_addresses" {
 // PKI
 
 resource "tls_private_key" "root_ca" {
-  algorithm   = local.platform_default_tls_algorithm.algorithm
-  ecdsa_curve = try(local.platform_default_tls_algorithm.ecdsa_curve, null)
-  rsa_bits    = try(local.platform_default_tls_algorithm.rsa_bits, null)
+  algorithm   = local.platform_tls_settings.algorithm
+  ecdsa_curve = try(local.platform_tls_settings.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_tls_settings.rsa_bits, null)
 }
 
 resource "tls_self_signed_cert" "root_ca" {
@@ -22,18 +22,18 @@ resource "tls_self_signed_cert" "root_ca" {
 
   subject {
     common_name         = "Platform Root CA 1"
-    country             = try(local.platform_default_tls_subject.country, null)
-    locality            = try(local.platform_default_tls_subject.locality, null)
-    organization        = try(local.platform_default_tls_subject.organization, null)
-    organizational_unit = try(local.platform_default_tls_subject.organizational_unit, null)
-    postal_code         = try(local.platform_default_tls_subject.postal_code, null)
-    province            = try(local.platform_default_tls_subject.province, null)
+    country             = try(local.platform_tls_settings.subject.country, null)
+    locality            = try(local.platform_tls_settings.subject.locality, null)
+    organization        = try(local.platform_tls_settings.subject.organization, null)
+    organizational_unit = try(local.platform_tls_settings.subject.organizational_unit, null)
+    postal_code         = try(local.platform_tls_settings.subject.postal_code, null)
+    province            = try(local.platform_tls_settings.subject.province, null)
     serial_number       = ""
-    street_address      = try(local.platform_default_tls_subject.street_address, null)
+    street_address      = try(local.platform_tls_settings.subject.street_address, null)
   }
 
   is_ca_certificate     = true
-  validity_period_hours = local.platform_default_tls_ttl.ca
+  validity_period_hours = local.platform_tls_settings.ttl_hours.ca
   allowed_uses = [
     "cert_signing",
   ]
@@ -42,9 +42,9 @@ resource "tls_self_signed_cert" "root_ca" {
 // SSH automation
 
 resource "tls_private_key" "management_key" {
-  algorithm   = local.platform_ssh_algorithm.algorithm
-  ecdsa_curve = try(local.platform_ssh_algorithm.ecdsa_curve, null)
-  rsa_bits    = try(local.platform_ssh_algorithm.rsa_bits, null)
+  algorithm   = local.platform_ssh_settings.algorithm
+  ecdsa_curve = try(local.platform_ssh_settings.ecdsa_curve, null)
+  rsa_bits    = try(local.platform_ssh_settings.rsa_bits, null)
 }
 
 resource "exoscale_ssh_key" "management_key" {
@@ -143,7 +143,7 @@ resource "local_sensitive_file" "root_ca_private_key_pem" {
 
 resource "local_sensitive_file" "ssh_private_key" {
   content         = tls_private_key.management_key.private_key_openssh
-  filename        = "${path.module}/../artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}"
+  filename        = "${path.module}/../artifacts/id_${lower(local.platform_ssh_settings.algorithm)}"
   file_permission = 0600
 }
 
@@ -153,7 +153,7 @@ all:
   vars:
     ansible_ssh_user: ubuntu
     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
-    ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_algorithm.algorithm)}
+    ansible_ssh_private_key_file: artifacts/id_${lower(local.platform_ssh_settings.algorithm)}
 
     base_operator_security_group: "${exoscale_security_group.operator.id}"
     base_exoscale_security_group: "${exoscale_security_group.exoscale.id}"
