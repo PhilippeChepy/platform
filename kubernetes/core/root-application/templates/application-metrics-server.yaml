@@ -24,10 +24,10 @@ spec:
           kubernetes:
             kubelet:
               caCert: |
-                {{- .Values.platform.vault.caCert | nindent 16 }}
+                {{- .Values.platform.kubernetes.kubelet.caCert | nindent 16 }}
             aggregationLayer:
               caCert: |
-                {{- .Values.platform.vault.caCert | nindent 16 }}
+                {{- .Values.platform.kubernetes.aggregationLayer.caCert | nindent 16 }}
 
   project: "{{ .Values.core.projectName }}"
   syncPolicy:
