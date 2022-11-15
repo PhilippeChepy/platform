@@ -1,0 +1,4 @@
+apiVersion: v2
+name: helm-platform-cert-manager-dns01-cloudflare
+type: application
+version: 0.1.0

@@ -1,0 +1,29 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns-cloudflare
+spec:
+  destination:
+    name: ''
+    namespace: "{{ .Values.platform.ingress.name }}"
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "{{ .Values.deployment.externalDnsCloudflare.path }}"
+    repoURL: "{{ .Values.deployment.externalDnsCloudflare.repoURL }}"
+    targetRevision: "{{ .Values.deployment.externalDnsCloudflare.targetRevision }}"
+    helm:
+      values: |-
+        platform:
+          domain: "{{ .Values.platform.domain }}"
+          ingress:
+            name: "{{ .Values.platform.ingress.name }}"
+            domain: "{{ .Values.platform.ingress.domain }}"
+            cloudflare:
+              apiToken: "{{ .Values.platform.ingress.cloudflare.apiToken }}"
+
+  project: "{{ .Values.core.projectName }}"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: {{ .Values.deployment.externalDnsCloudflare.selfHeal }}
