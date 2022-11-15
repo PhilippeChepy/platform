@@ -1,0 +1,4 @@
+apiVersion: v2
+name: helm-platform-root-ingress
+type: application
+version: 0.1.0

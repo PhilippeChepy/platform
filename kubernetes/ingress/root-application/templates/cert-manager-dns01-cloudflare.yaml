@@ -1,0 +1,28 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-dns01-cloudflare
+spec:
+  destination:
+    name: ''
+    namespace: "{{ .Values.platform.ingress.name }}"
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "{{ .Values.deployment.certManagerDns01Cloudflare.path }}"
+    repoURL: "{{ .Values.deployment.certManagerDns01Cloudflare.repoURL }}"
+    targetRevision: "{{ .Values.deployment.certManagerDns01Cloudflare.targetRevision }}"
+    helm:
+      values: |-
+        platform:
+          ingress:
+            name: "{{ .Values.platform.ingress.name }}"
+            domain: "{{ .Values.platform.ingress.domain }}"
+            cloudflare:
+              apiToken: "{{ .Values.platform.ingress.cloudflare.apiToken }}"
+
+  project: "{{ .Values.core.projectName }}"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: {{ .Values.deployment.certManagerDns01Cloudflare.selfHeal }}

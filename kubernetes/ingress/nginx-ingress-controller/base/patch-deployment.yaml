@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      containers:
+      - name: controller
+        imagePullPolicy: Always
+        args:
+          - /nginx-ingress-controller
+          - --election-id=ingress-controller-leader
+          - "--controller-class=k8s.io/{{ .Values.platform.ingress.name }}-nginx"
+          - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+          - "--default-ssl-certificate=$(POD_NAMESPACE)/{{ .Values.platform.ingress.name }}-wildcard"
+          - --ingress-class-by-name=true
+          - --validating-webhook=:8443
+          - --validating-webhook-certificate=/usr/local/certificates/cert
+          - --validating-webhook-key=/usr/local/certificates/key
+          - --publish-service=$(POD_NAMESPACE)/ingress-nginx-controller
+          - --default-backend-service=$(POD_NAMESPACE)/nginx-errors
+          - --update-status
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+            # add: null
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 500m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      nodeSelector:
+        "{{ .Values.platform.ingress.label.name }}": "{{ .Values.platform.ingress.label.value }}"
+      tolerations:
+      - key: "{{ .Values.platform.ingress.taint.name }}"
+        operator: Equal
+        value: "{{ .Values.platform.ingress.taint.value }}"
+        effect: NoSchedule

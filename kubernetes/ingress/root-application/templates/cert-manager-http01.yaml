@@ -1,0 +1,25 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-http01
+spec:
+  destination:
+    name: ''
+    namespace: "{{ .Values.platform.ingress.name }}"
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "{{ .Values.deployment.certMmanagerHttp01.path }}"
+    repoURL: "{{ .Values.deployment.certMmanagerHttp01.repoURL }}"
+    targetRevision: "{{ .Values.deployment.certMmanagerHttp01.targetRevision }}"
+    helm:
+      values: |-
+        platform:
+          ingress:
+            name: "{{ .Values.platform.ingress.name }}"
+
+  project: "{{ .Values.core.projectName }}"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: {{ .Values.deployment.certMmanagerHttp01.selfHeal }}
