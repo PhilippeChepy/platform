@@ -82,3 +82,5 @@ patches:
           drop:
           - ALL
         readOnlyRootFilesystem: true
+
+namespace: "{{ .Values.platform.ingress.name }}"

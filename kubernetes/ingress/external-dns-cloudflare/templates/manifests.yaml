@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: external-dns
+  namespace: '{{ .Values.platform.ingress.name }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -53,7 +54,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: external-dns
-  namespace: default
+  namespace: '{{ .Values.platform.ingress.name }}'
 ---
 apiVersion: v1
 data:
@@ -61,11 +62,13 @@ data:
 kind: Secret
 metadata:
   name: '{{ .Values.platform.ingress.name }}-cloudflare-api-token'
+  namespace: '{{ .Values.platform.ingress.name }}'
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
+  namespace: '{{ .Values.platform.ingress.name }}'
 spec:
   replicas: 2
   selector:
@@ -123,6 +126,7 @@ metadata:
   labels:
     app: external-dns
   name: external-dns
+  namespace: '{{ .Values.platform.ingress.name }}'
 spec:
   minAvailable: 1
   selector:
