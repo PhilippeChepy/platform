@@ -1,0 +1,179 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-application-core
+spec:
+  destination:
+    namespace: argocd
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "${ argocd_root_application_core_path }"
+    repoURL: "${ argocd_root_application_core_repository }"
+    targetRevision: "${ argocd_root_application_core_revision }"
+    helm:
+      parameters:
+        - name: core.projectName
+          value: "${ argocd_core_project_name }"
+        - name: deployment.argocd.path
+          value: "${ argocd_deployment_argocd_path }"
+        - name: deployment.argocd.repoURL
+          value: "${ argocd_deployment_argocd_repository }"
+        - name: deployment.argocd.targetRevision
+          value: "${ argocd_deployment_argocd_revision }"
+        - name: deployment.argocd.selfHeal
+          value: "${ argocd_deployment_argocd_self_heal }"
+        - name: deployment.certManager.path
+          value: "${ argocd_deployment_cert_manager_path }"
+        - name: deployment.certManager.repoURL
+          value: "${ argocd_deployment_cert_manager_repository }"
+        - name: deployment.certManager.targetRevision
+          value: "${ argocd_deployment_cert_manager_revision }"
+        - name: deployment.certManager.selfHeal
+          value: "${ argocd_deployment_cert_manager_self_heal }"
+        - name: deployment.cilium.path
+          value: "${ argocd_deployment_cilium_path }"
+        - name: deployment.cilium.repoURL
+          value: "${ argocd_deployment_cilium_repository }"
+        - name: deployment.cilium.targetRevision
+          value: "${ argocd_deployment_cilium_revision }"
+        - name: deployment.cilium.selfHeal
+          value: "${ argocd_deployment_cilium_self_heal }"
+        - name: deployment.coredns.path
+          value: "${ argocd_deployment_coredns_path }"
+        - name: deployment.coredns.repoURL
+          value: "${ argocd_deployment_coredns_repository }"
+        - name: deployment.coredns.targetRevision
+          value: "${ argocd_deployment_coredns_revision }"
+        - name: deployment.coredns.selfHeal
+          value: "${ argocd_deployment_coredns_self_heal }"
+        - name: deployment.dex.path
+          value: "${ argocd_deployment_dex_path }"
+        - name: deployment.dex.repoURL
+          value: "${ argocd_deployment_dex_repository }"
+        - name: deployment.dex.targetRevision
+          value: "${ argocd_deployment_dex_revision }"
+        - name: deployment.dex.selfHeal
+          value: "${ argocd_deployment_dex_self_heal }"
+        - name: deployment.konnectivityAgent.path
+          value: "${ argocd_deployment_konnectivity_agent_path }"
+        - name: deployment.konnectivityAgent.repoURL
+          value: "${ argocd_deployment_konnectivity_agent_repository }"
+        - name: deployment.konnectivityAgent.targetRevision
+          value: "${ argocd_deployment_konnectivity_agent_revision }"
+        - name: deployment.konnectivityAgent.selfHeal
+          value: "${ argocd_deployment_konnectivity_agent_self_heal }"
+        - name: deployment.kyverno.path
+          value: "${ argocd_deployment_kyverno_path }"
+        - name: deployment.kyverno.repoURL
+          value: "${ argocd_deployment_kyverno_repository }"
+        - name: deployment.kyverno.targetRevision
+          value: "${ argocd_deployment_kyverno_revision }"
+        - name: deployment.kyverno.selfHeal
+          value: "${ argocd_deployment_kyverno_self_heal }"
+        - name: deployment.metricsServer.path
+          value: "${ argocd_deployment_metrics_server_path }"
+        - name: deployment.metricsServer.repoURL
+          value: "${ argocd_deployment_metrics_server_repository }"
+        - name: deployment.metricsServer.targetRevision
+          value: "${ argocd_deployment_metrics_server_revision }"
+        - name: deployment.metricsServer.selfHeal
+          value: "${ argocd_deployment_metrics_server_self_heal }"
+        - name: deployment.networkPolicies.path
+          value: "${ argocd_deployment_network_policies_path }"
+        - name: deployment.networkPolicies.repoURL
+          value: "${ argocd_deployment_network_policies_repository }"
+        - name: deployment.networkPolicies.targetRevision
+          value: "${ argocd_deployment_network_policies_revision }"
+        - name: deployment.networkPolicies.selfHeal
+          value: "${ argocd_deployment_network_policies_self_heal }"
+        - name: deployment.reloader.path
+          value: "${ argocd_deployment_reloader_path }"
+        - name: deployment.reloader.repoURL
+          value: "${ argocd_deployment_reloader_repository }"
+        - name: deployment.reloader.targetRevision
+          value: "${ argocd_deployment_reloader_revision }"
+        - name: deployment.reloader.selfHeal
+          value: "${ argocd_deployment_reloader_self_heal }"
+        - name: platform.domain
+          value: "${ argocd_platform_domain }"
+        - name: platform.argocd.hostname
+          value: "${ argocd_platform_argocd_hostname }"
+        - name: platform.argocd.ingressClassName
+          value: "${ argocd_platform_argocd_ingress_class_name }"
+        - name: platform.argocd.oidc.clientSecret
+          value: "${ argocd_platform_argocd_oidc_client_secret }"
+        - name: platform.argocd.policy
+          value: |
+            ${ indent(12, argocd_platform_argocd_policy) }
+        - name: platform.dex.hostname
+          value: "${ argocd_platform_dex_hostname }"
+        - name: platform.dex.publicIP
+          value: "${ argocd_platform_dex_public_ip }"
+        - name: platform.dex.ingressClassName
+          value: "${ argocd_platform_dex_ingress_class_name }"
+        - name: platform.dex.oidc.issuer
+          value: "${ argocd_platform_dex_oidc_issuer }"
+        - name: platform.dex.oidc.clientID
+          value: "${ argocd_platform_dex_oidc_client_id }"
+        - name: platform.dex.oidc.clientSecret
+          value: "${ argocd_platform_dex_oidc_client_secret }"
+        - name: platform.dex.caCert
+          value:  |
+            ${ indent(12, argocd_platform_dex_cacert) }
+        - name: platform.kubernetes.aggregationLayer.caCert
+          value: |
+            ${ indent(12, argocd_platform_kubernetes_aggregation_layer_cacert) }
+        - name: platform.kubernetes.apiserver.address
+          value: "${ argocd_platform_kubernetes_apiserver_address }"
+        - name: platform.kubernetes.cluster.domain
+          value: "${ argocd_platform_kubernetes_cluster_domain }"
+        - name: platform.kubernetes.cluster.dnsServiceIPv4
+          value: "${ argocd_platform_kubernetes_cluster_dns_service_ipv4 }"
+        - name: platform.kubernetes.cluster.dnsServiceIPv6
+          value: "${ argocd_platform_kubernetes_cluster_dns_service_ipv6 }"
+        - name: platform.kubernetes.cluster.podCidrIPv4
+          value: "${ argocd_platform_kubernetes_cluster_pod_cidr_ipv4 }"
+        - name: platform.kubernetes.cluster.podCidrIPv6
+          value: "${ argocd_platform_kubernetes_cluster_pod_cidr_ipv6 }"
+        - name: platform.kubernetes.kubelet.caCert
+          value:  |
+            ${ indent(12, argocd_platform_kubernetes_kubelet_cacert) }
+        - name: platform.kubernetes.proxyserver.address0
+          value: "${ argocd_platform_kubernetes_proxyserver_address0 }"
+        - name: platform.kubernetes.proxyserver.address1
+          value: "${ argocd_platform_kubernetes_proxyserver_address1 }"
+        - name: platform.vault.corePKISignPath
+          value: "${ argocd_platform_vault_core_pki_sign_path }"
+        - name: platform.vault.aggregationLayerPKIPath
+          value: "${ argocd_platform_vault_aggregation_layer_pki_path }"
+        - name: platform.vault.baseUrl
+          value: "${ argocd_platform_vault_base_url }"
+        - name: platform.vault.publicIP
+          value: "${ argocd_platform_vault_public_ip }"
+        - name: platform.vault.caCert
+          value: |
+            ${ indent(12, argocd_platform_vault_cacert) }
+  project: "${ argocd_core_project_name }"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+---
+apiVersion: v1
+data:
+  project: "${ base64encode(argocd_core_project_name) }"
+%{~ if length(argocd_root_application_core_ssh_deploy_key) > 0 }
+  sshPrivateKey: "${ base64encode(argocd_root_application_core_ssh_deploy_key) }"
+%{~ endif }
+  type: "${ base64encode("git") }"
+  url: "${ base64encode(argocd_root_application_core_repository) }"
+kind: Secret
+metadata:
+  annotations:
+    managed-by: argocd.argoproj.io
+  labels:
+    argocd.argoproj.io/secret-type: repository
+  name: repo-${ argocd_core_project_name }
+  namespace: argocd
+type: Opaque
