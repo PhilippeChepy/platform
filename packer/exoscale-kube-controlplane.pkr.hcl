@@ -13,8 +13,8 @@ source "exoscale" "base" {
   instance_template    = "Linux Ubuntu 22.04 LTS 64-bit"
   instance_disk_size   = 10
   template_zone        = var.zone
-  template_name        = "Kubernetes 1.25.3 control plane"
-  template_description = "Kubernetes 1.25.3 - Control Plane (minimal Ubuntu 22.04 & Hashicorp Vault 1.12.0)"
+  template_name        = "Kubernetes 1.25.4 control plane"
+  template_description = "Kubernetes 1.25.4 - Control Plane (minimal Ubuntu 22.04 & Hashicorp Vault 1.12.1)"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }
