@@ -205,28 +205,28 @@ module "kubernetes_nodepool" {
     },
     local.platform_components.kubernetes.storage.enabled ? {
       "ceph-mon" = {
-        size              = 3
-        instance_type     = "standard.small"
-        root_size         = 10
-        data_size         = 60
-        labels            = { (local.platform_components.kubernetes.storage.label) = "monitor" }
-        taints            = { (local.platform_components.kubernetes.storage.label) = { value = "monitor", effect = "NoSchedule" } }
+        size          = 3
+        instance_type = "standard.small"
+        root_size     = 10
+        data_size     = 60
+        labels        = { (local.platform_domain) = "monitor" }
+        taints        = { (local.platform_domain) = { value = "monitor", effect = "NoSchedule" } }
       },
       "ceph-osd" = {
-        size              = 3
-        instance_type     = "standard.small"
-        root_size         = 10
-        data_size         = 90
-        labels            = { (local.platform_components.kubernetes.storage.label) = "data" }
-        taints            = { (local.platform_components.kubernetes.storage.label) = { value = "data", effect = "NoSchedule" } }
+        size          = 3
+        instance_type = "standard.small"
+        root_size     = 10
+        data_size     = 90
+        labels        = { (local.platform_domain) = "data" }
+        taints        = { (local.platform_domain) = { value = "data", effect = "NoSchedule" } }
       },
       "ceph-mds" = {
-        size              = 2
-        instance_type     = "standard.small"
-        root_size         = 10
-        data_size         = 1
-        labels            = { (local.platform_components.kubernetes.storage.label) = "metadata" }
-        taints            = { (local.platform_components.kubernetes.storage.label) = { value = "metadata", effect = "NoSchedule" } }
+        size          = 2
+        instance_type = "standard.small"
+        root_size     = 10
+        data_size     = 1
+        labels        = { (local.platform_domain) = "metadata" }
+        taints        = { (local.platform_domain) = { value = "metadata", effect = "NoSchedule" } }
       }
     } : {},
     {
@@ -236,8 +236,8 @@ module "kubernetes_nodepool" {
         instance_type        = "standard.tiny"
         security_group_rules = local.ingress_security_group_rules
         root_size            = 10
-        labels               = { (split("=", ingress.label)[0]) = split("=", ingress.label)[1] }
-        taints               = { (split("=", ingress.label)[0]) = { value = split("=", ingress.label)[1], effect = "NoSchedule" } }
+        labels               = { (local.platform_domain) = name }
+        taints               = { (local.platform_domain) = { value = name, effect = "NoSchedule" } }
       }
   })
 
@@ -268,9 +268,9 @@ module "kubernetes_nodepool" {
   kubernetes     = local.kubernetes_settings
   kubelet_labels = try(each.value.labels, {})
   kubelet_taints = try(each.value.taints, {})
-  
-  root_size      = try(each.value.root_size, 10)
-  data_size      = try(each.value.data_size, 0)
+
+  root_size = try(each.value.root_size, 10)
+  data_size = try(each.value.data_size, 0)
 }
 
 # User interactions
