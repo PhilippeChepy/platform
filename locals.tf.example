@@ -10,7 +10,7 @@ locals {
   # For more privacy, manually set the allowed list of public IPs:
   # platform_admin_networks = [
   #   "a.b.c.d/32"
-  # ]  
+  # ]
 
   # For development purposes (not recommended as this open administration services to the world)
   # platform_admin_networks = [
@@ -105,62 +105,27 @@ locals {
       dns_service_ipv6       = "fc00::1:2"
 
       deployments = {
-        bootstrap = {
-          cert-manager       = { version = "1.10.0", namespace = "cert-manager" }
-          cilium-base        = { version = "1.12.3", namespace = "kube-system" }
-          core-dns           = { version = "1.10.0", namespace = "kube-system" }
-          konnectivity-agent = { version = "0.0.33", namespace = "kube-system" }
-          kyverno            = { version = "1.8.1", namespace = "kyverno" }
-          external-secrets   = { version = "0.5.9", namespace = "external-secrets" }
-        }
-
         core = {
-          argocd                                 = { version = "2.5.0", namespace = "argocd" }
-          cert-manager-clusterissuer-deployments = { version = "0.0.1", namespace = "cert-manager" }
-          certificate-dex                        = { version = "0.0.1", namespace = "dex" }
-          certificate-metrics-server             = { version = "0.0.1", namespace = "kube-system", vault-service-account = "cert-manager-metrics-server" }
-          dex                                    = { version = "2.35.3", namespace = "dex" } # requires an ingress serving platform_domain
-          metrics-server                         = { version = "0.6.1", namespace = "kube-system" }
-          network-policies                       = { version = "0.0.1", namespace = "kube-system" }
-          reloader                               = { version = "0.0.124", namespace = "reloader" }
+          repository = "https://github.com/PhilippeChepy/platform.git"
+          revision   = "argocd-bootstrap"
+          self_heal  = true
         }
-
-        # Unless explicitely specified (e.g. cert-manager), these deployments are put in
-        # an ingress-specific namespace
-        #
-        # Vault service accounts are prefixed with "ingress-${ingress_name}-"
         ingress = {
-          nginx-ingress-controller          = { version = "1.3.0" }
-          cert-manager-clusterissuer-http01 = { version = "0.0.1" }
-          cert-manager-dns01-cloudflare     = { provider = "cloudflare", version = "0.0.1", namespace = "cert-manager", credentials = true, vault-service-account = "cert-manager-dns01-cloudflare" }
-          external-dns-cloudflare           = { provider = "cloudflare", version = "0.13.1", credentials = true, vault-service-account = "external-dns-cloudflare" }
-          certificate-wildcard-letsencrypt  = { provider = "any", version = "0.0.1" } # requires a "cert-manager-dns01-*" deployment
+          repository = "https://github.com/PhilippeChepy/platform.git"
+          revision   = "argocd-bootstrap"
+          self_heal  = true
         }
-
       }
 
       # Define your ingress pools here
       ingresses = {
         default = {
-          label     = "platform.example.tld/ingress=default",
           pool_size = 2
-          deployments = [
-            "cert-manager-clusterissuer-http01",
-            "nginx-ingress-controller"
-          ]
         }
         internal = {
-          label       = "platform.example.tld/ingress=internal",
           pool_size   = 2,
           domain      = "internal.example.tld"
           integration = "cloudflare"
-          deployments = [
-            "cert-manager-clusterissuer-http01",
-            "nginx-ingress-controller",
-            "cert-manager-dns01-cloudflare",
-            "external-dns-cloudflare",
-            "certificate-wildcard-letsencrypt",
-          ]
         }
       }
     }
