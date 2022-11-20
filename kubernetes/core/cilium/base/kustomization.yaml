@@ -60,7 +60,7 @@ helmCharts:
   repo: https://helm.cilium.io/
   releaseName: cilium
   namespace: kube-system
-  version: 1.12.3
+  version: 1.12.4
   valuesInline:
     image:
       pullPolicy: Always
