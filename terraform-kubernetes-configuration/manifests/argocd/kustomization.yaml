@@ -1,0 +1,26 @@
+resources:
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.5.0/manifests/install.yaml
+
+patchesStrategicMerge:
+  - delete-dex.yaml
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: argocd-cm
+    patch: |-
+      - op: add
+        path: /data
+        value:
+          url: https://${ argocd_platform_argocd_hostname }
+          users.anonymous.enabled: "true"
+  - target:
+      kind: ConfigMap
+      name: argocd-rbac-cm
+    patch: |-
+      - op: add
+        path: /data
+        value:
+          policy.default: role:admin
+
+namespace: argocd
