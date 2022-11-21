@@ -23,8 +23,9 @@ build {
   sources = ["source.exoscale.base"]
 
   provisioner "ansible" {
-    playbook_file = "./ansible/exoscale-etcd.yml"
-    user          = "ubuntu"
+    playbook_file   = "./ansible/exoscale-etcd.yml"
+    user            = "ubuntu"
+    extra_arguments = [ "--scp-extra-args", "'-O'" ]
   }
 }
 
