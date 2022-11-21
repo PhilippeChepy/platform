@@ -1,0 +1,25 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: namespaces
+spec:
+  destination:
+    name: ''
+    namespace: namespaces
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "{{ .Values.deployment.namespaces.path }}"
+    repoURL: "{{ .Values.deployment.namespaces.repoURL }}"
+    targetRevision: "{{ .Values.deployment.namespaces.targetRevision }}"
+    helm:
+      values: |-
+        ingresses:
+{{- range .Values.ingresses }}
+          - {{ . }}
+{{- end }}
+  project: "{{ .Values.core.projectName }}"
+  #syncPolicy:
+    #automated:
+    #  prune: false
+    #  selfHeal: {{ .Values.deployment.namespaces.selfHeal }}

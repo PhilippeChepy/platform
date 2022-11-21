@@ -1,4 +1,4 @@
-%{~ for ingress in argocd_ingress }
+%{~ for _, ingress in argocd_ingress }
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -81,7 +81,7 @@ spec:
       prune: false
       selfHeal: true
 %{~ endfor }
-%{~ for ingress in argocd_ingress }
+%{~ for _, ingress in argocd_ingress }
 ---
 apiVersion: v1
 data:

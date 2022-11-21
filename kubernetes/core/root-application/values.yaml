@@ -42,6 +42,11 @@ deployment:
     repoURL:
     targetRevision:
     selfHeal:
+  namespaces:
+    path:
+    repoURL:
+    targetRevision:
+    selfHeal:
   networkPolicy:
     path:
     repoURL:
@@ -91,3 +96,5 @@ platform:
       baseUrl:
       publicIP:
       caCert:
+
+ingresses: []
