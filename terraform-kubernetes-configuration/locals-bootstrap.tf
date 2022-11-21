@@ -35,6 +35,10 @@ locals {
     argocd_deployment_metrics_server_repository         = local.platform_components.kubernetes.deployments.core.repository
     argocd_deployment_metrics_server_revision           = local.platform_components.kubernetes.deployments.core.revision
     argocd_deployment_metrics_server_self_heal          = local.platform_components.kubernetes.deployments.core.self_heal
+    argocd_deployment_namespaces_path                   = "kubernetes/core/namespaces"
+    argocd_deployment_namespaces_repository             = local.platform_components.kubernetes.deployments.core.repository
+    argocd_deployment_namespaces_revision               = local.platform_components.kubernetes.deployments.core.revision
+    argocd_deployment_namespaces_self_heal              = local.platform_components.kubernetes.deployments.core.self_heal
     argocd_deployment_network_policies_path             = "kubernetes/core/network-policies"
     argocd_deployment_network_policies_repository       = local.platform_components.kubernetes.deployments.core.repository
     argocd_deployment_network_policies_revision         = local.platform_components.kubernetes.deployments.core.revision
@@ -79,8 +83,8 @@ EOT
     argocd_root_application_core_revision               = local.platform_components.kubernetes.deployments.core.revision
     argocd_root_application_core_ssh_deploy_key         = ""
 
-    argocd_ingress = {
-      for ingress_name, ingress in local.platform_components.kubernetes.ingresses : ingress_name => {
+    argocd_ingress = [
+      for ingress_name, ingress in local.platform_components.kubernetes.ingresses : {
         deployment_cert_manager_dns01_cloudflare_path       = "kubernetes/ingress/cert-manager-dns01-cloudflare",
         deployment_cert_manager_dns01_cloudflare_repository = local.platform_components.kubernetes.deployments.ingress.repository,
         deployment_cert_manager_dns01_cloudflare_revision   = local.platform_components.kubernetes.deployments.ingress.revision,
@@ -115,6 +119,6 @@ EOT
         root_application_revision                           = local.platform_components.kubernetes.deployments.ingress.revision,
         ssh_deploy_key                                      = "",
       }
-    }
+    ]
   }
 }

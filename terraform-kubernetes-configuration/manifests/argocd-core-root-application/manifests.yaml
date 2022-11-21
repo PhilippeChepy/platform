@@ -79,6 +79,14 @@ spec:
           value: "${ argocd_deployment_metrics_server_revision }"
         - name: deployment.metricsServer.selfHeal
           value: "${ argocd_deployment_metrics_server_self_heal }"
+        - name: deployment.namespaces.path
+          value: "${ argocd_deployment_namespaces_path }"
+        - name: deployment.namespaces.repoURL
+          value: "${ argocd_deployment_namespaces_repository }"
+        - name: deployment.namespaces.targetRevision
+          value: "${ argocd_deployment_namespaces_revision }"
+        - name: deployment.namespaces.selfHeal
+          value: "${ argocd_deployment_namespaces_self_heal }"
         - name: deployment.networkPolicies.path
           value: "${ argocd_deployment_network_policies_path }"
         - name: deployment.networkPolicies.repoURL
@@ -154,6 +162,10 @@ spec:
         - name: platform.vault.caCert
           value: |
             ${ indent(12, argocd_platform_vault_cacert) }
+%{~ for index, ingress in argocd_ingress }
+        - name: ingresses[${index}]
+          value: "${ingress.name}"
+%{~ endfor }
   project: "${ argocd_core_project_name }"
   syncPolicy:
     automated:
