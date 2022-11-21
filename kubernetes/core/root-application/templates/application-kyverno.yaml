@@ -21,3 +21,5 @@ spec:
     automated:
       prune: false
       selfHeal: {{ .Values.deployment.kyverno.selfHeal }}
+    syncOptions:
+      - Replace=true
