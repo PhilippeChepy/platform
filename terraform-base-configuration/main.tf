@@ -1116,7 +1116,7 @@ resource "vault_mount" "secret_oidc" {
 }
 
 resource "random_password" "oidc_client_secret" {
-  for_each = toset(try(local.platform_components.kubernetes.deployments.core.argocd, null) != null ? ["argocd"] : [])
+  for_each = toset(["argocd"])
 
   length  = 32
   lower   = true
@@ -1134,7 +1134,6 @@ resource "vault_generic_secret" "oidc_client_secret" {
     client-secret = each.value.result
   })
 }
-
 
 resource "local_file" "properties_vault" {
   content = jsonencode({
