@@ -10,19 +10,20 @@ locals {
 
   # Settings for Kubernetes clients
 
-  kubernetes_settings = {
-    apiserver_ip_address = data.exoscale_nlb.endpoint.ip_address
-    apiserver_url        = module.kubernetes_control_plane.url
-    cluster_domain       = local.platform_components.kubernetes.cluster_domain
-    controlplane_ca_pem  = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
-    dns_service_ipv4     = local.platform_components.kubernetes.dns_service_ipv4
-    dns_service_ipv6     = local.platform_components.kubernetes.dns_service_ipv6
-    kubelet_authentication_token = join("", [
+  kubelet_bootstrap_token = join(".", [
     data.vault_generic_secret.kubernetes["bootstrap-token"].data["id"],
-      ".",
     data.vault_generic_secret.kubernetes["bootstrap-token"].data["secret"],
   ])
-    kubelet_ca_pem = data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"]
+
+  kubernetes_settings = {
+    apiserver_ip_address         = data.exoscale_nlb.endpoint.ip_address
+    apiserver_url                = module.kubernetes_control_plane.url
+    cluster_domain               = local.platform_components.kubernetes.cluster_domain
+    controlplane_ca_pem          = data.vault_generic_secret.kubernetes["control-plane-ca"].data["ca_chain"]
+    dns_service_ipv4             = local.platform_components.kubernetes.dns_service_ipv4
+    dns_service_ipv6             = local.platform_components.kubernetes.dns_service_ipv6
+    kubelet_authentication_token = local.kubelet_bootstrap_token
+    kubelet_ca_pem               = data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"]
   }
 
   # Ingress nodes
@@ -256,7 +257,6 @@ module "kubernetes_nodepool" {
       "ingress-${name}" => {
         size                 = ingress.pool_size
         instance_type        = "standard.tiny"
-        security_group_rules = local.ingress_security_group_rules
         root_size            = 10
         labels               = { (local.platform_domain) = name }
         taints               = { (local.platform_domain) = { value = name, effect = "NoSchedule" } }
@@ -275,7 +275,7 @@ module "kubernetes_nodepool" {
     vault   = local.vault.client_security_group, # for vault-related agents
     kubelet = module.kubernetes_control_plane.kubelet_security_group_id
   }
-  security_group_rules = try(each.value.security_group_rules, {})
+  security_group_rules = startswith(each.key, "ingress-") ? local.ingress_security_group_rules : {}
   ssh_key              = "${local.platform_name}-management"
 
   labels = {
@@ -390,8 +390,10 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
 resource "vault_kubernetes_auth_backend_role" "roles" {
   depends_on = [vault_auth_backend.kubernetes]
   for_each = {
-    cert-manager = { namespace = "cert-manager", service-account = "cert-manager" },
-    argocd       = { namespace = "argocd", service-account = "argocd" }
+    cert-manager               = { namespace = "cert-manager", service-account = "cert-manager" },
+    argocd                     = { namespace = "argocd", service-account = "argocd" }
+    certificate-core           = { namespace = "cert-manager", service-account = "cert-manager-deployment-core" }
+    certificate-metrics-server = { namespace = "kube-system", service-account = "cert-manager-metrics-server" }
   }
   backend                          = vault_auth_backend.kubernetes.path
   role_name                        = each.key
