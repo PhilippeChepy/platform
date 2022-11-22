@@ -107,7 +107,7 @@ EOT
         deployment_nginx_ingress_controller_self_heal       = local.platform_components.kubernetes.deployments.ingress.self_heal,
         name                                                = "ingress-${ingress_name}",
         platform_domain                                     = local.platform_domain,
-        platform_ingress_cloudflare_api_token               = ingress.integration == "cloudflare" ? data.vault_generic_secret.cloudflare[ingress_name].data["api-key"] : null,
+        platform_ingress_cloudflare_api_token               = try(ingress.integration, null) == "cloudflare" ? data.vault_generic_secret.cloudflare[ingress_name].data["api-key"] : "",
         platform_ingress_domain                             = try(ingress.domain, ""),
         platform_ingress_label_name                         = "${local.platform_domain}/ingress",
         platform_ingress_label_value                        = ingress_name,
