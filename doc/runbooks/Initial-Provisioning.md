@@ -137,14 +137,10 @@
 - Configure the base infrastructure & Exoscale IAM Keys:
     - Terraform: from the `terraform-base-configuration` sub-directory, run `terraform init` and `terraform apply`.
     - Ansible: from the **root directory**, run `ansible-playbook -i artifacts/vault-inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml`
-- Create the Kubernetes infrastructure:
-    - Terraform: from the `terraform-kubernetes` sub-directory, run `terraform init` and `terraform apply`.
 - (Optional) if you want to integrate the infrastructure with Cloudflare, you can also apply the `terraform-cloudflare` configuration:
     - Terraform: from the `terraform-cloudflare` sub-directory, run `terraform init` and `terraform apply`.
-- Provision required deployments:
-    - Terraform: from the `terraform-kubernetes-deployments-bootstrap` sub-directory, run `terraform init` and `terraform apply`.
-- Provision core deployments & ingress-related deployments:
-    - Terraform: from the `terraform-kubernetes-deployments-core` sub-directory, run `terraform init` and `terraform apply`.
+- Create the Kubernetes infrastructure:
+    - Terraform: from the `terraform-kubernetes` sub-directory, run `terraform init` and `terraform apply`.
 
 ### User namespaces
 
