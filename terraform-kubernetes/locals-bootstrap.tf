@@ -61,18 +61,18 @@ EOT
     argocd_platform_dex_oidc_client_id                  = local.platform_authentication["provider"] == "vault" ? data.vault_generic_secret.oidc_client_secret["dex"].data["client_id"] : null
     argocd_platform_dex_oidc_client_secret              = local.platform_authentication["provider"] == "vault" ? data.vault_generic_secret.oidc_client_secret["dex"].data["client_secret"] : null
     argocd_platform_dex_oidc_issuer                     = "https://vault.${local.platform_domain}:8200/v1/identity/oidc/provider/default"
-    argocd_platform_dex_public_ip                       = local.kubernetes.ingress["internal"].ip_address
+    argocd_platform_dex_public_ip                       = exoscale_nlb.ingress["internal"].ip_address
     argocd_platform_domain                              = local.platform_domain
     argocd_platform_kubernetes_aggregation_layer_cacert = data.vault_generic_secret.kubernetes["aggregation-layer-ca"].data["ca_chain"]
-    argocd_platform_kubernetes_apiserver_address        = local.kubernetes.control_plane_ip_address
+    argocd_platform_kubernetes_apiserver_address        = data.exoscale_nlb.endpoint.ip_address
     argocd_platform_kubernetes_cluster_dns_service_ipv4 = local.platform_components.kubernetes.dns_service_ipv4
     argocd_platform_kubernetes_cluster_dns_service_ipv6 = local.platform_components.kubernetes.dns_service_ipv6
     argocd_platform_kubernetes_cluster_domain           = local.platform_components.kubernetes.cluster_domain
     argocd_platform_kubernetes_cluster_pod_cidr_ipv4    = local.platform_components.kubernetes.pod_cidr_ipv4
     argocd_platform_kubernetes_cluster_pod_cidr_ipv6    = local.platform_components.kubernetes.pod_cidr_ipv6
     argocd_platform_kubernetes_kubelet_cacert           = data.vault_generic_secret.kubernetes["kubelet-ca"].data["ca_chain"]
-    argocd_platform_kubernetes_proxyserver_address0     = local.kubernetes.control_plane_instance_ip_address[0]
-    argocd_platform_kubernetes_proxyserver_address1     = local.kubernetes.control_plane_instance_ip_address[1]
+    argocd_platform_kubernetes_proxyserver_address0     = tolist(module.kubernetes_control_plane.instances)[0].public_ip_address
+    argocd_platform_kubernetes_proxyserver_address1     = tolist(module.kubernetes_control_plane.instances)[1].public_ip_address
     argocd_platform_vault_aggregation_layer_pki_path    = local.pki.pki_sign_aggregation_layer
     argocd_platform_vault_base_url                      = local.vault.url
     argocd_platform_vault_cacert                        = data.local_file.root_ca_certificate_pem.content
@@ -111,7 +111,7 @@ EOT
         platform_ingress_domain                             = try(ingress.domain, ""),
         platform_ingress_label_name                         = "${local.platform_domain}/ingress",
         platform_ingress_label_value                        = ingress_name,
-        platform_ingress_loadbalancer_ip                    = local.kubernetes.ingress[ingress_name].ip_address,
+        platform_ingress_loadbalancer_ip                    = exoscale_nlb.ingress[ingress_name].ip_address,
         platform_ingress_taint_name                         = "${local.platform_domain}/ingress",
         platform_ingress_taint_value                        = ingress_name,
         root_application_path                               = "kubernetes/ingress/root-application",
