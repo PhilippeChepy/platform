@@ -34,7 +34,7 @@ resource "cloudflare_record" "base_services" {
 
   zone_id = data.cloudflare_zone.zone[each.value.domain].id
   name    = "${each.value.name}.${local.platform_domain}."
-  value   = local.kubernetes.control_plane_ip_address
+  value   = local.vault.ip_address
   type    = "A"
   ttl     = 120
 }
