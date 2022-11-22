@@ -4,12 +4,11 @@ locals {
     if try(ingress.domain, null) != null
   ]
 
-  api_keys = toset(concat([
-    for name, ingress in local.platform_components.kubernetes.ingresses : [
-      for _, deployment in try(ingress.deployments, []) : "${name}-${deployment}"
-      if try(local.platform_components.kubernetes.deployments.ingress[deployment].provider, "") == "cloudflare" && try(local.platform_components.kubernetes.deployments.ingress[deployment].credentials, false)
-    ]
-  ]...))
+  api_keys = {
+    for name, ingress in local.platform_components.kubernetes.ingresses :
+    name => ingress.domain
+    if try(ingress.integration, "") == "cloudflare"
+  }
 }
 
 data "cloudflare_api_token_permission_groups" "all" {
