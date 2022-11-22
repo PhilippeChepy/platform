@@ -25,6 +25,8 @@ build {
   provisioner "ansible" {
     playbook_file   = "./ansible/exoscale-vault.yml"
     user            = "ubuntu"
+
+    ansible_ssh_extra_args = ["-oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa"]
     extra_arguments = [ "--scp-extra-args", "'-O'" ]
   }
 }
