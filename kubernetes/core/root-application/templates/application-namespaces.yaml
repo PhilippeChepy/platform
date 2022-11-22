@@ -19,7 +19,7 @@ spec:
           - {{ . }}
 {{- end }}
   project: "{{ .Values.core.projectName }}"
-  #syncPolicy:
-    #automated:
-    #  prune: false
-    #  selfHeal: {{ .Values.deployment.namespaces.selfHeal }}
+  syncPolicy:
+    automated:
+     prune: false
+     selfHeal: {{ .Values.deployment.namespaces.selfHeal }}
