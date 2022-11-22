@@ -63,8 +63,10 @@ spec:
           value: "${ ingress.name }"
         - name: platform.ingress.domain
           value: "${ ingress.platform_ingress_domain }"
+%{~ if length(ingress.platform_ingress_cloudflare_api_token) > 0 }
         - name: platform.ingress.cloudflare.apiToken
           value: "${ ingress.platform_ingress_cloudflare_api_token }"
+%{~ endif }
         - name: platform.ingress.loadbalancerIP
           value: "${ ingress.platform_ingress_loadbalancer_ip }"
         - name: platform.ingress.label.name
@@ -80,8 +82,6 @@ spec:
     automated:
       prune: false
       selfHeal: true
-%{~ endfor }
-%{~ for _, ingress in argocd_ingress }
 ---
 apiVersion: v1
 data:
@@ -100,4 +100,22 @@ metadata:
   name: repo-platform-${ ingress.name }
   namespace: argocd
 type: Opaque
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: "platform-${ ingress.name }"
+  namespace: argocd
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - name: '*'
+    namespace: '*'
+    server: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+status: {}
 %{~ endfor }
