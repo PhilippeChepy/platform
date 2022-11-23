@@ -4,6 +4,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cert-manager-dns01-cloudflare
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   destination:
     name: ''
