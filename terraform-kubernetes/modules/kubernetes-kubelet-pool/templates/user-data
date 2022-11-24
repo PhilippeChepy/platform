@@ -23,7 +23,7 @@ write_files:
     clusterDomain: "${kube_cluster_domain}"
     clusterDNS:
       - "${kube_dns_service_ipv4}"
-      - "${kube_dns_service_ipv6}"
+    #   - "${kube_dns_service_ipv6}" # TODO: fix ipv6
     resolvConf: "/run/systemd/resolve/resolv.conf"
     providerID: exoscale://{{ ds.meta_data.instance_id }}
     systemReserved:

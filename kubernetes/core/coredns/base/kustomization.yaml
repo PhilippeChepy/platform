@@ -55,6 +55,12 @@ patches:
       - op: replace
         path: /metadata/name
         value: coredns
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/initialDelaySeconds
+        value: 10
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/initialDelaySeconds
+        value: 5
       - op: add
         path: /spec/template/spec/containers/0/securityContext
         value:
@@ -84,19 +90,20 @@ patches:
       kind: Service
       name: coredns-coredns
     patch: |-
-      - op: add
-        path: /spec/ipFamilyPolicy
-        value: PreferDualStack
-      - op: add
-        path: /spec/ipFamilies
-        value:  
-          - IPv4
-          - IPv6
-      - op: add
-        path: /spec/clusterIPs
-        value:
-        - "{{ .Values.platform.kubernetes.cluster.dnsServiceIPv4 }}"
-        - "{{ .Values.platform.kubernetes.cluster.dnsServiceIPv6 }}"
+      # TODO: fix ipv6
+      # - op: add
+      #   path: /spec/ipFamilyPolicy
+      #   value: PreferDualStack
+      # - op: add
+      #   path: /spec/ipFamilies
+      #   value:  
+      #     - IPv4
+      #     - IPv6
+      # - op: add
+      #   path: /spec/clusterIPs
+      #   value:
+      #   - "{{ .Values.platform.kubernetes.cluster.dnsServiceIPv4 }}"
+      #   - "{{ .Values.platform.kubernetes.cluster.dnsServiceIPv6 }}"
       - op: replace
         path: /spec/clusterIP
         value: "{{ .Values.platform.kubernetes.cluster.dnsServiceIPv4 }}"

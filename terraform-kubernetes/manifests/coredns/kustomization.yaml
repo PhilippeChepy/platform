@@ -56,6 +56,12 @@ patches:
           capabilities:
             drop:
             - ALL
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/initialDelaySeconds
+        value: 10
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/initialDelaySeconds
+        value: 5
       - op: add
         path: /spec/template/spec/affinity
         value:
@@ -75,19 +81,20 @@ patches:
       kind: Service
       name: coredns-coredns
     patch: |-
-      - op: add
-        path: /spec/ipFamilyPolicy
-        value: PreferDualStack
-      - op: add
-        path: /spec/ipFamilies
-        value:  
-          - IPv4
-          - IPv6
-      - op: add
-        path: /spec/clusterIPs
-        value:
-        - ${ argocd_platform_kubernetes_cluster_dns_service_ipv4 }
-        - ${ argocd_platform_kubernetes_cluster_dns_service_ipv6 }
+      # TODO: fix ipv6
+      # - op: add
+      #   path: /spec/ipFamilyPolicy
+      #   value: PreferDualStack
+      # - op: add
+      #   path: /spec/ipFamilies
+      #   value:  
+      #     - IPv4
+      #     - IPv6
+      # - op: add
+      #   path: /spec/clusterIPs
+      #   value:
+      #   - ${ argocd_platform_kubernetes_cluster_dns_service_ipv4 }
+      #   - ${ argocd_platform_kubernetes_cluster_dns_service_ipv6 }
       - op: replace
         path: /spec/clusterIP
         value: ${ argocd_platform_kubernetes_cluster_dns_service_ipv4 }

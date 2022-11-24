@@ -99,13 +99,6 @@ metadata:
   namespace: kube-system
 spec:
   clusterIP: ${ argocd_platform_kubernetes_cluster_dns_service_ipv4 }
-  clusterIPs:
-  - ${ argocd_platform_kubernetes_cluster_dns_service_ipv4 }
-  - ${ argocd_platform_kubernetes_cluster_dns_service_ipv6 }
-  ipFamilies:
-  - IPv4
-  - IPv6
-  ipFamilyPolicy: PreferDualStack
   ports:
   - name: udp-53
     port: 53
@@ -175,7 +168,7 @@ spec:
             path: /health
             port: 8080
             scheme: HTTP
-          initialDelaySeconds: 60
+          initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
@@ -193,7 +186,7 @@ spec:
             path: /ready
             port: 8181
             scheme: HTTP
-          initialDelaySeconds: 30
+          initialDelaySeconds: 5
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5

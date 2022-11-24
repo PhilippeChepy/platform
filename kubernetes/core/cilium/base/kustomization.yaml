@@ -116,13 +116,13 @@ helmCharts:
     ipam:
       operator:
         clusterPoolIPv4PodCIDR: "{{ .Values.platform.kubernetes.cluster.podCidrIPv4 }}"
-        clusterPoolIPv6PodCIDR: "{{ .Values.platform.kubernetes.cluster.podCidrIPv6 }}"
+        # clusterPoolIPv6PodCIDR: "{{ .Values.platform.kubernetes.cluster.podCidrIPv6 }}"
 
     ipv4:
       enabled: true
 
     ipv6:
-      enabled: true
+      enabled: false # TODO: fix ipv6
 
     policyEnforcementMode: "always"
     policyAuditMode: true
