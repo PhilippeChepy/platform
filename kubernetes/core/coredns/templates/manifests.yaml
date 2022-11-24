@@ -99,13 +99,6 @@ metadata:
   namespace: kube-system
 spec:
   clusterIP: '{{ .Values.platform.kubernetes.cluster.dnsServiceIPv4 }}'
-  clusterIPs:
-  - '{{ .Values.platform.kubernetes.cluster.dnsServiceIPv4 }}'
-  - '{{ .Values.platform.kubernetes.cluster.dnsServiceIPv6 }}'
-  ipFamilies:
-  - IPv4
-  - IPv6
-  ipFamilyPolicy: PreferDualStack
   ports:
   - name: udp-53
     port: 53
@@ -177,7 +170,7 @@ spec:
             path: /health
             port: 8080
             scheme: HTTP
-          initialDelaySeconds: 60
+          initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
@@ -195,7 +188,7 @@ spec:
             path: /ready
             port: 8181
             scheme: HTTP
-          initialDelaySeconds: 30
+          initialDelaySeconds: 5
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5

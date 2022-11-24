@@ -42,7 +42,7 @@ variable "ipv4" {
 variable "ipv6" {
   description = "If IPv6 must be enabled on member instances."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "additional_security_groups" {

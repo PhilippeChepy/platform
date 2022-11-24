@@ -55,13 +55,16 @@ helmCharts:
     ipam:
       operator:
         clusterPoolIPv4PodCIDR: "${ argocd_platform_kubernetes_cluster_pod_cidr_ipv4 }"
-        clusterPoolIPv6PodCIDR: "${ argocd_platform_kubernetes_cluster_pod_cidr_ipv6 }"
+        # clusterPoolIPv6PodCIDR: "${ argocd_platform_kubernetes_cluster_pod_cidr_ipv6 }"
 
     ipv4:
       enabled: true
 
     ipv6:
-      enabled: true
+      enabled: false # TODO: fix ipv6 support
+
+    policyEnforcementMode: "always"
+    policyAuditMode: true
 
     operator:
       image:

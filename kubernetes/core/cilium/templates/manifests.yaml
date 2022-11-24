@@ -383,8 +383,6 @@ data:
   cluster-name: default
   cluster-pool-ipv4-cidr: '{{ .Values.platform.kubernetes.cluster.podCidrIPv4 }}'
   cluster-pool-ipv4-mask-size: "24"
-  cluster-pool-ipv6-cidr: '{{ .Values.platform.kubernetes.cluster.podCidrIPv6 }}'
-  cluster-pool-ipv6-mask-size: "120"
   cni-chaining-mode: portmap
   custom-cni-conf: "false"
   debug: "false"
@@ -399,7 +397,7 @@ data:
   enable-hubble: "true"
   enable-ipv4: "true"
   enable-ipv4-masquerade: "true"
-  enable-ipv6: "true"
+  enable-ipv6: "false"
   enable-ipv6-masquerade: "true"
   enable-k8s-terminating-endpoint: "true"
   enable-l2-neigh-discovery: "true"
