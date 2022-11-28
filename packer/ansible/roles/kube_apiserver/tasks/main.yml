@@ -92,13 +92,16 @@
     - kube-apiserver
   become: true
   ansible.builtin.template:
-    src: "kube-apiserver.service.j2"
-    dest: "/etc/systemd/system/kube-apiserver.service"
+    src: "{{ item }}.service.j2"
+    dest: "/etc/systemd/system/{{ item }}.service"
     force: true
     owner: root
     group: root
     mode: "0644"
   notify: reload systemd
+  loop:
+    - kube-apiserver
+    - etcd-endpoints-probe
 
 - name: Add user to sudoers for service restart
   tags:
@@ -106,11 +109,14 @@
   become: true
   ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-apiserver"
-    line: "%{{ kube_apiserver_group }} ALL= NOPASSWD: /bin/systemctl restart kube-apiserver"
+    line: "%{{ kube_apiserver_group }} ALL= NOPASSWD: /bin/systemctl restart {{ item }}"
     owner: "root"
     group: "root"
     create: true
     mode: 0440
+  loop:
+    - kube-apiserver
+    - etcd-endpoints-probe
 
 - name: apiserver additional helper scripts
   tags:
@@ -125,3 +131,30 @@
     mode: "0755"
   loop:
     - kube-healthcheck
+
+- name: apiserver additional helper environment files
+  tags:
+    - kube-apiserver
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/default/{{ item }}"
+    force: true
+    owner: "{{ kube_apiserver_user }}"
+    group: "{{ kube_apiserver_group }}"
+    mode: "0644"
+  loop:
+    - etcd-endpoints-probe
+
+- name: apiserver additional helper scripts
+  tags:
+    - kube-apiserver
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ kube_apiserver_bin_path }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - etcd-endpoints-probe

@@ -16,6 +16,12 @@
     healthcheck_user: "{{ kube_apiserver_user }}"
     healthcheck_group: "{{ kube_apiserver_group }}"
     healthcheck_script_path: "{{ kube_apiserver_bin_path }}/kube-healthcheck"
+    # etcd endpoints probe
+    etcd_server: false # needs client only
+    etcd_user: "{{ kube_apiserver_user }}"
+    etcd_group: "{{ kube_apiserver_group }}"
+    etcd_groups: null
+    etcd_dotfile_disable: true
     # kubernetes control plane components integration with vault agent
     vault_agent_kube_control_plane_auth_path: auth/exoscale
     vault_agent_config_template: "{{ playbook_dir }}/defaults/templates/vault-agent-exoscale-kube-control-plane.hcl.j2"
@@ -65,6 +71,7 @@
     - wait_service
     - kubernetes_common
     - apiserver_network_proxy_server
+    - etcd
     - kube_apiserver
     - kube_controller_manager
     - kube_scheduler

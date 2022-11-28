@@ -1,0 +1,5 @@
+ETCDCTL_API=3
+ETCDCTL_ENDPOINTS="ETCD_ENDPOINTS_PROBE_ETCDCTL_ENDPOINTS"
+ETCDCTL_CACERT={{ kube_apiserver_config_path }}/etcd-ca.pem
+ETCDCTL_CERT={{ kube_apiserver_config_path }}/etcd.pem
+ETCDCTL_KEY={{ kube_apiserver_config_path }}/etcd.key

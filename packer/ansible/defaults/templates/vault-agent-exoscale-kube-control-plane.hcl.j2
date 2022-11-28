@@ -27,7 +27,7 @@ EOT
   destination = "{{ kube_apiserver_config_path }}/etcd-ca.pem"
   perms       = 0644
   exec        = {
-    command = "sudo systemctl restart kube-apiserver"
+    command = "sudo systemctl restart kube-apiserver && sudo systemctl restart etcd-endpoints-probe"
   }
 }
 
@@ -41,7 +41,7 @@ EOT
   destination = "{{ kube_apiserver_config_path }}/etcd.pem"
   perms       = 0644
   exec        = {
-    command = "sudo systemctl restart kube-apiserver"
+    command = "sudo systemctl restart kube-apiserver && sudo systemctl restart etcd-endpoints-probe"
   }
 }
 
@@ -56,7 +56,7 @@ EOT
   command     = "sudo systemctl restart kube-apiserver"
   perms       = 0640
   exec        = {
-    command = "sudo systemctl restart kube-apiserver"
+    command = "sudo systemctl restart kube-apiserver && sudo systemctl restart etcd-endpoints-probe"
   }
 }
 

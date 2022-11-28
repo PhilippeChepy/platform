@@ -107,6 +107,7 @@ resource "exoscale_instance_pool" "cluster" {
   security_group_ids = concat([exoscale_security_group.cluster.id], values(var.additional_security_groups))
   user_data = templatefile("${path.module}/templates/user-data", {
     domain                         = var.domain
+    etcd_cluster_servers           = var.etcd.servers
     etcd_cluster_ip_address        = var.etcd.ip_address
     kubernetes_cluster_domain      = var.kubernetes.cluster_domain
     kubernetes_cluster_ip_address  = data.exoscale_nlb.endpoint.ip_address

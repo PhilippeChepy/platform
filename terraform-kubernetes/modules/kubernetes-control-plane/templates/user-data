@@ -23,14 +23,13 @@ write_files:
   permissions: "0644"
   content: |
     KUBE_APISERVER_ADVERTISE_ADDRESS={{ ds.meta_data.public_ipv4 }}
-    KUBE_APISERVER_ETCD_SERVERS=https://${etcd_cluster_ip_address}:2379
+    KUBE_APISERVER_ETCD_SERVERS=${etcd_cluster_servers}
     KUBE_APISERVER_SERVICE_ACCOUNT_ISSUER=https://kubernetes.default.svc.${kubernetes_cluster_domain}
     KUBE_APISERVER_SERVICE_CLUSTER_IP_RANGE=${kubernetes_service_cidr_ipv4},${kubernetes_service_cidr_ipv6}
     KUBE_APISERVER_OIDC_ISSUER_URL=${ oidc_issuer_url }
     KUBE_APISERVER_OIDC_CLIENT_ID=${ oidc_client_id }
     KUBE_APISERVER_OIDC_USERNAME_CLAIM=${ oidc_username_claim }
     KUBE_APISERVER_OIDC_GROUPS_CLAIM=${ oidc_groups }
-
 - path: /etc/default/kube-controller-manager
   owner: kubernetes:kubernetes
   permissions: "0644"
@@ -68,6 +67,7 @@ runcmd:
 - [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/vault.hcl"]
 - [sed, -i, "s|CLUSTER_NAME|${kubernetes_cluster_name}|g", "/etc/vault/vault.hcl"]
 - [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${zone}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|ETCD_ENDPOINTS_PROBE_ETCDCTL_ENDPOINTS|https://${etcd_cluster_ip_address}:2379|g", "/etc/default/etcd-endpoints-probe"]
 # Final bootstrap
 - [/usr/local/bin/wait-service, "${etcd_cluster_ip_address}", "2379"]
 - [/usr/local/bin/vault-agent-init, "${vault_cluster_healthcheck_url}", "vault-agent"]

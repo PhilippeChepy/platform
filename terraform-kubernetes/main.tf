@@ -128,6 +128,7 @@ module "kubernetes_control_plane" {
   vault = local.vault_settings
 
   etcd = {
+    servers    = join(",", [for instance in module.etcd_cluster.instances: "https://${instance.public_ip_address}:2379"])
     ip_address = data.exoscale_nlb.endpoint.ip_address
   }
 

@@ -85,8 +85,9 @@
   loop:
     - etcd
     - etcdctl
+    - etcdutl
 
-- name: Install etcd
+- name: Install etcd server components
   tags:
     - etcd
   become: true
@@ -97,10 +98,25 @@
     owner: "{{ etcd_user }}"
     group: "{{ etcd_group }}"
     mode: "0755"
+  when: etcd_server
   loop:
     - etcd
-    - etcdctl
     - etcdutl
+
+- name: Install etcd client components
+  tags:
+    - etcd
+  become: true
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ etcd_local_storage }}/etcd-v{{ etcd_version }}-{{ etcd_os }}-{{ etcd_architecture }}/{{ item }}"
+    dest: "{{ etcd_bin_path }}"
+    owner: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    mode: "0755"
+  when: etcd_client
+  loop:
+    - etcdctl
 
 - name: Create directories
   tags:
@@ -112,6 +128,7 @@
     owner: "{{ etcd_user }}"
     group: "{{ etcd_group }}"
     mode: 0700
+  when: etcd_server
   loop:
     - "{{ etcd_config_path }}"
     - "{{ etcd_data_path }}"
