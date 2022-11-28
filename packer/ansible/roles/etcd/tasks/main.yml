@@ -26,6 +26,7 @@
   changed_when: false
   ignore_errors: true
   check_mode: false
+  when: etcd_server
   tags:
     - skip_ansible_lint  # command is a shell builtin
 
@@ -43,6 +44,7 @@
     owner: root
     group: root
     mode: "0644"
+  when: etcd_server
   notify: reload systemd
 
 - name: Insert etcdctl source in dotfile
@@ -56,7 +58,7 @@
     group: "{{ etcd_group }}"
     create: true
     mode: 0600
-  when:
+  when: 
     - not etcd_dotfile_disable
 
 - name: Install additional templated files
@@ -70,6 +72,7 @@
     owner: "{{ etcd_user }}"
     group: "{{ etcd_group }}"
     mode: "{{ item.mode }}"
+  when: etcd_server and etcd_client
   loop:
     - {name: 'etcdctl', dest: "/etc/default", mode: "0600"}
     - {name: 'base-environment', dest: "{{ etcd_config_path }}", mode: "0600"}
@@ -85,3 +88,4 @@
     owner: root
     group: root
     mode: "0755"
+  when: etcd_server

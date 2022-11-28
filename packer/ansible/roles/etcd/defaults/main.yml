@@ -32,3 +32,6 @@ etcd_groups: null
 
 etcd_dotfile: ".bashrc"
 etcd_dotfile_disable: false
+
+etcd_server: true
+etcd_client: true
