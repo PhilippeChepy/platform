@@ -93,7 +93,7 @@ locals {
         kubelet       = "<kubernetes-node-template-id>"
       }
       # cluster settings
-      cluster_domain         = "kubernetes.${local.platform_domain}"
+      cluster_domain         = "cluster.local"
       pod_cidr_ipv4          = "10.96.0.0/12"
       service_cidr_ipv4      = "10.80.0.0/12"
       apiserver_service_ipv4 = "10.80.0.1"
@@ -107,12 +107,12 @@ locals {
       deployments = {
         core = {
           repository = "https://github.com/PhilippeChepy/platform.git"
-          revision   = "argocd-bootstrap"
+          revision   = "main"
           self_heal  = true
         }
         ingress = {
           repository = "https://github.com/PhilippeChepy/platform.git"
-          revision   = "argocd-bootstrap"
+          revision   = "main"
           self_heal  = true
         }
       }
