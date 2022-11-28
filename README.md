@@ -5,7 +5,7 @@ This repository implements a minimal platform hosted in the Exoscale public clou
 This platform is based on:
 - Hashicorp Vault for secret management
 - Kubernetes for workloads orchestration
-- ArgoCD for deployments (optional)
+- ArgoCD for deployments
 
 Multi-tenancy can be achieved using:
 - Namespaces along resources quota and limit

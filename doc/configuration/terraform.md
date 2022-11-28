@@ -7,9 +7,7 @@ Terraform configurations:
 The whole infrastructure is provisioned by applying 5 configurations, one after another:
 - `terraform-base`: for the Vault infrastructure
 - `terraform-base-configuration`: for the Vault configuration and required Exoscale IAM keys
-- `terraform-kubernetes`: for the Etcd and Kubernetes infrastructure
-- `terraform-kubernetes-deployments-bootstrap`: for required Kubernetes deployments
-- `terraform-kubernetes-deployments-core`: for core Kubernetes and ingress-controller deployments
+- `terraform-kubernetes`: for the Etcd and Kubernetes infrastructure, and argocd bootstrapping
 
 Additionally, integration with Cloudflare is set by applying an additional configuration:
 - `terraform-cloudflare`: (optional, only if using Cloudflare) deploys external-DNS and lets-encrypt integration using DNS01 issuer
@@ -99,6 +97,8 @@ ansible-playbook -i artifacts/vault-inventory.yml playbooks/vault-cluster-tls-ag
 ## Etcd & Kubernetes cluster (terraform-kubernetes)
 
 This configuration creates an etcd cluster, a kubernetes control plane (2 nodes by default), and kubelet instance-pools.
+It also waits for the cluster to be available, and deploy required manifests to bootstrap a minimal ArgoCD deployment;
+ArgoCD will then take care of deploying other base deployments
 
 ![Terraform Kubernetes](../assets/terraform-kubernetes%402x.png)
 
