@@ -138,7 +138,20 @@
     - Terraform: from the `terraform-base-configuration` sub-directory, run `terraform init` and `terraform apply`.
     - Ansible: from the **root directory**, run `ansible-playbook -i artifacts/vault-inventory.yml ansible-playbooks/vault-cluster-tls-agent.yaml`
 - (Optional) if you want to integrate the infrastructure with Cloudflare, you can also apply the `terraform-cloudflare` configuration:
+    - In your `locals.tf` file, set `integration = "cloudflare"` to ingress controllers definitions.
     - Terraform: from the `terraform-cloudflare` sub-directory, run `terraform init` and `terraform apply`.
+- (Opional) if you don't want to integrate the infrastructure with Cloudflare:
+    - Grab the `ingress-internal` ip address (e.g here: `89.145.160.94`):
+        ```
+        ❯ exo compute nlb list        
+        ┼──────────────────────────────────────┼───────────────────────────┼──────────┼────────────────┼
+        │                  ID                  │           NAME            │   ZONE   │   IP ADDRESS   │
+        ┼──────────────────────────────────────┼───────────────────────────┼──────────┼────────────────┼
+        │ cb2b82ed-1270-489a-a0c6-31a0c5d5b7a9 │ platform                  │ de-fra-1 │ 89.145.163.97  │
+        │ 1eb47307-aca3-445b-bb1a-e293f1dfa5e9 │ platform-ingress-internal │ de-fra-1 │ 89.145.160.94  │
+        ┼──────────────────────────────────────┼───────────────────────────┼──────────┼────────────────┼
+        ```
+    - Set a "A" DNS record on `cd.<platform-domain>` and `dex.<platform-domain>` pointing to this IP address.
 - Create the Kubernetes infrastructure:
     - Terraform: from the `terraform-kubernetes` sub-directory, run `terraform init` and `terraform apply`.
 
