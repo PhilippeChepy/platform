@@ -233,24 +233,24 @@ module "kubernetes_nodepool" {
         instance_type = "standard.small"
         root_size     = 10
         data_size     = 60
-        labels        = { (local.platform_domain) = "monitor" }
-        taints        = { (local.platform_domain) = { value = "monitor", effect = "NoSchedule" } }
+        labels        = { "${local.platform_domain}/role" = "monitor" }
+        taints        = { "${local.platform_domain}/role" = { value = "monitor", effect = "NoSchedule" } }
       },
       "ceph-osd" = {
         size          = 3
         instance_type = "standard.small"
         root_size     = 10
         data_size     = 90
-        labels        = { (local.platform_domain) = "data" }
-        taints        = { (local.platform_domain) = { value = "data", effect = "NoSchedule" } }
+        labels        = { "${local.platform_domain}/role" = "data" }
+        taints        = { "${local.platform_domain}/role" = { value = "data", effect = "NoSchedule" } }
       },
       "ceph-mds" = {
         size          = 2
         instance_type = "standard.small"
         root_size     = 10
         data_size     = 1
-        labels        = { (local.platform_domain) = "metadata" }
-        taints        = { (local.platform_domain) = { value = "metadata", effect = "NoSchedule" } }
+        labels        = { "${local.platform_domain}/role" = "metadata" }
+        taints        = { "${local.platform_domain}/role" = { value = "metadata", effect = "NoSchedule" } }
       }
     } : {},
     {
@@ -259,8 +259,8 @@ module "kubernetes_nodepool" {
         size                 = ingress.pool_size
         instance_type        = "standard.tiny"
         root_size            = 10
-        labels               = { (local.platform_domain) = name }
-        taints               = { (local.platform_domain) = { value = name, effect = "NoSchedule" } }
+        labels               = { "${local.platform_domain}/ingress" = name }
+        taints               = { "${local.platform_domain}/ingress" = { value = name, effect = "NoSchedule" } }
       }
   })
 
