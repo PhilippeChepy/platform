@@ -1,5 +1,5 @@
 resources:
-- https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.6.1/components.yaml
+- https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.6.2/components.yaml
 - ./pod-disruption-budget.yaml
 - ./secret.yaml
 - ./certificate.yaml

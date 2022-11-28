@@ -190,7 +190,7 @@ spec:
         - --tls-cert-file=/var/run/secrets/platform/cert/tls.crt
         - --tls-private-key-file=/var/run/secrets/platform/cert/tls.key
         - --secure-port=4443
-        image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1
+        image: k8s.gcr.io/metrics-server/metrics-server:v0.6.2
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
