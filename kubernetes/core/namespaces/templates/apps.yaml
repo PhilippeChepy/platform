@@ -1,0 +1,150 @@
+{{- range $namespaceIndex, $namespace := .Values.app.namespaces }}
+{{- with $ }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "{{ $namespace.name }}"
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: default
+  namespace: "{{ $namespace.name }}"
+spec:
+  hard:
+    requests.cpu: "{{ $namespace.quota.requests.cpu }}"
+    requests.memory: "{{ $namespace.quota.requests.memory }}"
+    limits.memory: "{{ $namespace.quota.limits.memory }}"
+    pods: "{{ $namespace.quota.pods }}"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default
+  namespace: "{{ $namespace.name }}"
+spec:
+  limits:
+    - type: Container
+      default:
+        memory: "{{ $namespace.defaults.limits.memory }}"
+      defaultRequest:
+        cpu: "{{ $namespace.defaults.requests.cpu }}"
+        memory: "{{ $namespace.defaults.requests.memory }}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+  name: users
+  namespace: "{{ $namespace.name }}"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - cronjobs
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+{{- range $userIndex, $user := $namespace.users }}
+{{- with $ }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+  name: "{{ $user }}"
+  namespace: "{{ $namespace.name }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: users
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: "https://dex.{{ .Values.platform.domain }}#{{ $user }}"
+{{- end }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+  name: {{ $namespace.name }}-users
+  namespace: "{{ $namespace.name }}"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespace
+  verbs:
+  - get
+  - list
+  - watch
+{{- range $userIndex, $user := $namespace.users }}
+{{- with $ }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $namespace.name }}-{{ $user }}
+  namespace: "{{ $namespace.name }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $namespace.name }}-users
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: https://dex.{{ .Values.platform.domain }}#{{ $user }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

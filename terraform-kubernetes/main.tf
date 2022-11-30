@@ -128,7 +128,7 @@ module "kubernetes_control_plane" {
   vault = local.vault_settings
 
   etcd = {
-    servers    = join(",", [for instance in module.etcd_cluster.instances: "https://${instance.public_ip_address}:2379"])
+    servers    = join(",", [for instance in module.etcd_cluster.instances : "https://${instance.public_ip_address}:2379"])
     ip_address = data.exoscale_nlb.endpoint.ip_address
   }
 
@@ -256,11 +256,11 @@ module "kubernetes_nodepool" {
     {
       for name, ingress in local.platform_components.kubernetes.ingresses :
       "ingress-${name}" => {
-        size                 = ingress.pool_size
-        instance_type        = "standard.tiny"
-        root_size            = 10
-        labels               = { "${local.platform_domain}/ingress" = name }
-        taints               = { "${local.platform_domain}/ingress" = { value = name, effect = "NoSchedule" } }
+        size          = ingress.pool_size
+        instance_type = "standard.tiny"
+        root_size     = 10
+        labels        = { "${local.platform_domain}/ingress" = name }
+        taints        = { "${local.platform_domain}/ingress" = { value = name, effect = "NoSchedule" } }
       }
   })
 
@@ -299,7 +299,7 @@ module "kubernetes_nodepool" {
 # Deployments
 
 resource "null_resource" "bootstrap_namespace" {
-  for_each   = toset(["argocd", "cert-manager"])
+  for_each = toset(["argocd", "cert-manager"])
 
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]

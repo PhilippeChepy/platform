@@ -166,6 +166,28 @@ spec:
         - name: ingresses[${index}]
           value: "${ingress.name}"
 %{~ endfor }
+%{~ for namespaceIndex, namespace in app_namespace }
+        - name: namespaces[${namespaceIndex}].name
+          value: "${namespace.name}"
+        - name: namespaces[${namespaceIndex}].quota_cpu_request
+          value: "${namespace.quota_cpu_request}"
+        - name: namespaces[${namespaceIndex}].quota_memory_request
+          value: "${namespace.quota_memory_request}"
+        - name: namespaces[${namespaceIndex}].quota_memory_limit
+          value: "${namespace.quota_memory_limit}"
+        - name: namespaces[${namespaceIndex}].quota_pods
+          value: "${namespace.quota_pods}"
+        - name: namespaces[${namespaceIndex}].default_cpu_request
+          value: "${namespace.default_cpu_request}"
+        - name: namespaces[${namespaceIndex}].default_memory_request
+          value: "${namespace.default_memory_request}"
+        - name: namespaces[${namespaceIndex}].default_memory_limit
+          value: "${namespace.default_memory_limit}"
+%{~ for userIndex, user in namespace.users }
+        - name: namespaces[${namespaceIndex}].users[${userIndex}]
+          value: "${user}"
+%{~ endfor }
+%{~ endfor }
   project: "${ argocd_core_project_name }"
   syncPolicy:
     automated:

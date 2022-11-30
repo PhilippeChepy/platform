@@ -98,3 +98,5 @@ platform:
       caCert:
 
 ingresses: []
+
+namespaces: []

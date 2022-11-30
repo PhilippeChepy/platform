@@ -8,7 +8,7 @@ metadata:
 spec:
   destination:
     name: ''
-    namespace: namespaces
+    # namespace: namespaces
     server: 'https://kubernetes.default.svc'
   source:
     path: "{{ .Values.deployment.namespaces.path }}"
@@ -16,9 +16,33 @@ spec:
     targetRevision: "{{ .Values.deployment.namespaces.targetRevision }}"
     helm:
       values: |-
+        platform:
+          domain: "{{ .Values.platform.domain }}"
         ingresses:
 {{- range .Values.ingresses }}
           - {{ . }}
+{{- end }}
+        app:
+          namespaces:
+{{- range .Values.namespaces }}
+            - name: {{ .name }}
+              quota:
+                requests:
+                  cpu: {{ .quota_cpu_request }}
+                  memory: {{ .quota_memory_request }}
+                limits:
+                  memory: {{ .quota_memory_limit }}
+                pods: {{ .quota_pods }}
+              defaults:
+                requests:
+                  cpu: {{ .default_cpu_request }}
+                  memory: {{ .default_memory_request }}
+                limits:
+                  memory: {{ .default_memory_limit }}
+              users:
+{{- range .users }}
+                - {{ . }}
+{{- end }}
 {{- end }}
   project: "{{ .Values.core.projectName }}"
   syncPolicy:
