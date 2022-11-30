@@ -1,6 +1,10 @@
 locals {
   admin_user_emails = [for user in local.platform_authentication.users : user.email if contains(user.groups, "administrator")]
 
+  groups_users = transpose(merge([
+    for username, user in local.platform_authentication.users : { (username) = try(user.groups, []) }
+  ]...))
+
   bootstrap_deployment_variable = {
     argocd_core_project_name                            = "platform-core"
     argocd_deployment_argocd_path                       = "kubernetes/core/argocd"
@@ -120,5 +124,24 @@ EOT
         ssh_deploy_key                                      = "",
       }
     ]
+
+    app_namespace = concat([
+      for project_name, project in local.platform_app_namespaces : [
+        for environment_name, environment in project : {
+          name                   = "${environment_name}-${project_name}"
+          quota_cpu_request      = environment.resource-quota.cpu-request,
+          quota_memory_request   = environment.resource-quota.memory-request,
+          quota_memory_limit     = environment.resource-quota.memory-limit,
+          quota_pods             = environment.resource-quota.pods,
+          default_cpu_request    = environment.resource-defaults.cpu-request,
+          default_memory_request = environment.resource-defaults.memory-request,
+          default_memory_limit   = environment.resource-defaults.memory-limit,
+          users = concat(
+            try(environment.users, []),
+            [for group in try(environment.groups, []) : try(local.groups_users[group])]...
+          )
+        }
+      ]
+    ]...)
   }
 }
