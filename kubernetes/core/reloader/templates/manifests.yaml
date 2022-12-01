@@ -93,7 +93,7 @@ spec:
                 app: reloader
             topologyKey: kubernetes.io/hostname
       containers:
-      - image: stakater/reloader:v0.0.124
+      - image: stakater/reloader:v0.0.125
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 5
