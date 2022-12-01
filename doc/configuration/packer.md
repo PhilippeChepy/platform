@@ -7,7 +7,7 @@ This approach allows faster and simpler provisioning, as templates are preconfig
 
 Each template is based on Ubuntu 22.04 (LTS)
 
-- `exoscale-vault.pkr.hcl` (Vault 1.12.1)
+- `exoscale-vault.pkr.hcl` (Vault 1.12.2)
     - Hashicorp Vault is used as a management system for most PKI, IAM, and other secrets for use by the whole infrastructure
 - `exoscale-etcd.pkr.hcl` (Etcd 3.5.6):
     - Etcd is used as a data store for the Kubernetes control plane.
