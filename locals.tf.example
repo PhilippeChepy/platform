@@ -21,9 +21,8 @@ locals {
   # Set your infrastructure domain here
   platform_domain = "${local.platform_name}.domain.tld"
 
-  # TODO/WIP: authentication management
   # Set your authentication settings here.
-  # Possible provider is only "vault" for now.
+  # Possible (oidc) provider is only "vault" for now.
   #
   # If provider is "vault", you can set your users and their groups here.
   # In this case, possible groups are "administrator", "developer" or both.

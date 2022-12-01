@@ -321,7 +321,6 @@ resource "null_resource" "bootstrap_deployment" {
     cilium  = { namespace = "kube-system" }
     coredns = { namespace = "kube-system" }
     argocd  = { namespace = "argocd" }
-    # konnectivity-agent = { namespace = "kube-system" }
   }
 
   provisioner "local-exec" {
