@@ -1,0 +1,121 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-autoscaler-node-ignore-helper
+  labels:
+    app.kubernetes.io/name: cluster-autoscaler-node-ignore-helper
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-autoscaler-node-ignore-helper
+  labels:
+    app.kubernetes.io/name: cluster-autoscaler-node-ignore-helper
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-autoscaler-node-ignore-helper
+  labels:
+    app.kubernetes.io/name: cluster-autoscaler-node-ignore-helper
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-autoscaler-node-ignore-helper
+subjects:
+  - kind: ServiceAccount
+    name: cluster-autoscaler-node-ignore-helper
+    namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-autoscaler-node-ignore-helper
+  labels:
+    app.kubernetes.io/name: cluster-autoscaler-node-ignore-helper
+data:
+  patch: |
+    {
+      "metadata": {
+        "annotations": {
+          "cluster-autoscaler.kubernetes.io/scale-down-disabled": "true"
+        },
+        "labels": {
+          "platform.i6h.io/autoscaling": "disabled"
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cluster-autoscaler-node-ignore-helper
+  labels:
+    app.kubernetes.io/name: cluster-autoscaler-node-ignore-helper
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cluster-autoscaler-node-ignore-helper
+  template:
+    metadata:
+      name: cluster-autoscaler-node-ignore-helper
+      labels:
+        app.kubernetes.io/name: cluster-autoscaler-node-ignore-helper
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: platform.i6h.io/autoscaling
+                operator: In
+                values:
+                - requires-deactivation
+      tolerations:
+      - operator: Exists
+      containers:
+      - name: annotator
+        image: bitnami/kubectl:1.25.4
+        command:
+        - /bin/sh
+        - -c
+        - |
+          for node in $(kubectl get nodes -l platform.i6h.io/autoscaling=requires-deactivation -o name);
+          do
+            kubectl patch node "${node##*/}" --patch-file /kubernetes-manifests/node-patch.yaml
+          done
+        resources:
+          limits:
+            memory: 32Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /kubernetes-manifests
+          name: patch-volume
+      serviceAccount: cluster-autoscaler-node-ignore-helper
+      volumes:
+      - name: patch-volume
+        configMap:
+          items:
+          - key: patch
+            path: node-patch.yaml
+          name: cluster-autoscaler-node-ignore-helper

@@ -318,16 +318,21 @@ resource "null_resource" "bootstrap_namespace" {
 resource "null_resource" "bootstrap_deployment" {
   depends_on = [null_resource.bootstrap_namespace]
   for_each = {
-    cilium  = { namespace = "kube-system" }
-    coredns = { namespace = "kube-system" }
-    argocd  = { namespace = "argocd" }
+    cilium                 = { namespace = "kube-system" }
+    coredns                = { namespace = "kube-system" }
+    argocd                 = { namespace = "argocd" }
+    cas-node-ignore-helper = { namespace = "kube-system", template = false }
   }
 
   provisioner "local-exec" {
     when        = create
     command     = <<-EOT
 cat <<'EOF' | kubectl apply --namespace=${each.value.namespace} --filename=-
+%{~if coalesce(each.value.template, false) == true~}
 ${sensitive(templatefile("manifests/${each.key}/manifests.yaml", local.bootstrap_deployment_variable))}
+%{~else}
+${sensitive(file("manifests/${each.key}/manifests.yaml"))}
+%{~endif}
 EOF
 EOT
     environment = { KUBECONFIG = "../artifacts/admin.kubeconfig" }

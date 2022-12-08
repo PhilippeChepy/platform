@@ -23,6 +23,14 @@ spec:
           value: "${ argocd_deployment_argocd_revision }"
         - name: deployment.argocd.selfHeal
           value: "${ argocd_deployment_argocd_self_heal }"
+        - name: deployment.casNodeAnnotatorHelper.path
+          value: "${ argocd_deployment_cas_node_annotator_helper_path }"
+        - name: deployment.casNodeAnnotatorHelper.repoURL
+          value: "${ argocd_deployment_cas_node_annotator_helper_repository }"
+        - name: deployment.casNodeAnnotatorHelper.targetRevision
+          value: "${ argocd_deployment_cas_node_annotator_helper_revision }"
+        - name: deployment.casNodeAnnotatorHelper.selfHeal
+          value: "${ argocd_deployment_cas_node_annotator_helper_self_heal }"
         - name: deployment.certManager.path
           value: "${ argocd_deployment_cert_manager_path }"
         - name: deployment.certManager.repoURL

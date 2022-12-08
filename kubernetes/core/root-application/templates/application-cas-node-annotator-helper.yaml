@@ -1,0 +1,26 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cas-node-annotator-helper
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  destination:
+    name: ''
+    namespace: kube-system
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: "{{ .Values.deployment.casNodeAnnotatorHelper.path }}"
+    repoURL: "{{ .Values.deployment.casNodeAnnotatorHelper.repoURL }}"
+    targetRevision: "{{ .Values.deployment.casNodeAnnotatorHelper.targetRevision }}"
+    helm:
+      values: |-
+        platform:
+          domain: "{{ .Values.platform.domain }}"
+
+  project: "{{ .Values.core.projectName }}"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: {{ .Values.deployment.casNodeAnnotatorHelper.selfHeal }}
