@@ -220,49 +220,11 @@ module "kubernetes_nodepool" {
     module.kubernetes_control_plane
   ]
 
-  for_each = merge({
-    "general" = {
-      size          = 3
-      instance_type = "standard.small"
-      root_size     = 10
-    }
-    },
-    local.platform_components.kubernetes.storage.enabled ? {
-      "ceph-mon" = {
-        size          = 3
-        instance_type = "standard.small"
-        root_size     = 10
-        data_size     = 60
-        labels        = { "${local.platform_domain}/role" = "monitor" }
-        taints        = { "${local.platform_domain}/role" = { value = "monitor", effect = "NoSchedule" } }
-      },
-      "ceph-osd" = {
-        size          = 3
-        instance_type = "standard.small"
-        root_size     = 10
-        data_size     = 90
-        labels        = { "${local.platform_domain}/role" = "data" }
-        taints        = { "${local.platform_domain}/role" = { value = "data", effect = "NoSchedule" } }
-      },
-      "ceph-mds" = {
-        size          = 2
-        instance_type = "standard.small"
-        root_size     = 10
-        data_size     = 1
-        labels        = { "${local.platform_domain}/role" = "metadata" }
-        taints        = { "${local.platform_domain}/role" = { value = "metadata", effect = "NoSchedule" } }
-      }
-    } : {},
-    {
-      for name, ingress in local.platform_components.kubernetes.ingresses :
-      "ingress-${name}" => {
-        size          = ingress.pool_size
-        instance_type = "standard.tiny"
-        root_size     = 10
-        labels        = { "${local.platform_domain}/ingress" = name }
-        taints        = { "${local.platform_domain}/ingress" = { value = name, effect = "NoSchedule" } }
-      }
-  })
+  for_each = merge(
+    local.node_base_purpose,
+    # local.node_storage,
+    local.node_ingress
+  )
 
   zone = local.platform_zone
   name = "${local.platform_name}-${each.key}"
