@@ -13,10 +13,10 @@ Each template is based on Ubuntu 22.04 (LTS)
     - Etcd is used as a data store for the Kubernetes control plane.
     - Vault agent to retrieve and update TLS certificates from the Vault cluster.
     - Helper script to create or join the cluster automatically, based on instance pool members.
-- `exoscale-kube-controlplane.pkr.hcl` (Kubernetes 1.25.4 control plane):
+- `exoscale-kube-controlplane.pkr.hcl` (Kubernetes 1.26.0 control plane):
     - Kubernetes control plane components: `apiserver`, `apiserver-network-proxy` (aka `konnectivity`), `scheduler`, `controller-manager`.
     - Vault agent to retrieve and update TLS certificates and other secrets from the Vault cluster.
-- `exoscale-kube-node.pkr.hcl` (Kubernetes 1.25.4 node):
+- `exoscale-kube-node.pkr.hcl` (Kubernetes 1.26.0 node):
     - Kubelet service.
     - `kube-proxy` is NOT installed because the CNI plugin replaces its features (Cilium is deployed in the cluster in strict `kube-proxy` replacement mode).
 
