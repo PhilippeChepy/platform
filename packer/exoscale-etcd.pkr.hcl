@@ -25,9 +25,6 @@ build {
   provisioner "ansible" {
     playbook_file   = "./ansible/exoscale-etcd.yml"
     user            = "ubuntu"
-
-    ansible_ssh_extra_args = ["-oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa"]
-    extra_arguments = [ "--scp-extra-args", "'-O'" ]
   }
 }
 
@@ -36,6 +33,10 @@ packer {
     exoscale = {
       version = ">= 0.3.0"
       source  = "github.com/exoscale/exoscale"
+    }
+    ansible = {
+      version = ">= 1.0.2"
+      source  = "github.com/hashicorp/ansible"
     }
   }
 }

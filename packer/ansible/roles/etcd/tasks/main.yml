@@ -58,7 +58,7 @@
     group: "{{ etcd_group }}"
     create: true
     mode: 0600
-  when: 
+  when:
     - not etcd_dotfile_disable
 
 - name: Install additional templated files

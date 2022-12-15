@@ -55,7 +55,7 @@
 - name: Install OS packages and Vault
   include_tasks: _install.yml
 
-- name: extract systemd version
+- name: Extract systemd version
   ansible.builtin.shell: |
     set -o pipefail
     systemctl --version systemd | head -n 1 | cut -d' ' -f2
@@ -64,7 +64,8 @@
   changed_when: false
   check_mode: false
   register: systemd_version
-  tags: skip_ansible_lint
+  tags:
+    - skip_ansible_lint
 
 - name: Create TLS directory
   tags:

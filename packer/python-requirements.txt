@@ -1,0 +1,2 @@
+ansible>=6
+ansible-lint>=6
