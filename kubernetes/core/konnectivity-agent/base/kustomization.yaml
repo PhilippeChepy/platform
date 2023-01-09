@@ -63,7 +63,7 @@ patches:
           runAsUser: 1000
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent:v0.0.33
+        value: eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent:v0.0.35
       - op: copy
         from: /spec/template/spec/containers/0
         path: /spec/template/spec/containers/1
