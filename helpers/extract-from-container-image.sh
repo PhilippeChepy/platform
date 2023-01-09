@@ -10,7 +10,7 @@ export TMP_DIR="${DST_FILE}.tmp"
 image_download() {
     echo " > Downloading container image"
     mkdir -p "${TMP_DIR}"
-    docker pull "$IMAGE:$TAG" > /dev/null
+    docker pull --platform linux/amd64 "$IMAGE:$TAG" > /dev/null
     docker save "$IMAGE:$TAG" > "${TMP_DIR}/image.tar"
 }
 
