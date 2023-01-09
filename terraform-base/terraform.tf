@@ -7,7 +7,7 @@ terraform {
 
     exoscale = {
       source  = "exoscale/exoscale"
-      version = ">= 0.41.0"
+      version = ">= 0.43.0"
     }
 
     http = {
