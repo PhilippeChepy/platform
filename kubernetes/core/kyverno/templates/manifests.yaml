@@ -8,14 +8,13 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: admissionreports.kyverno.io
 spec:
   group: kyverno.io
   names:
     categories:
     - kyverno
-    - all
     kind: AdmissionReport
     listKind: AdmissionReportList
     plural: admissionreports
@@ -355,14 +354,13 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: backgroundscanreports.kyverno.io
 spec:
   group: kyverno.io
   names:
     categories:
     - kyverno
-    - all
     kind: BackgroundScanReport
     listKind: BackgroundScanReportList
     plural: backgroundscanreports
@@ -662,14 +660,13 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: clusteradmissionreports.kyverno.io
 spec:
   group: kyverno.io
   names:
     categories:
     - kyverno
-    - all
     kind: ClusterAdmissionReport
     listKind: ClusterAdmissionReportList
     plural: clusteradmissionreports
@@ -1010,14 +1007,13 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: clusterbackgroundscanreports.kyverno.io
 spec:
   group: kyverno.io
   names:
     categories:
     - kyverno
-    - all
     kind: ClusterBackgroundScanReport
     listKind: ClusterBackgroundScanReportList
     plural: clusterbackgroundscanreports
@@ -1317,14 +1313,13 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: clusterpolicies.kyverno.io
 spec:
   group: kyverno.io
   names:
     categories:
     - kyverno
-    - all
     kind: ClusterPolicy
     listKind: ClusterPolicyList
     plural: clusterpolicies
@@ -4061,6 +4056,8 @@ spec:
                                   description: PredicateType defines the type of Predicate
                                     contained within the Statement.
                                   type: string
+                              required:
+                              - predicateType
                               type: object
                             type: array
                           attestors:
@@ -7102,6 +7099,8 @@ spec:
                                       description: PredicateType defines the type
                                         of Predicate contained within the Statement.
                                       type: string
+                                  required:
+                                  - predicateType
                                   type: object
                                 type: array
                               attestors:
@@ -9899,6 +9898,8 @@ spec:
                                   description: PredicateType defines the type of Predicate
                                     contained within the Statement.
                                   type: string
+                              required:
+                              - predicateType
                               type: object
                             type: array
                           attestors:
@@ -12915,6 +12916,8 @@ spec:
                                       description: PredicateType defines the type
                                         of Predicate contained within the Statement.
                                       type: string
+                                  required:
+                                  - predicateType
                                   type: object
                                 type: array
                               attestors:
@@ -13238,7 +13241,7 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: clusterpolicyreports.wgpolicyk8s.io
 spec:
   group: wgpolicyk8s.io
@@ -13606,7 +13609,7 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: generaterequests.kyverno.io
 spec:
   group: kyverno.io
@@ -13795,7 +13798,7 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: policies.kyverno.io
 spec:
   group: kyverno.io
@@ -16540,6 +16543,8 @@ spec:
                                   description: PredicateType defines the type of Predicate
                                     contained within the Statement.
                                   type: string
+                              required:
+                              - predicateType
                               type: object
                             type: array
                           attestors:
@@ -19582,6 +19587,8 @@ spec:
                                       description: PredicateType defines the type
                                         of Predicate contained within the Statement.
                                       type: string
+                                  required:
+                                  - predicateType
                                   type: object
                                 type: array
                               attestors:
@@ -22380,6 +22387,8 @@ spec:
                                   description: PredicateType defines the type of Predicate
                                     contained within the Statement.
                                   type: string
+                              required:
+                              - predicateType
                               type: object
                             type: array
                           attestors:
@@ -25396,6 +25405,8 @@ spec:
                                       description: PredicateType defines the type
                                         of Predicate contained within the Statement.
                                       type: string
+                                  required:
+                                  - predicateType
                                   type: object
                                 type: array
                               attestors:
@@ -25719,7 +25730,7 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: policyreports.wgpolicyk8s.io
 spec:
   group: wgpolicyk8s.io
@@ -26086,14 +26097,13 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: v1.8.4
+    app.kubernetes.io/version: v1.8.5
   name: updaterequests.kyverno.io
 spec:
   group: kyverno.io
   names:
     categories:
     - kyverno
-    - all
     kind: UpdateRequest
     listKind: UpdateRequestList
     plural: updaterequests
@@ -26479,8 +26489,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno
   namespace: kyverno
 ---
@@ -26494,8 +26504,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:leaderelection
   namespace: kyverno
 rules:
@@ -26535,8 +26545,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -26549,8 +26559,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
   name: kyverno:admin-generaterequest
 rules:
@@ -26577,8 +26587,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
   name: kyverno:admin-policies
 rules:
@@ -26606,8 +26616,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
   name: kyverno:admin-policyreport
 rules:
@@ -26635,8 +26645,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
   name: kyverno:admin-reports
 rules:
@@ -26666,8 +26676,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
   name: kyverno:admin-updaterequest
 rules:
@@ -26694,8 +26704,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:events
 rules:
 - apiGroups:
@@ -26718,8 +26728,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:generate
 rules:
 - apiGroups:
@@ -26767,8 +26777,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:policies
 rules:
 - apiGroups:
@@ -26822,8 +26832,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:userinfo
 rules:
 - apiGroups:
@@ -26847,8 +26857,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:view
 rules:
 - apiGroups:
@@ -26870,8 +26880,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:webhook
 rules:
 - apiGroups:
@@ -26898,8 +26908,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno:leaderelection
   namespace: kyverno
 roleRef:
@@ -26921,8 +26931,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -26946,8 +26956,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno
   namespace: kyverno
 ---
@@ -26963,8 +26973,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno-metrics
   namespace: kyverno
 ---
@@ -26978,8 +26988,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno-svc
   namespace: kyverno
 spec:
@@ -27004,8 +27014,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno-svc-metrics
   namespace: kyverno
 spec:
@@ -27030,8 +27040,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kyverno
     app.kubernetes.io/part-of: kyverno
-    app.kubernetes.io/version: 2.6.4
-    helm.sh/chart: kyverno-2.6.4
+    app.kubernetes.io/version: 2.6.5
+    helm.sh/chart: kyverno-2.6.5
   name: kyverno
   namespace: kyverno
 spec:
@@ -27054,8 +27064,8 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: kyverno
         app.kubernetes.io/part-of: kyverno
-        app.kubernetes.io/version: 2.6.4
-        helm.sh/chart: kyverno-2.6.4
+        app.kubernetes.io/version: 2.6.5
+        helm.sh/chart: kyverno-2.6.5
         rule.{{ .Values.platform.domain }}/allow-egress-api-server: "true"
         rule.{{ .Values.platform.domain }}/allow-ingress-api-server: "true"
     spec:
@@ -27096,7 +27106,7 @@ spec:
           value: /.sigstore
         - name: KYVERNO_DEPLOYMENT
           value: kyverno
-        image: ghcr.io/kyverno/kyverno:v1.8.4
+        image: ghcr.io/kyverno/kyverno:v1.8.5
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -27173,7 +27183,7 @@ spec:
               fieldPath: metadata.name
         - name: KYVERNO_DEPLOYMENT
           value: kyverno
-        image: ghcr.io/kyverno/kyvernopre:v1.8.4
+        image: ghcr.io/kyverno/kyvernopre:v1.8.5
         imagePullPolicy: IfNotPresent
         name: kyverno-pre
         resources:
