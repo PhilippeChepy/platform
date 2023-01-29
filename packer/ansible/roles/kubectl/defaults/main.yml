@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-kubectl_version: "1.26.0"
+kubectl_version: "1.26.1"
 kubectl_architecture_map:
   amd64: amd64
   x86_64: amd64
