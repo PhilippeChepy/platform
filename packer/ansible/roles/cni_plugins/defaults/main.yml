@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-cni_plugins_version: "1.1.1"
+cni_plugins_version: "1.2.0"
 cni_plugins_architecture_map:
   amd64: amd64
   x86_64: amd64
