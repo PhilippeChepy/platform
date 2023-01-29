@@ -13,7 +13,7 @@ helmCharts:
   repo: https://charts.jetstack.io
   releaseName: cert-manager
   namespace: cert-manager
-  version: 1.10.1
+  version: 1.11.0
   valuesInline:
     installCRDs: true
     global:
@@ -22,13 +22,13 @@ helmCharts:
 
 images:
 - name: quay.io/jetstack/cert-manager-controller
-  newTag: v1.10.1
+  newTag: v1.11.0
 - name: quay.io/jetstack/cert-manager-cainjector
-  newTag: v1.10.1
+  newTag: v1.11.0
 - name: quay.io/jetstack/cert-manager-webhook
-  newTag: v1.10.1
+  newTag: v1.11.0
 - name: quay.io/jetstack/cert-manager-ctl
-  newTag: v1.10.1
+  newTag: v1.11.0
 
 
 patches:
