@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export IMAGE="eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-server"
+export IMAGE="registry.k8s.io/kas-network-proxy/proxy-server"
 export TAG="v0.0.35"
 export SRC_FILE="proxy-server"
 export DST_FILE="$SRC_FILE-$TAG-linux-amd64"

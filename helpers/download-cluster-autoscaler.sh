@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export IMAGE="k8s.gcr.io/autoscaling/cluster-autoscaler"
+export IMAGE="registry.k8s.io/autoscaling/cluster-autoscaler"
 export TAG="v1.26.1"
 export SRC_FILE="cluster-autoscaler"
 export DST_FILE="$SRC_FILE-$TAG-linux-amd64"
