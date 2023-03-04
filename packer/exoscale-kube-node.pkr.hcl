@@ -13,8 +13,8 @@ source "exoscale" "base" {
   instance_template    = "Linux Ubuntu 22.04 LTS 64-bit"
   instance_disk_size   = 10
   template_zone        = var.zone
-  template_name        = "Kubernetes 1.26.1 node"
-  template_description = "Kubernetes 1.26.1 - Kubelet (minimal Ubuntu 22.04)"
+  template_name        = "Kubernetes 1.26.2 node"
+  template_description = "Kubernetes 1.26.2 - Kubelet (minimal Ubuntu 22.04)"
   template_username    = "ubuntu"
   ssh_username         = "ubuntu"
 }

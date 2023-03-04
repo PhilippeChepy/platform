@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-kube_controller_manager_version: "1.26.1"
+kube_controller_manager_version: "1.26.2"
 kube_controller_manager_architecture_map:
   amd64: amd64
   x86_64: amd64
