@@ -7,11 +7,6 @@ resources:
 
 patches:
 - target:
-    kind: CustomResourceDefinition
-  patch: |-
-    - op: remove
-      path: /metadata/creationTimestamp
-- target:
     kind: Deployment
     name: kyverno
   patch: |-
