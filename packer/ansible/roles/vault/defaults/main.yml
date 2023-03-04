@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-vault_version: "1.12.2"
+vault_version: "1.13.0"
 vault_architecture_map:
   amd64: amd64
   x86_64: amd64
