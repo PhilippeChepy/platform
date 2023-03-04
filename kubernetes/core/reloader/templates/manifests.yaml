@@ -93,7 +93,7 @@ spec:
                 app: reloader
             topologyKey: kubernetes.io/hostname
       containers:
-      - image: stakater/reloader:v0.0.126
+      - image: stakater/reloader:v1.0.11
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 5
@@ -105,15 +105,13 @@ spec:
           timeoutSeconds: 5
         name: reloader
         ports:
-        - containerPort: 9091
-          name: http
         - containerPort: 9090
-          name: metrics
+          name: http
         readinessProbe:
           failureThreshold: 5
           httpGet:
             path: /metrics
-            port: metrics
+            port: http
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
