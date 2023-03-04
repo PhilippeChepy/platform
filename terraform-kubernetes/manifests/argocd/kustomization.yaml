@@ -1,5 +1,5 @@
 resources:
-  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.5.9/manifests/install.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.6.3/manifests/install.yaml
 
 patchesStrategicMerge:
   - delete-dex.yaml
