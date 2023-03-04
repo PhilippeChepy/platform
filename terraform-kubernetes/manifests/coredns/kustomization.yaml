@@ -1,6 +1,6 @@
 images:
 - name: coredns/coredns
-  newTag: 1.10.0
+  newTag: 1.10.1
 
 patches:
   - target:
