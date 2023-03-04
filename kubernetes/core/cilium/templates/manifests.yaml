@@ -23,8 +23,27 @@ metadata:
   namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
+  name: cilium-config-agent
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
   name: cilium
 rules:
 - apiGroups:
@@ -66,12 +85,11 @@ rules:
 - apiGroups:
   - cilium.io
   resources:
-  - ciliumbgploadbalancerippools
+  - ciliumloadbalancerippools
   - ciliumbgppeeringpolicies
   - ciliumclusterwideenvoyconfigs
   - ciliumclusterwidenetworkpolicies
   - ciliumegressgatewaypolicies
-  - ciliumegressnatpolicies
   - ciliumendpoints
   - ciliumendpointslices
   - ciliumenvoyconfigs
@@ -79,6 +97,7 @@ rules:
   - ciliumlocalredirectpolicies
   - ciliumnetworkpolicies
   - ciliumnodes
+  - ciliumnodeconfigs
   verbs:
   - list
   - watch
@@ -124,6 +143,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
   name: cilium-operator
 rules:
 - apiGroups:
@@ -163,6 +184,7 @@ rules:
   - services/status
   verbs:
   - update
+  - patch
 - apiGroups:
   - ""
   resources:
@@ -245,6 +267,7 @@ rules:
   - list
   - watch
   - delete
+  - patch
 - apiGroups:
   - apiextensions.k8s.io
   resources:
@@ -257,12 +280,11 @@ rules:
 - apiGroups:
   - apiextensions.k8s.io
   resourceNames:
-  - ciliumbgploadbalancerippools.cilium.io
+  - ciliumloadbalancerippools.cilium.io
   - ciliumbgppeeringpolicies.cilium.io
   - ciliumclusterwideenvoyconfigs.cilium.io
   - ciliumclusterwidenetworkpolicies.cilium.io
   - ciliumegressgatewaypolicies.cilium.io
-  - ciliumegressnatpolicies.cilium.io
   - ciliumendpoints.cilium.io
   - ciliumendpointslices.cilium.io
   - ciliumenvoyconfigs.cilium.io
@@ -271,10 +293,25 @@ rules:
   - ciliumlocalredirectpolicies.cilium.io
   - ciliumnetworkpolicies.cilium.io
   - ciliumnodes.cilium.io
+  - ciliumnodeconfigs.cilium.io
   resources:
   - customresourcedefinitions
   verbs:
   - update
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumloadbalancerippools
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cilium.io
+  resources:
+  - ciliumloadbalancerippools/status
+  verbs:
+  - patch
 - apiGroups:
   - coordination.k8s.io
   resources:
@@ -287,6 +324,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
   name: hubble-ui
 rules:
 - apiGroups:
@@ -328,8 +367,26 @@ rules:
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
+  name: cilium-config-agent
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cilium-config-agent
+subjects:
+- kind: ServiceAccount
+  name: cilium
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
   name: cilium
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -343,6 +400,8 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
   name: cilium-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -356,6 +415,8 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
+  labels:
+    app.kubernetes.io/part-of: cilium
   name: hubble-ui
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -394,10 +455,12 @@ data:
   enable-endpoint-health-checking: "true"
   enable-health-check-nodeport: "true"
   enable-health-checking: "true"
+  enable-host-legacy-routing: "true"
   enable-hubble: "true"
   enable-ipv4: "true"
   enable-ipv4-masquerade: "true"
   enable-ipv6: "false"
+  enable-ipv6-big-tcp: "false"
   enable-ipv6-masquerade: "true"
   enable-k8s-terminating-endpoint: "true"
   enable-l2-neigh-discovery: "true"
@@ -405,6 +468,7 @@ data:
   enable-local-redirect-policy: "false"
   enable-policy: always
   enable-remote-node-identity: "true"
+  enable-sctp: "false"
   enable-svc-source-range-check: "true"
   enable-vtep: "false"
   enable-well-known-identities: "false"
@@ -413,6 +477,8 @@ data:
   hubble-listen-address: :4244
   hubble-socket-path: /var/run/cilium/hubble.sock
   identity-allocation-mode: crd
+  identity-gc-interval: 15m0s
+  identity-heartbeat-timeout: 30m0s
   install-iptables-rules: "true"
   install-no-conntrack-iptables-rules: "false"
   ipam: cluster-pool
@@ -507,6 +573,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/name: hubble-peer
+    app.kubernetes.io/part-of: cilium
     k8s-app: cilium
   name: hubble-peer
   namespace: kube-system
@@ -524,6 +592,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/name: hubble-relay
+    app.kubernetes.io/part-of: cilium
     k8s-app: hubble-relay
   name: hubble-relay
   namespace: kube-system
@@ -540,6 +610,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app.kubernetes.io/name: hubble-ui
+    app.kubernetes.io/part-of: cilium
     k8s-app: hubble-ui
   name: hubble-ui
   namespace: kube-system
@@ -556,6 +628,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/name: cilium-operator
+    app.kubernetes.io/part-of: cilium
     io.cilium/app: operator
     name: cilium-operator
   name: cilium-operator
@@ -574,6 +648,8 @@ spec:
   template:
     metadata:
       labels:
+        app.kubernetes.io/name: cilium-operator
+        app.kubernetes.io/part-of: cilium
         io.cilium/app: operator
         name: cilium-operator
         rule.{{ .Values.platform.domain }}/allow-egress-api-server: "true"
@@ -615,7 +691,7 @@ spec:
           value: '{{ .Values.platform.kubernetes.apiserver.address }}'
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/operator-generic:v1.12.6@sha256:eec4430d222cb2967d42d3b404d2606e66468de47ae85e0a3ca3f58f00a5e017
+        image: quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -657,6 +733,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/name: hubble-relay
+    app.kubernetes.io/part-of: cilium
     k8s-app: hubble-relay
   name: hubble-relay
   namespace: kube-system
@@ -672,6 +750,8 @@ spec:
   template:
     metadata:
       labels:
+        app.kubernetes.io/name: hubble-relay
+        app.kubernetes.io/part-of: cilium
         k8s-app: hubble-relay
         rule.{{ .Values.platform.domain }}/allow-egress-cilium-health: "true"
         rule.{{ .Values.platform.domain }}/allow-egress-cilium-hubble: "true"
@@ -690,7 +770,7 @@ spec:
         - serve
         command:
         - hubble-relay
-        image: quay.io/cilium/hubble-relay:v1.12.6@sha256:27a68a16f0ee7ed6ba690e91847de6931a5511f85a7f939320df216486764cb9
+        image: quay.io/cilium/hubble-relay:v1.13.0@sha256:bc00f086285d2d287dd662a319d3dbe90e57179515ce8649425916aecaa9ac3c
         imagePullPolicy: IfNotPresent
         livenessProbe:
           tcpSocket:
@@ -726,6 +806,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/name: hubble-ui
+    app.kubernetes.io/part-of: cilium
     k8s-app: hubble-ui
   name: hubble-ui
   namespace: kube-system
@@ -738,10 +820,12 @@ spec:
     metadata:
       annotations: null
       labels:
+        app.kubernetes.io/name: hubble-ui
+        app.kubernetes.io/part-of: cilium
         k8s-app: hubble-ui
     spec:
       containers:
-      - image: quay.io/cilium/hubble-ui:v0.9.2@sha256:d3596efc94a41c6b772b9afe6fe47c17417658956e04c3e2a28d293f2670663e
+      - image: quay.io/cilium/hubble-ui:v0.10.0@sha256:118ad2fcfd07fabcae4dde35ec88d33564c9ca7abe520aa45b1eb13ba36c6e0a
         imagePullPolicy: IfNotPresent
         name: frontend
         ports:
@@ -759,7 +843,7 @@ spec:
           value: "8090"
         - name: FLOWS_API_ADDR
           value: hubble-relay:80
-        image: quay.io/cilium/hubble-ui-backend:v0.9.2@sha256:a3ac4d5b87889c9f7cc6323e86d3126b0d382933bd64f44382a92778b0cde5d7
+        image: quay.io/cilium/hubble-ui-backend:v0.10.0@sha256:cc5e2730b3be6f117b22176e25875f2308834ced7c3aa34fb598aa87a2c0a6a4
         imagePullPolicy: IfNotPresent
         name: backend
         ports:
@@ -788,6 +872,8 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   labels:
+    app.kubernetes.io/name: cilium-operator
+    app.kubernetes.io/part-of: cilium
     io.cilium/app: operator
     name: cilium-operator
   name: cilium-operator
@@ -803,6 +889,8 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
+    app.kubernetes.io/name: cilium-agent
+    app.kubernetes.io/part-of: cilium
     k8s-app: cilium
   name: cilium
   namespace: kube-system
@@ -816,6 +904,8 @@ spec:
         container.apparmor.security.beta.kubernetes.io/cilium-agent: unconfined
         container.apparmor.security.beta.kubernetes.io/clean-cilium-state: unconfined
       labels:
+        app.kubernetes.io/name: cilium-agent
+        app.kubernetes.io/part-of: cilium
         k8s-app: cilium
         rule.{{ .Values.platform.domain }}/allow-egress-api-server: "true"
     spec:
@@ -860,7 +950,7 @@ spec:
           value: '{{ .Values.platform.kubernetes.apiserver.address }}'
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.12.6@sha256:454134506b0448c756398d3e8df68d474acde2a622ab58d0c7e8b272b5867d0d
+        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
         imagePullPolicy: Always
         lifecycle:
           postStart:
@@ -959,23 +1049,47 @@ spec:
         - mountPath: /var/lib/cilium/clustermesh
           name: clustermesh-secrets
           readOnly: true
-        - mountPath: /tmp/cilium/config-map
-          name: cilium-config-path
-          readOnly: true
         - mountPath: /lib/modules
           name: lib-modules
           readOnly: true
         - mountPath: /run/xtables.lock
           name: xtables-lock
+        - mountPath: /tmp
+          name: tmp
       hostNetwork: true
       initContainers:
+      - command:
+        - cilium
+        - build-config
+        env:
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        - name: CILIUM_K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: KUBERNETES_SERVICE_HOST
+          value: '{{ .Values.platform.kubernetes.apiserver.address }}'
+        - name: KUBERNETES_SERVICE_PORT
+          value: "6443"
+        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        imagePullPolicy: Always
+        name: config
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
       - args:
         - mount | grep "/sys/fs/bpf type bpf" || mount -t bpf bpf /sys/fs/bpf
         command:
         - /bin/bash
         - -c
         - --
-        image: quay.io/cilium/cilium:v1.12.6@sha256:454134506b0448c756398d3e8df68d474acde2a622ab58d0c7e8b272b5867d0d
+        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
         imagePullPolicy: Always
         name: mount-bpf-fs
         securityContext:
@@ -1004,7 +1118,7 @@ spec:
           value: '{{ .Values.platform.kubernetes.apiserver.address }}'
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.12.6@sha256:454134506b0448c756398d3e8df68d474acde2a622ab58d0c7e8b272b5867d0d
+        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
         imagePullPolicy: Always
         name: clean-cilium-state
         resources:
@@ -1042,6 +1156,8 @@ spec:
       tolerations:
       - operator: Exists
       volumes:
+      - emptyDir: {}
+        name: tmp
       - hostPath:
           path: /var/run/cilium
           type: DirectoryOrCreate
@@ -1074,9 +1190,6 @@ spec:
           defaultMode: 256
           optional: true
           secretName: cilium-clustermesh
-      - configMap:
-          name: cilium-config
-        name: cilium-config-path
       - hostPath:
           path: /proc/sys/net
           type: Directory

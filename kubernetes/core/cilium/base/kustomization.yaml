@@ -30,12 +30,6 @@ patches:
     - op: add
       path: /spec/template/metadata/labels/rule.{{ .Values.platform.domain }}~1allow-egress-cilium-health
       value: "true"
-- target:
-    kind: ConfigMap
-    name: cilium-config
-  patch: |-
-    - op: remove
-      path: /data/host-reachable-services-protos
 # - target:
 #     kind: Certificate
 #     name: hubble-relay-client-certs
@@ -60,7 +54,7 @@ helmCharts:
   repo: https://helm.cilium.io/
   releaseName: cilium
   namespace: kube-system
-  version: 1.12.6
+  version: 1.13.0
   valuesInline:
     image:
       pullPolicy: Always
