@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 4.59.0"
+      version = ">= 4.63.0"
     }
 
     exoscale = {
@@ -22,7 +22,7 @@ terraform {
 
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.4.0"
+      version = ">= 3.5.0"
     }
 
     tls = {

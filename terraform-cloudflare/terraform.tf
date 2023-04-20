@@ -2,7 +2,7 @@ terraform {
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = ">= 4.2.0"
+      version = ">= 4.4.0"
     }
 
     local = {
@@ -12,7 +12,7 @@ terraform {
 
     vault = {
       source  = "hashicorp/vault"
-      version = ">= 3.14.0"
+      version = ">= 3.15.0"
     }
   }
 }
