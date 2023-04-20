@@ -1,6 +1,6 @@
 #!/bin/bash
 
-systemctl start etcd-vault-agent.service
+systemctl start vault-agent.service
 
 # Wait vault-agent provisioned Etcd Authentication certs
 while [ ! -f {{ etcd_certs_path }}/ca.pem ]; do sleep 1; done

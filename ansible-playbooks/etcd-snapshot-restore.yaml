@@ -22,7 +22,7 @@
         state: stopped
       loop:
         - etcd
-        - etcd-vault-agent
+        - vault-agent
 
     - name: Remove existing backup dir
       ansible.builtin.file:
@@ -71,7 +71,7 @@
         state: started
       loop:
         - etcd
-        - etcd-vault-agent
+        - vault-agent
 
     - name: Remove backup dir
       ansible.builtin.file:
