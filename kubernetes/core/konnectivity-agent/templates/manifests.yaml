@@ -60,7 +60,7 @@ spec:
           }}
         command:
         - /proxy-agent
-        image: eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent:v0.0.35
+        image: registry.k8s.io/kas-network-proxy/proxy-agent:v0.1.2
         livenessProbe:
           httpGet:
             path: /healthz
@@ -102,7 +102,7 @@ spec:
           }}
         command:
         - /proxy-agent
-        image: eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent:v0.0.35
+        image: registry.k8s.io/kas-network-proxy/proxy-agent:v0.1.2
         livenessProbe:
           httpGet:
             path: /healthz

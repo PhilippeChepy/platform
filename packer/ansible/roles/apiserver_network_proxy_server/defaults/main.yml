@@ -1,8 +1,8 @@
 ---
 
 # Package variables
-# extracted from eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-server:v0.0.33
-apiserver_network_proxy_server_binary: "proxy-server-v0.0.35-linux-amd64"
+# extracted from eu.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-server:v0.1.2
+apiserver_network_proxy_server_binary: "proxy-server-v0.1.2-linux-amd64"
 
 # Paths
 apiserver_network_proxy_server_bin_path: /usr/local/bin
