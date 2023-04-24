@@ -2,22 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- https://raw.githubusercontent.com/stakater/Reloader/v1.0.11/deployments/kubernetes/reloader.yaml
+- https://raw.githubusercontent.com/stakater/Reloader/v1.0.22/deployments/kubernetes/reloader.yaml
 - ./pod-disruption-budget.yaml
 
 namespace: reloader
 
 patches:
-- target:
-    kind: ClusterRoleBinding
-  patch: |-
-    - op: remove
-      path: /metadata/namespace
-- target:
-    kind: ClusterRole
-  patch: |-
-    - op: remove
-      path: /metadata/namespace
 - target:
     kind: .*
     name: .*
