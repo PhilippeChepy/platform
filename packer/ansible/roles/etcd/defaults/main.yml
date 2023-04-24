@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-etcd_version: "3.5.6"
+etcd_version: "3.5.8"
 etcd_architecture_map:
   amd64: amd64
   x86_64: amd64
