@@ -445,6 +445,7 @@ data:
   cluster-pool-ipv4-cidr: '{{ .Values.platform.kubernetes.cluster.podCidrIPv4 }}'
   cluster-pool-ipv4-mask-size: "24"
   cni-chaining-mode: portmap
+  cni-uninstall: "true"
   custom-cni-conf: "false"
   debug: "false"
   disable-cnp-status-updates: "true"
@@ -479,7 +480,6 @@ data:
   identity-allocation-mode: crd
   identity-gc-interval: 15m0s
   identity-heartbeat-timeout: 30m0s
-  install-iptables-rules: "true"
   install-no-conntrack-iptables-rules: "false"
   ipam: cluster-pool
   kube-proxy-replacement: strict
@@ -664,6 +664,7 @@ spec:
                 values:
                 - operator
             topologyKey: kubernetes.io/hostname
+      automountServiceAccountToken: true
       containers:
       - args:
         - --config-dir=/tmp/cilium/config-map
@@ -691,7 +692,7 @@ spec:
           value: '{{ .Values.platform.kubernetes.apiserver.address }}'
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5
+        image: quay.io/cilium/operator-generic:v1.13.1@sha256:f47ba86042e11b11b1a1e3c8c34768a171c6d8316a3856253f4ad4a92615d555
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -770,7 +771,7 @@ spec:
         - serve
         command:
         - hubble-relay
-        image: quay.io/cilium/hubble-relay:v1.13.0@sha256:bc00f086285d2d287dd662a319d3dbe90e57179515ce8649425916aecaa9ac3c
+        image: quay.io/cilium/hubble-relay:v1.13.1@sha256:ad7ce650c7877f8d769264e20bf5b9020ea778a9530cfae9d67a5c9d942c04cb
         imagePullPolicy: IfNotPresent
         livenessProbe:
           tcpSocket:
@@ -816,6 +817,10 @@ spec:
   selector:
     matchLabels:
       k8s-app: hubble-ui
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       annotations: null
@@ -824,6 +829,7 @@ spec:
         app.kubernetes.io/part-of: cilium
         k8s-app: hubble-ui
     spec:
+      automountServiceAccountToken: true
       containers:
       - image: quay.io/cilium/hubble-ui:v0.10.0@sha256:118ad2fcfd07fabcae4dde35ec88d33564c9ca7abe520aa45b1eb13ba36c6e0a
         imagePullPolicy: IfNotPresent
@@ -916,6 +922,7 @@ spec:
               matchLabels:
                 k8s-app: cilium
             topologyKey: kubernetes.io/hostname
+      automountServiceAccountToken: true
       containers:
       - args:
         - --config-dir=/tmp/cilium/config-map
@@ -950,7 +957,7 @@ spec:
           value: '{{ .Values.platform.kubernetes.apiserver.address }}'
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.1@sha256:428a09552707cc90228b7ff48c6e7a33dc0a97fe1dd93311ca672834be25beda
         imagePullPolicy: Always
         lifecycle:
           postStart:
@@ -1042,8 +1049,6 @@ spec:
           name: cilium-cgroup
         - mountPath: /var/run/cilium
           name: cilium-run
-        - mountPath: /host/opt/cni/bin
-          name: cni-path
         - mountPath: /host/etc/cni/net.d
           name: etc-cni-netd
         - mountPath: /var/lib/cilium/clustermesh
@@ -1076,7 +1081,7 @@ spec:
           value: '{{ .Values.platform.kubernetes.apiserver.address }}'
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.1@sha256:428a09552707cc90228b7ff48c6e7a33dc0a97fe1dd93311ca672834be25beda
         imagePullPolicy: Always
         name: config
         terminationMessagePolicy: FallbackToLogsOnError
@@ -1089,7 +1094,7 @@ spec:
         - /bin/bash
         - -c
         - --
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.1@sha256:428a09552707cc90228b7ff48c6e7a33dc0a97fe1dd93311ca672834be25beda
         imagePullPolicy: Always
         name: mount-bpf-fs
         securityContext:
@@ -1118,7 +1123,7 @@ spec:
           value: '{{ .Values.platform.kubernetes.apiserver.address }}'
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.1@sha256:428a09552707cc90228b7ff48c6e7a33dc0a97fe1dd93311ca672834be25beda
         imagePullPolicy: Always
         name: clean-cilium-state
         resources:
@@ -1146,6 +1151,26 @@ spec:
           name: cilium-cgroup
         - mountPath: /var/run/cilium
           name: cilium-run
+      - command:
+        - /install-plugin.sh
+        image: quay.io/cilium/cilium:v1.13.1@sha256:428a09552707cc90228b7ff48c6e7a33dc0a97fe1dd93311ca672834be25beda
+        imagePullPolicy: Always
+        name: install-cni-binaries
+        resources:
+          requests:
+            cpu: 100m
+            memory: 10Mi
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          seLinuxOptions:
+            level: s0
+            type: spc_t
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - mountPath: /host/opt/cni/bin
+          name: cni-path
       nodeSelector:
         kubernetes.io/os: linux
       priorityClassName: system-node-critical

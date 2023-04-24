@@ -373,6 +373,7 @@ data:
   cluster-pool-ipv4-cidr: ${ argocd_platform_kubernetes_cluster_pod_cidr_ipv4 }
   cluster-pool-ipv4-mask-size: "24"
   cni-chaining-mode: portmap
+  cni-uninstall: "true"
   custom-cni-conf: "false"
   debug: "false"
   disable-cnp-status-updates: "true"
@@ -403,7 +404,6 @@ data:
   identity-allocation-mode: crd
   identity-gc-interval: 15m0s
   identity-heartbeat-timeout: 30m0s
-  install-iptables-rules: "true"
   install-no-conntrack-iptables-rules: "false"
   ipam: cluster-pool
   kube-proxy-replacement: strict
@@ -480,6 +480,7 @@ spec:
                 values:
                 - operator
             topologyKey: kubernetes.io/hostname
+      automountServiceAccountToken: true
       containers:
       - args:
         - --config-dir=/tmp/cilium/config-map
@@ -507,7 +508,7 @@ spec:
           value: ${ argocd_platform_kubernetes_apiserver_address }
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5
+        image: quay.io/cilium/operator-generic:v1.13.2@sha256:a1982c0a22297aaac3563e428c330e17668305a41865a842dec53d241c5490ab
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -592,6 +593,7 @@ spec:
               matchLabels:
                 k8s-app: cilium
             topologyKey: kubernetes.io/hostname
+      automountServiceAccountToken: true
       containers:
       - args:
         - --config-dir=/tmp/cilium/config-map
@@ -626,16 +628,16 @@ spec:
           value: ${ argocd_platform_kubernetes_apiserver_address }
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6
         imagePullPolicy: Always
         lifecycle:
           postStart:
             exec:
               command:
-              - /cni-install.sh
-              - --enable-debug=false
-              - --cni-exclusive=true
-              - --log-file=/var/run/cilium/cilium-cni.log
+              - bash
+              - -c
+              - |
+                /cni-install.sh --enable-debug=false --cni-exclusive=true --log-file=/var/run/cilium/cilium-cni.log
           preStop:
             exec:
               command:
@@ -718,8 +720,6 @@ spec:
           name: cilium-cgroup
         - mountPath: /var/run/cilium
           name: cilium-run
-        - mountPath: /host/opt/cni/bin
-          name: cni-path
         - mountPath: /host/etc/cni/net.d
           name: etc-cni-netd
         - mountPath: /var/lib/cilium/clustermesh
@@ -752,7 +752,7 @@ spec:
           value: ${ argocd_platform_kubernetes_apiserver_address }
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6
         imagePullPolicy: Always
         name: config
         terminationMessagePolicy: FallbackToLogsOnError
@@ -765,7 +765,7 @@ spec:
         - /bin/bash
         - -c
         - --
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6
         imagePullPolicy: Always
         name: mount-bpf-fs
         securityContext:
@@ -794,7 +794,7 @@ spec:
           value: ${ argocd_platform_kubernetes_apiserver_address }
         - name: KUBERNETES_SERVICE_PORT
           value: "6443"
-        image: quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68
+        image: quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6
         imagePullPolicy: Always
         name: clean-cilium-state
         resources:
@@ -822,6 +822,26 @@ spec:
           name: cilium-cgroup
         - mountPath: /var/run/cilium
           name: cilium-run
+      - command:
+        - /install-plugin.sh
+        image: quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6
+        imagePullPolicy: Always
+        name: install-cni-binaries
+        resources:
+          requests:
+            cpu: 100m
+            memory: 10Mi
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          seLinuxOptions:
+            level: s0
+            type: spc_t
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - mountPath: /host/opt/cni/bin
+          name: cni-path
       nodeSelector:
         kubernetes.io/os: linux
       priorityClassName: system-node-critical
