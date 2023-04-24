@@ -1,13 +1,13 @@
 resources:
-  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.6.3/manifests/install.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.6.7/manifests/install.yaml
   - secret-oidc.yaml
   - certificate.yaml
   - ingress.yaml
-  - https://raw.githubusercontent.com/argoproj-labs/argocd-vault-plugin/v1.13.0/manifests/cmp-sidecar/cmp-plugin.yaml
+  - https://raw.githubusercontent.com/argoproj-labs/argocd-vault-plugin/v1.14.0/manifests/cmp-sidecar/cmp-plugin.yaml
 
 patchesStrategicMerge:
   - delete-dex.yaml
-  - https://raw.githubusercontent.com/argoproj-labs/argocd-vault-plugin/v1.13.0/manifests/cmp-sidecar/argocd-repo-server.yaml
+  - https://raw.githubusercontent.com/argoproj-labs/argocd-vault-plugin/v1.14.0/manifests/cmp-sidecar/argocd-repo-server.yaml
 
 patches:
   - target:
