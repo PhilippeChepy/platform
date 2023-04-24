@@ -22,13 +22,13 @@ helmCharts:
 
 images:
 - name: quay.io/jetstack/cert-manager-controller
-  newTag: v1.11.0
+  newTag: v1.11.1
 - name: quay.io/jetstack/cert-manager-cainjector
-  newTag: v1.11.0
+  newTag: v1.11.1
 - name: quay.io/jetstack/cert-manager-webhook
-  newTag: v1.11.0
+  newTag: v1.11.1
 - name: quay.io/jetstack/cert-manager-ctl
-  newTag: v1.11.0
+  newTag: v1.11.1
 
 
 patches:
