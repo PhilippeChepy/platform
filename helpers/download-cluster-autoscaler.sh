@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export IMAGE="registry.k8s.io/autoscaling/cluster-autoscaler"
-export TAG="v1.26.1"
+export TAG="v1.26.2"
 export SRC_FILE="cluster-autoscaler"
 export DST_FILE="$SRC_FILE-$TAG-linux-amd64"
 

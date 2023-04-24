@@ -1,8 +1,8 @@
 ---
 
 # Package variables
-# extracted from k8s.gcr.io/autoscaling/cluster-autoscaler:v1.26.0, then compressed
-cluster_autoscaler_binary: "cluster-autoscaler-v1.26.1-linux-amd64.gz"
+# extracted from registry.k8s.io/autoscaling/cluster-autoscaler:v1.26.2, then compressed
+cluster_autoscaler_binary: "cluster-autoscaler-v1.26.2-linux-amd64.gz"
 
 # Paths
 cluster_autoscaler_bin_path: /usr/local/bin
