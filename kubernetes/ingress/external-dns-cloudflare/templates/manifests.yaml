@@ -100,7 +100,7 @@ spec:
             secretKeyRef:
               key: api-token
               name: '{{ .Values.platform.ingress.name }}-cloudflare-api-token'
-        image: registry.k8s.io/external-dns/external-dns:v0.13.2
+        image: registry.k8s.io/external-dns/external-dns:v0.13.4
         name: external-dns
         resources:
           limits:
