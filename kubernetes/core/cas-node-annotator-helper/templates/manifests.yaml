@@ -85,7 +85,7 @@ spec:
       - operator: Exists
       containers:
       - name: annotator
-        image: bitnami/kubectl:1.25.4
+        image: bitnami/kubectl:1.27.1
         command:
         - /bin/sh
         - -c
