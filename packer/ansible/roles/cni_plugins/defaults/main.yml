@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-cni_plugins_version: "1.2.0"
+cni_plugins_version: "1.3.0"
 cni_plugins_architecture_map:
   amd64: amd64
   x86_64: amd64
@@ -19,19 +19,21 @@ cni_plugins_bin_path: /opt/cni/bin
 cni_plugins_config_path: /etc/cni/net.d
 
 cni_plugins_enabled:
-  - macvlan
-  - static
-  - vlan
-  - portmap
-  - host-local
-  - vrf
+  - bandwidth
   - bridge
-  - tuning
+  - dhcp
+  - dummy
   - firewall
   - host-device
-  - sbr
-  - loopback
-  - dhcp
-  - ptp
+  - host-local
   - ipvlan
-  - bandwidth
+  - loopback
+  - macvlan
+  - portmap
+  - ptp
+  - sbr
+  - static
+  - tap
+  - tuning
+  - vlan
+  - vrf
