@@ -1,7 +1,7 @@
 ---
 
 # Package variables
-cilium_cli_version: "0.14.3"
+cilium_cli_version: "0.14.7"
 cilium_cli_architecture_map:
   amd64: amd64
   x86_64: amd64
