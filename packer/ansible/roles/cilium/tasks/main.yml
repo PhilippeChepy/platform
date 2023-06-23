@@ -1,0 +1,26 @@
+---
+
+# issue: https://github.com/cilium/cilium/issues/10645
+- name: Set sysctl configuration
+  tags:
+    - ciliun-sysctl
+  become: true
+  ansible.builtin.copy:
+    src: "99-zzz-override_cilium.conf"
+    dest: "/etc/sysctl.d/99-zzz-override_cilium.conf"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+
+# issue: https://github.com/cilium/cilium/issues/18706
+- name: Ensure systemd_networkd setting
+  become: true
+  ansible.builtin.lineinfile:
+    dest: "/etc/systemd/networkd.conf"
+    regexp: "{{ item }}"
+    line: "{{ cilium_systemd_networkd_settings[item] }}"
+    state: "present"
+  loop: "{{ cilium_systemd_networkd_settings|flatten }}"
+  tags:
+    - ssh

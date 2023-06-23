@@ -1,0 +1,5 @@
+---
+
+cilium_systemd_networkd_settings:
+  "^#ManageForeignRoutes": "ManageForeignRoutes=no"
+  "^#ManageForeignRoutingPolicyRules": "ManageForeignRoutingPolicyRules=no"

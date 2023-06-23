@@ -14,5 +14,4 @@
     - containerd
     - wait_service
     - kubelet
-    - cilium_sysctl
-
+    - cilium
