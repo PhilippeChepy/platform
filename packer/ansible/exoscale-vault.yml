@@ -38,6 +38,7 @@
     vault_agent_secrets:
       kv_backup_encryption: "kv/platform/backup/vault-public"
       kv_backup_exoscale_api: "kv/platform/exoscale/vault-backup"
+      pki_root: 'pki/root/cert/ca_chain'
       pki_vault_cert: 'pki/platform/vault/issue/server'
     # backups
     rclone_backup_service_extra_environment_files:

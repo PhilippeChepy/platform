@@ -8,9 +8,9 @@ After=network-online.target
 ConditionPathExists={{ vault_main_config }}
 
 [Service]
+{% if vault_mode == 'server' %}
 User={{ vault_user }}
 Group={{ vault_group }}
-{% if vault_mode == 'server' %}
 ProtectSystem=full
 ProtectHome=read-only
 PrivateTmp=yes

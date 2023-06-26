@@ -31,37 +31,18 @@ listener "unix" {
 
 template {
   contents    = <<EOT
-{% raw %}{{ with secret "{% endraw %}{{ vault_agent_secrets['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,vault.CLUSTER_DOMAIN_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
-{{ .Data.issuing_ca }}
+{% raw %}{{- with pkiCert "{% endraw %}{{ vault_agent_secrets['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,vault.CLUSTER_DOMAIN_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
+{{ .Cert }}{{ .CA }}{{ .Key }}
+{{ .Key | writeToFile "{% endraw %}{{ vault_tls_config_path }}/server.key" "vault" "vault{% raw %}" "0400" }}
+{{ .Cert | writeToFile "{% endraw %}{{ vault_tls_config_path }}/server.pem" "vault" "vault{% raw %}" "0644" }}
+{{ .CA | writeToFile "{% endraw %}{{ vault_tls_config_path }}/server.pem" "vault" "vault{% raw %}" "0644" "append" }}
 {{ end }}
-{% endraw %}
+{{ with secret "{% endraw %}{{ vault_agent_secrets['pki_root'] }}{% raw %}" }}
+{{ .Data.ca_chain | writeToFile "{% endraw %}{{ vault_tls_config_path }}/ca.pem" "vault" "vault{% raw %}" "0644" }}
+{{- end -}}
 EOT
-  destination = "{{ vault_tls_config_path }}/ca.pem"
-  command     = "sudo systemctl reload vault-server"
-  perms       = 0644
-}
 
-template {
-  contents    = <<EOT
-{% raw %}{{ with secret "{% endraw %}{{ vault_agent_secrets['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,vault.CLUSTER_DOMAIN_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
-{{ .Data.certificate }}
-{{ .Data.issuing_ca }}
-{{ end }}
-{% endraw %}
-EOT
-  destination = "{{ vault_tls_config_path }}/server.pem"
-  command     = "sudo systemctl reload vault-server"
-  perms       = 0644
-}
-
-template {
-  contents    = <<EOT
-{% raw %}{{ with secret "{% endraw %}{{ vault_agent_secrets['pki_vault_cert'] }}{% raw %}" "common_name=CLUSTER_NAME" "alt_names=CLUSTER_NAME,CLUSTER_MEMBER_NAME,vault.CLUSTER_DOMAIN_NAME,CLUSTER_NAME.CLUSTER_DOMAIN_NAME,CLUSTER_MEMBER_NAME.CLUSTER_DOMAIN_NAME" "ip_sans=CLUSTER_NLB_ADDRESS,CLUSTER_MEMBER_ADDRESS" "ttl=24h" -}}
-{{ .Data.private_key }}
-{{ end }}
-{% endraw %}
-EOT
-  destination = "{{ vault_tls_config_path }}/server.key"
+  destination = "{% endraw %}{{ vault_tls_config_path }}{% raw %}/.vault-cache.pem"
   command     = "sudo systemctl reload vault-server"
   perms       = 0600
 }
