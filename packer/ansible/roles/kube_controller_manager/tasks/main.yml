@@ -82,22 +82,12 @@
     - kube-controller-manager
   become: true
   ansible.builtin.template:
-    src: "kube-controller-manager.service.j2"
-    dest: "/etc/systemd/system/kube-controller-manager.service"
+    src: "{{ item }}.service.j2"
+    dest: "/etc/systemd/system/{{ item }}.service"
     force: true
     owner: root
     group: root
     mode: "0644"
   notify: reload systemd
-
-- name: Add user to sudoers for service restart
-  tags:
+  loop:
     - kube-controller-manager
-  become: true
-  ansible.builtin.lineinfile:
-    path: "/etc/sudoers.d/kube-controller-manager"
-    line: "%{{ kube_controller_manager_group }} ALL= NOPASSWD: /bin/systemctl restart kube-controller-manager"
-    owner: "root"
-    group: "root"
-    create: true
-    mode: 0440

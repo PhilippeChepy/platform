@@ -83,6 +83,8 @@
 
 - name: Configure Vault and service
   include_tasks: _config.yml
+  when:
+    - vault_mode != 'unmanaged'
 
 - name: vault-server configuration
   tags:
@@ -124,7 +126,7 @@
     group: "{{ vault_group }}"
     mode: 0600
   when:
-    - vault_mode == 'agent'
+    - vault_mode != 'server'
 
 - name: Install vault-agent-init helper script
   tags:

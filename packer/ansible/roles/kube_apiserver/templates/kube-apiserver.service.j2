@@ -2,22 +2,7 @@
 Description=Kubernetes API server
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
-ConditionPathExists={{ kube_apiserver_config_path }}/aggregation-layer-ca.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/aggregation-layer.key
-ConditionPathExists={{ kube_apiserver_config_path }}/aggregation-layer.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/egress-selector-configuration.yaml
-ConditionPathExists={{ kube_apiserver_config_path }}/encryption-configuration.yaml
-ConditionPathExists={{ kube_apiserver_config_path }}/etcd-ca.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/etcd.key
-ConditionPathExists={{ kube_apiserver_config_path }}/etcd.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/kubelet-ca.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/kubelet-client.key
-ConditionPathExists={{ kube_apiserver_config_path }}/kubelet-client.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/oidc-ca.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/server-ca.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/server.key
-ConditionPathExists={{ kube_apiserver_config_path }}/server.pem
-ConditionPathExists={{ kube_apiserver_config_path }}/service-account-key.pem
+Requires=apiserver-network-proxy-server.service
 
 [Service]
 User={{ kube_apiserver_user }}
@@ -40,8 +25,8 @@ ExecStart={{ kube_apiserver_bin_path }}/kube-apiserver \
   --encryption-provider-config={{ kube_apiserver_config_path }}/encryption-configuration.yaml \
   --feature-gates=EndpointSliceTerminatingCondition=true \
   --kubelet-certificate-authority={{ kube_apiserver_config_path }}/kubelet-ca.pem \
-  --kubelet-client-certificate={{ kube_apiserver_config_path }}/kubelet-client.pem \
-  --kubelet-client-key={{ kube_apiserver_config_path }}/kubelet-client.key \
+  --kubelet-client-certificate={{ kube_apiserver_config_path }}/kubelet.pem \
+  --kubelet-client-key={{ kube_apiserver_config_path }}/kubelet.key \
   --kubelet-preferred-address-types=InternalIP,ExternalIP \
   --profiling=false \
   --service-account-issuer="${KUBE_APISERVER_SERVICE_ACCOUNT_ISSUER}" \
@@ -57,7 +42,6 @@ ExecStart={{ kube_apiserver_bin_path }}/kube-apiserver \
   --oidc-client-id="${KUBE_APISERVER_OIDC_CLIENT_ID}" \
   --oidc-username-claim="${KUBE_APISERVER_OIDC_USERNAME_CLAIM}" \
   --oidc-groups-claim="${KUBE_APISERVER_OIDC_GROUPS_CLAIM}" \
-  --oidc-ca-file={{ kube_apiserver_config_path }}/oidc-ca.pem \
   --v=2
 Restart=on-failure
 RestartSec=5

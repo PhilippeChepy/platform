@@ -2,8 +2,7 @@
 Description=Cluster Autoscaler
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
-ConditionPathExists={{ cluster_autoscaler_config_path }}/cloud-environment
-ConditionPathExists={{ cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig
+Requires=kube-apiserver.service
 
 [Service]
 User={{ cluster_autoscaler_user }}

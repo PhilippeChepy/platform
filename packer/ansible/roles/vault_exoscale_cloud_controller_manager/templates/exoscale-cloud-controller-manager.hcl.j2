@@ -1,0 +1,73 @@
+vault {
+  address = "VAULT_ADDRESS"
+  ca_cert = "{{ vault_tls_config_path }}/ca.pem"
+}
+
+exit_after_auth = true
+
+auto_auth {
+  method "approle" {
+    mount_path = "{{ vault_agent_kube_control_plane_auth_path }}"
+
+    config = {
+      role_id_file_path                   = "{{ vault_agent_approle_path }}/.role_id"
+      secret_id_file_path                 = "{{ vault_agent_approle_path }}/.instance_id"
+      remove_secret_id_file_after_reading = false
+    }
+  }
+}
+
+template {
+  contents    = <<EOT
+<<- with secret "{{ vault_agent_secrets['kv_exoscale_cloud_controller_manager_exoscale_api'] }}" >>
+EXOSCALE_API_KEY="<< .Data.api_key >>"
+EXOSCALE_API_SECRET="<< .Data.api_secret >>"
+EXOSCALE_ZONE="EXOSCALE_CLUSTER_ZONE"
+EXOSCALE_SKS_AGENT_RUNNERS="node-csr-validation"
+<<- end >>
+EOT
+
+  error_on_missing_key = true
+  left_delimiter       = "<<"
+  right_delimiter      = ">>"
+  destination          = "{{ exoscale_cloud_controller_manager_config_path }}/cloud-environment"
+  perms                = 0600
+  user                 = "{{ exoscale_cloud_controller_manager_user }}"
+  group                = "{{ exoscale_cloud_controller_manager_group }}"
+}
+
+template {
+  contents    = <<EOT
+apiVersion: v1
+clusters:
+- cluster:
+<<- with secret "{{ vault_agent_secrets['pki_controlplane_ca_chain'] }}" >>
+    certificate-authority-data: << base64Encode .Data.ca_chain >>
+<<- end >>
+    server: https://CLUSTER_MEMBER_ADDRESS:6443
+  name: local
+contexts:
+- context:
+    cluster: local
+    user: exoscale-cloud-controller-manager
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: exoscale-cloud-controller-manager
+  user:
+<<- with secret "{{ vault_agent_secrets['pki_controlplane_cert_cloud_controller_manager'] }}" "common_name=exoscale-cloud-controller-manager" "ttl=24h" >>
+    client-certificate-data: << base64Encode .Data.certificate >>
+    client-key-data: << base64Encode .Data.private_key >>
+<<- end >>
+EOT
+
+  error_on_missing_key = true
+  left_delimiter       = "<<"
+  right_delimiter      = ">>"
+  destination          = "{{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig"
+  perms                = 0600
+  user                 = "{{ exoscale_cloud_controller_manager_user }}"
+  group                = "{{ exoscale_cloud_controller_manager_group }}"
+}

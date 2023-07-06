@@ -2,8 +2,7 @@
 Description=Exoscale Cloud Controller Manager
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
-ConditionPathExists={{ exoscale_cloud_controller_manager_config_path }}/cloud-environment
-ConditionPathExists={{ exoscale_cloud_controller_manager_config_path }}/cloud-controller-manager.kubeconfig
+Requires=kube-apiserver.service
 
 [Service]
 User={{ exoscale_cloud_controller_manager_user }}

@@ -1,0 +1,72 @@
+vault {
+  address = "VAULT_ADDRESS"
+  ca_cert = "{{ vault_tls_config_path }}/ca.pem"
+}
+
+exit_after_auth = true
+
+auto_auth {
+  method "approle" {
+    mount_path = "{{ vault_agent_kube_control_plane_auth_path }}"
+
+    config = {
+      role_id_file_path                   = "{{ vault_agent_approle_path }}/.role_id"
+      secret_id_file_path                 = "{{ vault_agent_approle_path }}/.instance_id"
+      remove_secret_id_file_after_reading = false
+    }
+  }
+}
+
+template {
+  contents    = <<EOT
+<<- with secret "{{ vault_agent_secrets['kv_cluster_autoscaler_exoscale_api'] }}" >>
+EXOSCALE_API_KEY="<< .Data.api_key >>"
+EXOSCALE_API_SECRET="<< .Data.api_secret >>"
+EXOSCALE_ZONE="EXOSCALE_CLUSTER_ZONE"
+<<- end >>
+EOT
+
+  error_on_missing_key = true
+  left_delimiter       = "<<"
+  right_delimiter      = ">>"
+  destination          = "{{ cluster_autoscaler_config_path }}/cloud-environment"
+  perms                = 0600
+  user                 = "{{ cluster_autoscaler_user }}"
+  group                = "{{ cluster_autoscaler_group }}"
+}
+
+template {
+  contents    = <<EOT
+apiVersion: v1
+clusters:
+- cluster:
+<<- with secret "{{ vault_agent_secrets['pki_controlplane_ca_chain'] }}" >>
+    certificate-authority-data: << base64Encode .Data.ca_chain >>
+<<- end >>
+    server: https://CLUSTER_MEMBER_ADDRESS:6443
+  name: local
+contexts:
+- context:
+    cluster: local
+    user: cluster-autoscaler
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: cluster-autoscaler
+  user:
+<<- with secret "{{ vault_agent_secrets['pki_controlplane_cert_cluster_autoscaler'] }}" "common_name=cluster-autoscaler" "ttl=24h" >>
+    client-certificate-data: << base64Encode .Data.certificate >>
+    client-key-data: << base64Encode .Data.private_key >>
+<<- end >>
+EOT
+
+  error_on_missing_key = true
+  left_delimiter       = "<<"
+  right_delimiter      = ">>"
+  destination          = "{{ cluster_autoscaler_config_path }}/cluster-autoscaler.kubeconfig"
+  perms                = 0600
+  user                 = "{{ cluster_autoscaler_user }}"
+  group                = "{{ cluster_autoscaler_group }}"
+}

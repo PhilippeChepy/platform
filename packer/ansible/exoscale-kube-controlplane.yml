@@ -5,10 +5,9 @@
   become: true
   vars:
     # vault agent
-    vault_config_path: /etc/vault
     vault_tls_config_path: /var/vault/tls
     vault_service_name: vault-agent
-    vault_mode: agent
+    vault_mode: unmanaged
     vault_user: kubernetes
     vault_group: kubernetes
     # kubernetes apiserver healthcheck reverse-proxy for the Network Load Balancer
@@ -34,6 +33,7 @@
       kv_serviceaccount: 'kv/platform/kubernetes/service-account'
       pki_aggregationlayer_ca_chain: 'pki/platform/kubernetes/aggregation-layer/cert/ca_chain'
       pki_aggregationlayer_cert_apiserver: 'pki/platform/kubernetes/aggregation-layer/issue/apiserver'
+      pki_aggregationlayer_cert_metrics_server: 'pki/platform/kubernetes/aggregation-layer/issue/metrics-server'
       pki_client_ca_chain: 'pki/platform/kubernetes/client/cert/ca_chain'
       pki_client_cert_admin: 'pki/platform/kubernetes/client/issue/operator-admin'
       pki_controlplane_ca_chain: 'pki/platform/kubernetes/control-plane/cert/ca_chain'
@@ -78,6 +78,12 @@
     - cluster_autoscaler
     - exoscale_cloud_controller_manager
     - kubectl
+    - vault_apiserver_network_proxy_server
+    - vault_kube_apiserver
+    - vault_kube_controller_manager
+    - vault_kube_scheduler
+    - vault_cluster_autoscaler
+    - vault_exoscale_cloud_controller_manager
     - exoscale_cli
     - jq
     - ssl_exporter

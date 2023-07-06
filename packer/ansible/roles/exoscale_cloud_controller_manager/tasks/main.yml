@@ -39,27 +39,17 @@
     group: "{{ exoscale_cloud_controller_manager_group }}"
     mode: 0770
 
-- name: Add user to sudoers for service restart
-  tags:
-    - exoscale-cloud-controller-manager
-  become: true
-  ansible.builtin.lineinfile:
-    path: "/etc/sudoers.d/cloud-controller-manager"
-    line: "%{{ exoscale_cloud_controller_manager_group }} ALL= NOPASSWD: /bin/systemctl restart exoscale-cloud-controller-manager"
-    owner: "root"
-    group: "root"
-    create: true
-    mode: 0440
-
 - name: systemd unit
   tags:
     - exoscale-cloud-controller-manager
   become: true
   ansible.builtin.template:
-    src: "exoscale-cloud-controller-manager.service.j2"
-    dest: "/etc/systemd/system/exoscale-cloud-controller-manager.service"
+    src: "{{ item }}.service.j2"
+    dest: "/etc/systemd/system/{{ item }}.service"
     force: true
     owner: root
     group: root
     mode: "0644"
   notify: reload systemd
+  loop:
+    - exoscale-cloud-controller-manager

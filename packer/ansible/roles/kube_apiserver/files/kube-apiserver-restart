@@ -1,0 +1,9 @@
+#!/bin/bash
+
+systemctl restart kube-apiserver
+
+wait-service 127.0.0.1 6443
+sudo -u kubernetes kubectl apply -f /home/kubernetes/kubelet-bootstrap-rbac.yaml
+sudo -u kubernetes kubectl apply -f /home/kubernetes/exoscale-cloud-controller-manager-rbac.yaml
+sudo -u kubernetes kubectl apply -f /home/kubernetes/cluster-autoscaler-rbac.yaml
+sudo -u kubernetes kubectl apply -f /home/kubernetes/metrics-server.yaml

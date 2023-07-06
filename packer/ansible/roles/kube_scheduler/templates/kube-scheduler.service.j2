@@ -2,8 +2,7 @@
 Description=Kubernetes Scheduler
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
-ConditionPathExists={{ kube_scheduler_config_path }}/kube-scheduler.kubeconfig
-ConditionPathExists={{ kube_scheduler_config_path }}/server-ca.pem
+Requires=kube-apiserver.service
 
 [Service]
 User={{ kube_scheduler_user }}

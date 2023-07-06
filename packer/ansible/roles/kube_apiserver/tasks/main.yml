@@ -101,7 +101,7 @@
   notify: reload systemd
   loop:
     - kube-apiserver
-    - etcd-endpoints-probe
+    - kube-apiserver-etcd-sd
 
 - name: Add user to sudoers for service restart
   tags:
@@ -109,14 +109,14 @@
   become: true
   ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/kube-apiserver"
-    line: "%{{ kube_apiserver_group }} ALL= NOPASSWD: /bin/systemctl restart {{ item }}"
+    line: "%{{ kube_apiserver_group }} ALL= NOPASSWD: {{ item }}"
     owner: "root"
     group: "root"
     create: true
     mode: 0440
   loop:
-    - kube-apiserver
-    - etcd-endpoints-probe
+    - /usr/local/bin/etcdctl lock kube-apiserver systemctl restart kube-apiserver
+    - /bin/systemctl restart kube-apiserver
 
 - name: apiserver additional helper scripts
   tags:
@@ -144,7 +144,7 @@
     group: "{{ kube_apiserver_group }}"
     mode: "0644"
   loop:
-    - etcd-endpoints-probe
+    - etcd
 
 - name: apiserver additional helper scripts
   tags:
@@ -157,4 +157,24 @@
     group: root
     mode: "0755"
   loop:
-    - etcd-endpoints-probe
+    - kube-apiserver-etcd-sd
+    - kube-apiserver-restart
+
+- name: additional manifests
+  tags:
+    - kube-apiserver
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/home/kubernetes/{{ item }}"
+    owner: kubernetes
+    group: kubernetes
+    mode: "0755"
+  loop:
+    - cluster-autoscaler-rbac.yaml
+    - exoscale-cloud-controller-manager-rbac.yaml
+
+- name: Enable the etcd endpoints watcher
+  ansible.builtin.systemd:
+    name: "kube-apiserver-etcd-sd.service"
+    enabled: true

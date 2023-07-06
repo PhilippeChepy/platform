@@ -1,0 +1,31 @@
+---
+
+- name: Vault template
+  tags:
+    - kube-apiserver
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ vault_config_path }}/{{ item }}"
+    force: true
+    owner: "{{ kube_apiserver_user }}"
+    group: "{{ kube_apiserver_group }}"
+    mode: "0622"
+  loop:
+    - kube-apiserver.hcl
+
+- name: systemd unit
+  tags:
+    - kube-apiserver
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+  loop:
+    - vault-kube-apiserver.service
+    - vault-kube-apiserver.timer

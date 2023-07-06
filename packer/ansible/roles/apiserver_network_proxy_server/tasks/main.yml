@@ -49,22 +49,12 @@
     - apiserver-network-proxy-server
   become: true
   ansible.builtin.template:
-    src: "apiserver-network-proxy-server.service.j2"
-    dest: "/etc/systemd/system/apiserver-network-proxy-server.service"
+    src: "{{ item }}.service.j2"
+    dest: "/etc/systemd/system/{{ item }}.service"
     force: true
     owner: root
     group: root
     mode: "0644"
   notify: reload systemd
-
-- name: Add user to sudoers for service restart
-  tags:
+  loop:
     - apiserver-network-proxy-server
-  become: true
-  ansible.builtin.lineinfile:
-    path: "/etc/sudoers.d/apiserver-network-proxy-server"
-    line: "%{{ apiserver_network_proxy_server_group }} ALL= NOPASSWD: /bin/systemctl restart apiserver-network-proxy-server"
-    owner: "root"
-    group: "root"
-    create: true
-    mode: 0440

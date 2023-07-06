@@ -1,0 +1,31 @@
+---
+
+- name: Vault template
+  tags:
+    - kube-scheduler
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ vault_config_path }}/{{ item }}"
+    force: true
+    owner: "{{ kube_scheduler_user }}"
+    group: "{{ kube_scheduler_group }}"
+    mode: "0622"
+  loop:
+    - kube-scheduler.hcl
+
+- name: systemd unit
+  tags:
+    - kube-scheduler
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+  loop:
+    - vault-kube-scheduler.service
+    - vault-kube-scheduler.timer

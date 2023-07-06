@@ -1,0 +1,10 @@
+[Unit]
+Description=Vault agent timer for exoscale-cloud-controller-manager
+
+[Timer]
+OnBootSec=0min
+OnUnitActiveSec=20h
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

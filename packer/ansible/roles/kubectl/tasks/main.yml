@@ -75,3 +75,20 @@
     mode: 0755
   loop:
     - "/home/{{ kubectl_user }}/.kube"
+
+- name: Add user to sudoers for service restart
+  tags:
+    - kubectl
+  become: true
+  ansible.builtin.lineinfile:
+    path: "/etc/sudoers.d/kube-base-manifests"
+    line: "%{{ kubectl_group }} ALL= NOPASSWD: {{ item }}"
+    owner: "root"
+    group: "root"
+    create: true
+    mode: 0440
+  loop:
+    - /usr/local/bin/kubectl apply -f /home/kubernetes/metrics-server.yaml
+    - /usr/local/bin/kubectl apply -f /home/kubernetes/cluster-autoscaler-rbac.yaml
+    - /usr/local/bin/kubectl apply -f /home/kubernetes/exoscale-cloud-controller-manager-rbac.yaml
+    - /usr/local/bin/kubectl apply -f /home/kubernetes/kubelet-bootstrap-rbac.yaml

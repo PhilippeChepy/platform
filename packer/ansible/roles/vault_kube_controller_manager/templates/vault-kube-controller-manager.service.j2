@@ -1,0 +1,17 @@
+[Unit]
+Description=Vault agent integration for kube-controller-manager
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+StartLimitBurst=10
+StartLimitIntervalSec=60
+
+[Service]
+EnvironmentFile=/etc/default/etcd
+ExecStart=/usr/local/bin/vault agent -config={{ vault_config_path }}/kube-controller-manager.hcl
+ExecStartPost=/usr/local/bin/etcdctl lock kube-controller-manager sudo systemctl restart kube-controller-manager --command-timeout=300s
+Restart=on-failure
+RestartSec=5
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

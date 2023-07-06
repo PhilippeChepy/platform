@@ -2,9 +2,6 @@
 Description=API Server Network Proxy Server (Konnectivity)
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
-ConditionPathExists={{ apiserver_network_proxy_server_config_path }}/apiserver-network-proxy.kubeconfig
-ConditionPathExists={{ apiserver_network_proxy_server_config_path }}/cluster.key
-ConditionPathExists={{ apiserver_network_proxy_server_config_path }}/cluster.pem
 
 [Service]
 User={{ apiserver_network_proxy_server_user }}

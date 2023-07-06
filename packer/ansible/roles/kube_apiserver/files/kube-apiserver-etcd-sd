@@ -3,20 +3,20 @@
 set -euo pipefail
 
 # get configured etcd endpoints
-etcd_endpoints=$(grep KUBE_APISERVER_ETCD_SERVERS= /etc/default/kube-apiserver |cut -d= -f2)
+etcd_endpoints=$(grep KUBE_APISERVER_ETCD_SERVERS= /etc/default/kube-apiserver | cut -d= -f2)
+
 while true; 
 do
     # get actual endpoints from the cluster through the load balancer (stable ip address)
-    new_etcd_endpoints=$(etcdctl member list -wjson |jq -r '.members | map(.clientURLs) | flatten | join(",")')
-    if [ "$new_etcd_endpoints" != "$etcd_endpoints" ]
-    then
+    new_etcd_endpoints=$(etcdctl member list -wjson | jq -r '.members | map(.clientURLs) | flatten | join(",")')
+
+    if [ "$new_etcd_endpoints" != "$etcd_endpoints" ]; then
         etcd_endpoints="$new_etcd_endpoints"
         echo "Updating kube-apiserver configuration"
         NEW_APISERVER_ENV=$(sed "s|KUBE_APISERVER_ETCD_SERVERS=.*|KUBE_APISERVER_ETCD_SERVERS=$etcd_endpoints|g" /etc/default/kube-apiserver)
         echo "$NEW_APISERVER_ENV" > /etc/default/kube-apiserver
-        echo "Restarting kube-apiserver"
-        etcdctl lock kube-apiserver-restart sudo systemctl restart kube-apiserver
-    else
-        sleep 5
+        echo "Trigger the kube-apiserver restart"
+        etcdctl lock kube-apiserver-restart sudo kube-apiserver-restart --command-timeout=300s
     fi
+    sleep 5
 done

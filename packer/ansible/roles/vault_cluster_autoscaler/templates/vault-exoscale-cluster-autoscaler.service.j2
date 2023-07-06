@@ -1,0 +1,17 @@
+[Unit]
+Description=Vault agent integration for exoscale-cluster-autoscaler
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+StartLimitBurst=10
+StartLimitIntervalSec=60
+
+[Service]
+EnvironmentFile=/etc/default/etcd
+ExecStart=/usr/local/bin/vault agent -config={{ vault_config_path }}/exoscale-cluster-autoscaler.hcl
+ExecStartPost=/usr/local/bin/etcdctl lock exoscale-cluster-autoscaler sudo systemctl restart cluster-autoscaler --command-timeout=300s
+Restart=on-failure
+RestartSec=5
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

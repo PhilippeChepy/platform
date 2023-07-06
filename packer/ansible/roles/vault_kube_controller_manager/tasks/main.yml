@@ -1,0 +1,31 @@
+---
+
+- name: Vault template
+  tags:
+    - kube-controller-manager
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ vault_config_path }}/{{ item }}"
+    force: true
+    owner: "{{ kube_controller_manager_user }}"
+    group: "{{ kube_controller_manager_group }}"
+    mode: "0622"
+  loop:
+    - kube-controller-manager.hcl
+
+- name: systemd unit
+  tags:
+    - kube-controller-manager
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+  loop:
+    - vault-kube-controller-manager.service
+    - vault-kube-controller-manager.timer

@@ -1,0 +1,14 @@
+[Unit]
+Description=etcd endpoints probe
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+
+[Service]
+User={{ kube_apiserver_user }}
+EnvironmentFile=/etc/default/etcd
+ExecStart={{ kube_apiserver_bin_path }}/kube-apiserver-etcd-sd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
