@@ -1,0 +1,89 @@
+## template: jinja
+#cloud-config
+manage_etc_hosts: false
+hostname: {{ ds.meta_data.public_hostname }}
+
+write_files:
+- path: /etc/kubernetes/kubelet/node-ca.pem
+  content: ${node_ca_pem}
+  encoding: b64
+  owner: root:root
+  permissions: "0600"
+- path: /etc/kubernetes/kubelet/config.yaml
+  owner: root:root
+  permissions: "0600"
+  content: |
+    kind: KubeletConfiguration
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    authentication:
+      x509:
+        clientCAFile: "/etc/kubernetes/kubelet/node-ca.pem"
+    cgroupDriver: systemd
+    clusterDomain: "${kube_cluster_domain}"
+    clusterDNS:
+      - "${kube_dns_service_ipv4}"
+    #   - "${kube_dns_service_ipv6}" # TODO: fix ipv6
+    resolvConf: "/run/systemd/resolve/resolv.conf"
+    providerID: exoscale://{{ ds.meta_data.instance_id }}
+    systemReserved:
+      cpu: 100m
+      memory: 128Mi
+      ephemeral-storage: 2Gi
+    kubeReserved:
+      cpu: 100m
+      memory: 128Mi
+      ephemeral-storage: 1Gi
+    serverTLSBootstrap: true
+    registerNode: true
+    %{~ if length(taints) > 0 ~}
+    registerWithTaints:
+    %{~ for key, specs in taints ~}
+      - key: ${ key }
+        value: ${ specs.value }
+        effect: ${ specs.effect }
+    %{~ endfor ~}
+    %{~ endif ~}
+- path: /etc/kubernetes/kubelet/bootstrap-kubelet.kubeconfig
+  owner: root:root
+  permissions: "0600"
+  content: |
+    apiVersion: v1
+    clusters:
+    - cluster:
+        certificate-authority-data: ${controlplane_ca_pem}
+        server: ${apiserver_url}
+      name: cluster
+    contexts:
+    - context:
+        cluster: cluster
+        user: kubelet
+      name: default
+    current-context: default
+    kind: Config
+    preferences: {}
+    users:
+    - name: kubelet
+      user:
+        token: ${authentication_token}
+- path: /etc/default/kubelet
+  owner: root:root
+  permissions: "0644"
+  content: |
+    %{~ if length(labels) > 0 ~}
+    KUBELET_NODE_LABELS="${ labels }"
+    %{~ endif ~}
+
+%{~ if storage_partition }
+growpart:
+  mode: 'off'
+
+bootcmd:
+- [ cloud-init-per, once, move-second, sgdisk, --move-second-header, /dev/vda]
+- [ cloud-init-per, once, create-vda2, parted, --script, /dev/vda, 'mkpart 2 ${root_size}GiB -1' ]
+- [ cloud-init-per, once, resize-vda1, resize2fs, /dev/vda1]
+- [ cloud-init-per, once, partprobe, partprobe]
+%{ endif ~}
+
+runcmd:
+- [systemctl, enable, kubelet.service]
+- [systemctl, start, kubelet.service]

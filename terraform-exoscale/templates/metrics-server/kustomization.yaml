@@ -1,0 +1,71 @@
+resources:
+- https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.6.3/components.yaml
+- ./pod-disruption-budget.yaml
+
+patchesStrategicMerge:
+- delete-secrets.yaml
+
+patches:
+- target:
+    kind: Deployment
+    name: metrics-server
+  patch: |-
+    - op: add
+      path: /spec/template/metadata/labels/rule.${ platform_domain }~1allow-egress-api-server
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${ platform_domain }~1allow-egress-kubelet
+      value: "true"
+    - op: add
+      path: /spec/template/metadata/labels/rule.${ platform_domain }~1allow-ingress-api-server
+      value: "true"
+    - op: replace
+      path: /spec/template/spec/containers/0/volumeMounts
+      value:
+      - name: cert
+        mountPath: /var/run/secrets/platform
+    - op: replace
+      path: /spec/template/spec/containers/0/args
+      value:
+      - --kubelet-certificate-authority=/var/run/secrets/platform/kubelet-server-ca.pem
+      - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+      - --kubelet-use-node-status-port
+      - --metric-resolution=15s
+      - --requestheader-client-ca-file=/var/run/secrets/platform/ca.crt
+      - --tls-cert-file=/var/run/secrets/platform/tls.crt
+      - --tls-private-key-file=/var/run/secrets/platform/tls.key
+      - --secure-port=4443
+    - op: add
+      path: /spec/replicas
+      value: 2
+    - op: add
+      path: /spec/template/spec/volumes
+      value:
+      - name: cert
+        secret:
+          secretName: metrics-server
+    - op: add
+      path: /spec/template/spec/affinity
+      value:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                k8s-app: metrics-server
+    - op: add
+      path: /spec/template/spec/containers/0/securityContext/capabilities
+      value:
+        drop:
+        - ALL
+    - op: add
+      path: /spec/template/spec/containers/0/resources
+      value:
+        limits:
+          cpu: 100m
+          memory: 64Mi
+        requests:
+          cpu: 100m
+          memory: 32Mi
+
+namespace: kube-system

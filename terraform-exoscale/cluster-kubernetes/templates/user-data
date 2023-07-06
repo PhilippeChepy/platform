@@ -1,0 +1,84 @@
+## template: jinja
+#cloud-config
+manage_etc_hosts: false
+hostname: {{ ds.meta_data.public_hostname }}
+
+write_files:
+- path: /var/vault/tls/ca.pem
+  content: ${ vault_ca_pem }
+  encoding: b64
+  owner: kubernetes:kubernetes
+  permissions: "0644"
+- path: /var/vault/.role_id
+  owner: kubernetes:kubernetes
+  permissions: "0600"
+  content: kubernetes-control-plane
+- path: /var/vault/.instance_id
+  owner: kubernetes:kubernetes
+  permissions: "0600"
+  content: "{{ ds.meta_data.instance_id }}"
+- path: /etc/default/kube-apiserver
+  owner: kube-apiserver:kubernetes
+  permissions: "0644"
+  content: |
+    KUBE_APISERVER_ADVERTISE_ADDRESS={{ ds.meta_data.public_ipv4 }}
+    KUBE_APISERVER_ETCD_SERVERS=${etcd_cluster_servers}
+    KUBE_APISERVER_SERVICE_ACCOUNT_ISSUER=https://kubernetes.default.svc.${kubernetes_cluster_domain}
+    KUBE_APISERVER_SERVICE_CLUSTER_IP_RANGE=${kubernetes_service_cidr_ipv4},${kubernetes_service_cidr_ipv6}
+    KUBE_APISERVER_OIDC_ISSUER_URL=${ oidc_issuer_url }
+    KUBE_APISERVER_OIDC_CLIENT_ID=${ oidc_client_id }
+    KUBE_APISERVER_OIDC_USERNAME_CLAIM=${ oidc_username_claim }
+    KUBE_APISERVER_OIDC_GROUPS_CLAIM=${ oidc_groups }
+- path: /etc/default/kube-controller-manager
+  owner: kubernetes:kubernetes
+  permissions: "0644"
+  content: |
+    KUBE_CONTROLLER_MANAGER_CLUSTER_CIDR=${kubernetes_pod_cidr_ipv4},${kubernetes_pod_cidr_ipv6}
+    KUBE_CONTROLLER_MANAGER_SERVICE_CLUSTER_IP_RANGE=${kubernetes_service_cidr_ipv4},${kubernetes_service_cidr_ipv6}
+    KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV4=24
+    KUBE_CONTROLLER_MANAGER_NODE_CIDR_MASK_SIZE_IPV6=120
+- path: /home/kubernetes/kubelet-bootstrap-rbac.yaml
+  owner: kubernetes:kubernetes
+  encoding: b64
+  permissions: "0600"
+  content: ${kubelet_bootstrap_manifests}
+
+runcmd:
+# Vault CLI
+- [sed, -i, "s|CLUSTER_NAME|${vault_cluster_name}|g", "/etc/default/vault"]
+# Vault templates settings
+- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${kubernetes_cluster_domain}|g", "/etc/vault/conf.d/kube-apiserver.hcl"]
+- [sed, -i, "s|CLUSTER_INTERNAL_ADDRESS|${kubernetes_cluster_internal_ip}|g", "/etc/vault/conf.d/kube-apiserver.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/conf.d/apiserver-network-proxy.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/conf.d/exoscale-cloud-controller-manager.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/conf.d/exoscale-cluster-autoscaler.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/conf.d/kube-apiserver.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/conf.d/kube-controller-manager.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/conf.d/kube-scheduler.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/conf.d/kube-apiserver.hcl"]
+- [sed, -i, "s|CLUSTER_NAME|${kubernetes_cluster_name}|g", "/etc/vault/conf.d/kube-apiserver.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${kubernetes_cluster_ip_address}|g", "/etc/vault/conf.d/apiserver-network-proxy.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${kubernetes_cluster_ip_address}|g", "/etc/vault/conf.d/kube-apiserver.hcl"]
+- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${zone}|g", "/etc/vault/conf.d/exoscale-cloud-controller-manager.hcl"]
+- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${zone}|g", "/etc/vault/conf.d/exoscale-cluster-autoscaler.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/conf.d/apiserver-network-proxy.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/conf.d/exoscale-cloud-controller-manager.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/conf.d/exoscale-cluster-autoscaler.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/conf.d/kube-apiserver.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/conf.d/kube-controller-manager.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/conf.d/kube-scheduler.hcl"]
+# etcd
+- [sed, -i, "s|ETCD_SD_ENDPOINT|https://${etcd_cluster_ip_address}:2379|g", "/etc/default/etcd"]
+# Final bootstrap
+- [systemctl, start, "vault-apiserver-network-proxy-server.timer"]
+- [systemctl, start, "vault-apiserver-network-proxy-server.service"]
+- [systemctl, start, "vault-kube-apiserver.timer"]
+- [systemctl, start, "vault-kube-apiserver.service"]
+- [systemctl, start, "vault-kube-controller-manager.timer"]
+- [systemctl, start, "vault-kube-controller-manager.service"]
+- [systemctl, start, "vault-kube-scheduler.timer"]
+- [systemctl, start, "vault-kube-scheduler.service"]
+- [systemctl, start, "vault-exoscale-cluster-autoscaler.timer"]
+- [systemctl, start, "vault-exoscale-cluster-autoscaler.service"]
+- [systemctl, start, "vault-exoscale-cloud-controller-manager.timer"]
+- [systemctl, start, "vault-exoscale-cloud-controller-manager.service"]

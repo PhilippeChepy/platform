@@ -1,0 +1,46 @@
+## template: jinja
+#cloud-config
+manage_etc_hosts: false
+hostname: {{ ds.meta_data.public_hostname }}
+
+write_files:
+- path: /var/vault/tls/ca.pem
+  content: ${ vault_ca_pem }
+  encoding: b64
+  owner: etcd:etcd
+  permissions: "0644"
+- path: /var/vault/.role_id
+  owner: etcd:etcd
+  permissions: "0600"
+  content: etcd-server
+- path: /var/vault/.instance_id
+  owner: etcd:etcd
+  permissions: "0600"
+  content: "{{ ds.meta_data.instance_id }}"
+
+runcmd:
+# Vault CLI
+- [sed, -i, "s|CLUSTER_NAME|${vault_cluster_name}|g", "/etc/default/vault"]
+# Vault agent: etcd TLS certs self-renewal
+- [sed, -i, "s|CLUSTER_DOMAIN_NAME|${domain}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NLB_ADDRESS|${etcd_cluster_ip_address}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_MEMBER_NAME|{{ ds.meta_data.public_hostname }}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|CLUSTER_NAME|${etcd_cluster_name}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_CLUSTER_ZONE|${etcd_cluster_zone}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|EXOSCALE_INSTANCEPOOL_NAME|${etcd_cluster_instance_pool_name}|g", "/etc/vault/vault.hcl"]
+- [sed, -i, "s|VAULT_ADDRESS|${vault_cluster_address}|g", "/etc/vault/vault.hcl"]
+# etcd
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/default/etcdctl"]
+- [sed, -i, "s|CLUSTER_MEMBER_ADDRESS|{{ ds.meta_data.public_ipv4 }}|g", "/etc/etcd/base-environment"]
+# Rclone
+- [sed, -i, "s|S3_ZONE|${backup_zone}|g", "/etc/rclone/backup.conf"]
+- [sed, -i, "s|S3_ENDPOINT|https://sos-${backup_zone}.exo.io|g", "/etc/rclone/backup.conf"]
+- [sed, -i, "s|S3_REMOTE_PATH|${backup_bucket}/{{ ds.meta_data.public_hostname }}|g", "/etc/default/rclone-backup"]
+- [sed, -i, "s|S3_RETENTION|7|g", "/etc/default/rclone-backup"]
+- [sed, -i, "s|LOCAL_PATH|/var/backups/etcd|g", "/etc/default/rclone-backup"]
+
+# Final bootstrap
+- [/usr/local/bin/vault-agent-init, "${vault_cluster_healthcheck_url}", "vault-agent"]
+- [/usr/local/bin/exoscale-etcd-init]
+- [/usr/local/bin/rclone-backup-init]

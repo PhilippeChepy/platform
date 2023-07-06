@@ -1,0 +1,198 @@
+infrastructure:
+  name: "platform-name"
+  zone: "at-vie-2"
+  domain: "internal.domain.tld"
+  phase: "cluster-vault" # phase can be: "cluster-vault", "cluster-etcd", "cluster-kubernetes", "cluster-kubernetes-pools"
+
+backup:
+  prefix: "core-backup"
+  zone: "at-vie-1"
+  encryption:
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
+
+templates:
+  vault: "template-uuid"
+  etcd: "template-uuid"
+  kubernetes: "template-uuid"
+  kubelet: "template-uuid"
+
+operators:
+  my-name:
+    networks:
+    - w.x.y.z/32
+
+vault:
+  endpoint: "vault.domain.tld"
+  pool:
+    size: 3
+    offering: "standard.tiny"
+    disk_size_gb: 10
+
+etcd:
+  pool:
+    size: 3
+    offering: "standard.tiny"
+    disk_size_gb: 10
+
+kubernetes:
+  domain: "cluster.local"
+  pool:
+    size: 2
+    offering: "standard.small"
+    disk_size_gb: 10
+  network:
+    inet4:
+      pod_cidr: "10.96.0.0/12"
+      svc_cidr: "10.80.0.0/12"
+      kubernetes: "10.80.0.1"
+      dns: "10.80.0.2"
+    inet6:
+      pod_cidr: "fc00::2:0/112"
+      svc_cidr: "fc00::1:0/112"
+      kubernetes: "fc00::1:1"
+      dns: "fc00::1:2"
+
+kubelet_pool:
+  generic:
+    size: 2
+    offering: "standard.small"
+    disk:
+      root_size_gb: 50
+    labels:
+      internal.domain.tld/role: "generic"
+  data:
+    size: 2
+    offering: "standard.medium"
+    disk:
+      root_size_gb: 10
+      data_size_gb: 100
+    labels:
+      internal.domain.tld/role: "data"
+      internal.domain.tld/autoscaling: "requires-deactivation"
+    taints:
+      internal.domain.tld/role:
+        value: "data"
+        effect: NoSchedule
+  ingress:
+    size: 2
+    offering: "standard.small"
+    is_internal_ingress: true
+    disk:
+      root_size_gb: 10
+    labels:
+      internal.domain.tld/role: "ingress"
+      internal.domain.tld/autoscaling: "requires-deactivation"
+    taints:
+        value: "ingress"
+        effect: NoSchedule
+
+ssh:
+  algorithm: "ed25519" # can also be "rsa" or "ecdsa"
+  # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+  # rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+
+pki:
+  service_account:
+    algorithm: "ecdsa" # can be "rsa" or "ecdsa"
+    ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    # rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+  root:
+    ttl_hours: 262800 # 30 years
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    common_name: "commont name"
+    subject:
+      organizational_unit: "Org unit"
+      organization: "Org name"
+      street_address: ["Org address"]
+      postal_code: "zip"
+      locality: "abc"
+      province: "abc"
+      country: "abc"
+  vault:
+    ttl_hours: 87600 # 10 years
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    common_name: "commont name"
+    subject:
+      organizational_unit: "Org unit"
+      organization: "Org name"
+      street_address: ["Org address"]
+      postal_code: "zip"
+      locality: "abc"
+      province: "abc"
+      country: "abc"
+  etcd:
+    ttl_hours: 87600 # 30 years
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    common_name: "commont name"
+    subject:
+      organizational_unit: "Org unit"
+      organization: "Org name"
+      street_address: ["Org address"]
+      postal_code: "zip"
+      locality: "abc"
+      province: "abc"
+      country: "abc"
+  kubernetes_apiserver:
+    ttl_hours: 87600 # 30 years
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    common_name: "commont name"
+    subject:
+      organizational_unit: "Org unit"
+      organization: "Org name"
+      street_address: ["Org address"]
+      postal_code: "zip"
+      locality: "abc"
+      province: "abc"
+      country: "abc"
+  kubernetes_kubelet:
+    ttl_hours: 87600 # 30 years
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    common_name: "commont name"
+    subject:
+      organizational_unit: "Org unit"
+      organization: "Org name"
+      street_address: ["Org address"]
+      postal_code: "zip"
+      locality: "abc"
+      province: "abc"
+      country: "abc"
+  kubernetes_aggregation_layer:
+    ttl_hours: 87600 # 30 years
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    common_name: "commont name"
+    subject:
+      organizational_unit: "Org unit"
+      organization: "Org name"
+      street_address: ["Org address"]
+      postal_code: "zip"
+      locality: "abc"
+      province: "abc"
+      country: "abc"
+  kubernetes_client:
+    ttl_hours: 87600 # 30 years
+    algorithm: "rsa" # can also be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
+    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    common_name: "commont name"
+    subject:
+      organizational_unit: "Org unit"
+      organization: "Org name"
+      street_address: ["Org address"]
+      postal_code: "zip"
+      locality: "abc"
+      province: "abc"
+      country: "abc"
