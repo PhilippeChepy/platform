@@ -1,9 +1,0 @@
-{{- range $ingressIndex, $ingress :=.Values.ingresses }}
-{{- with $ -}}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ $ingress }}
-{{- end}}
-{{- end}}
