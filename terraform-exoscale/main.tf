@@ -117,6 +117,12 @@ module "cluster_etcd" {
   ]...))
 }
 
+resource "local_file" "etcd_inventory" {
+  for_each = local.enabled_module.cluster_etcd
+  content  = module.cluster_etcd["enabled"].inventory
+  filename = "${path.module}/../artifacts/etcd-inventory.yml"
+}
+
 // Kubernetes
 
 module "cluster_kubernetes" {
