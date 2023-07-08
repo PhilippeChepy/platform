@@ -90,19 +90,19 @@ kubelet_pool:
 
 ssh:
   algorithm: "ed25519" # can also be "rsa" or "ecdsa"
-  # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-  # rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+  # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+  # rsa_bits: 4096 # can be 2048, 3072 or 4096
 
 pki:
   service_account:
     algorithm: "ecdsa" # can be "rsa" or "ecdsa"
-    ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    # rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    # rsa_bits: 4096 # can be 2048, 3072 or 4096
   root:
     ttl_hours: 262800 # 30 years
-    algorithm: "rsa" # can also be "rsa" or "ecdsa"
-    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    algorithm: "rsa" # can be "rsa" or "ecdsa"
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
     common_name: "commont name"
     subject:
       organizational_unit: "Org unit"
@@ -115,8 +115,8 @@ pki:
   vault:
     ttl_hours: 87600 # 10 years
     algorithm: "rsa" # can also be "rsa" or "ecdsa"
-    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
     common_name: "commont name"
     subject:
       organizational_unit: "Org unit"
@@ -129,8 +129,8 @@ pki:
   etcd:
     ttl_hours: 87600 # 30 years
     algorithm: "rsa" # can also be "rsa" or "ecdsa"
-    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
     common_name: "commont name"
     subject:
       organizational_unit: "Org unit"
@@ -143,8 +143,8 @@ pki:
   kubernetes_apiserver:
     ttl_hours: 87600 # 30 years
     algorithm: "rsa" # can also be "rsa" or "ecdsa"
-    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
     common_name: "commont name"
     subject:
       organizational_unit: "Org unit"
@@ -157,8 +157,8 @@ pki:
   kubernetes_kubelet:
     ttl_hours: 87600 # 30 years
     algorithm: "rsa" # can also be "rsa" or "ecdsa"
-    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
     common_name: "commont name"
     subject:
       organizational_unit: "Org unit"
@@ -171,8 +171,8 @@ pki:
   kubernetes_aggregation_layer:
     ttl_hours: 87600 # 30 years
     algorithm: "rsa" # can also be "rsa" or "ecdsa"
-    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
     common_name: "commont name"
     subject:
       organizational_unit: "Org unit"
@@ -185,8 +185,8 @@ pki:
   kubernetes_client:
     ttl_hours: 87600 # 30 years
     algorithm: "rsa" # can also be "rsa" or "ecdsa"
-    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521, with 'P224' as the default.    
-    rsa_bits: 4096 # can be 2048, 3072 or 4096, with '2048' as the default.
+    # ecdsa_curve: P521 # can be P224,  P256, P384 or P521
+    rsa_bits: 4096 # can be 2048, 3072 or 4096
     common_name: "commont name"
     subject:
       organizational_unit: "Org unit"
